@@ -1,0 +1,55 @@
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Лесная фея{% endblock %}</title>
+    {% comment %} <meta name="description" content="{% block description %}Магазин лесных грибов {% endblock %}">
+    <!-- Open Graph (для соцсетей и Яндекса) -->
+    <meta property="og:title" content="{% block og_title %}Лесная фея{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Магазин лесных грибов{% endblock %}">
+    <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ru_RU"> {% endcomment %}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
+    {% comment %} <link type="text/css" rel="stylesheet" href="{% static 'shop/css/swiper-bundle.min.css' %}" /> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="{% static 'shop/css/dropzone.min.css' %}"> {% endcomment %}
+    <link type="text/css" rel="stylesheet" href="{% static 'shop/css/main.css' %}" />
+    {% comment %} <link rel="manifest" href="{% static 'manifest.json' %}"> {% endcomment %}
+    {% comment %} <meta name="mobile-web-app-capable" content="yes"> {% endcomment %}
+    {% comment %} <meta name="apple-mobile-web-app-status-bar-style" content="default"> {% endcomment %}
+    {% block extra_css %}{% endblock extra_css %}
+</head>
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>    
+{% comment %} <div class="all_content_wrapper">
+ {% if request.resolver_match.url_name == 'index' %}   
+    {% include 'shop/includes/desctop_header.html' %}  
+    
+{% else %}
+    {% include 'shop/includes/mobile_header.html' %}  
+{% endif %}   
+ {% include 'notifications/includes/chat_widget.html' %}   {% endcomment %}
+    
+{% block content %}
+
+
+{% endblock content %}
+
+
+{% comment %} <script type="text/javascript" defer src='{% static  "core/js/htmx.js" %}'></script>
+<script type="text/javascript" defer src='{% static  "core/js/alpine.js" %}'></script> {% endcomment %}
+{% comment %} </div> {% endcomment %}
+
+{% comment %} <script src="{% static 'js/push-subscribe.js' %}"></script>
+
+<script defer src="{% static 'shop/js/alpine.js' %}"></script>
+<script defer src="{% static 'shop/js/htmx.min.js' %}"></script>
+<script defer src="{% static 'shop/js/swiper-bundle.min.js' %}"></script>
+<script  src="{% static 'shop/js/dropzone.min.js' %}"></script>
+<script  src="{% static 'shop/js/sortable.min.js' %}"></script> {% endcomment %}
+<script  src="{% static 'shop/js/main.js' %}"></script>
+
+</body>
+</html>
