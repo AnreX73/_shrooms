@@ -153,8 +153,14 @@ MEDIA_URL = "/media/"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTHENTICATION_BACKENDS = [
+    "users.authentication.EmailAuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 
 AUTH_USER_MODEL = "users.User"
+LOGOUT_REDIRECT_URL = "shop:index"
 
 UNFOLD = {
     "SITE_TITLE": "Управление студия НР",
@@ -175,3 +181,9 @@ UNFOLD = {
         },
     },
 }
+
+
+PASSWORD_HASHERS = [
+    "users.hashers.FastPBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",  # для старых паролей
+]

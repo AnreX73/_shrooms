@@ -16,15 +16,15 @@ html {
 }
 
 :root {
-    --primary-color: #8a5944;
-    --secondary-color: #d4b8a5;
-    --accent-color: #C43F44;
-    --text-color: #646464;
-    --transparent-color: rgba(0, 0, 0, 0.4);
-    --dark-color: #3a2c28;
-    --light-color: #f8f3ef;
-    --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    --active-shadow: 0 5px 15px rgba(138, 89, 68, 0.3);
+    --primary-color: #7BA88E;      /* Мятно-зеленый */
+    --secondary-color: #E6DFD3;    /* Серовато-бежевый */
+    --accent-color: #bd5d25;       /* Грибной бежевый */
+    --text-color: #3F4A3E;
+    --transparent-color: rgba(63, 74, 62, 0.4);
+    --dark-color: #2E3A2D;
+    --light-color: #C8DCC8;
+    --shadow: 0 5px 15px rgba(63, 74, 62, 0.12);
+    --active-shadow: 0 5px 15px rgba(123, 168, 142, 0.35);
     --all-content-width: 1366px;
     --select-width: 320px;
     --select-font-size: 14px;
@@ -76,4 +76,213 @@ html {
   box-shadow: 
     inset 0 2px 4px rgba(0, 0, 0, 0.5), /* Вдавленная тень */
     0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+
+/*forms section */
+.auth_all_form_content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form_container {
+    margin-top: 1.5rem;
+    margin-inline: auto;
+    width: clamp(300px, 30%, 500px);
+    text-align: center;
+    max-width: var(--all-content-width);
+}
+
+.form_title {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+
+/* input text
+-------------------------- */
+.group {
+    position: relative;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+input[type="text"],
+input[type="password"] {
+    font-size: 18px;
+    padding: 10px 10px 10px 5px;
+    display: block;
+    width: clamp(240px, 100%, 500px);
+    border: none;
+    border-bottom: 1px solid #757575;
+}
+
+/* LABEL ======================================= */
+input[type="text"]~label,
+input[type="password"]~label {
+    color: #999;
+    font-size: 18px;
+    font-weight: normal;
+    position: absolute;
+    pointer-events: none;
+    right: 5px;
+    top: 10px;
+    transition: 0.2s ease all;
+    -moz-transition: 0.2s ease all;
+    -webkit-transition: 0.2s ease all;
+}
+
+/* active state */
+input[type="text"]:focus~label,
+input[type="password"]:focus~label,
+input[type="password"]:valid~label {
+    top: -20px;
+    font-size: 14px;
+    color: var(--primary-color);
+}
+
+/* BOTTOM BARS ================================= */
+.bar {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.bar:before,
+.bar:after {
+    content: '';
+    height: 2px;
+    width: 0;
+    bottom: 1px;
+    position: absolute;
+    background: #5264AE;
+    transition: 0.2s ease all;
+    -moz-transition: 0.2s ease all;
+    -webkit-transition: 0.2s ease all;
+}
+
+.bar:before {
+    left: 50%;
+}
+
+.bar:after {
+    right: 50%;
+}
+
+/* active state */
+input[type="text"]:focus~.bar:before,
+input[type="text"]:focus~.bar:after,
+
+input[type="password"]:focus~.bar:before,
+input[type="password"]:focus~.bar:after {
+    width: 50%;
+}
+
+/* end input text
+-------------------------- */
+
+
+
+/* Radio
+-------------------------- */
+.radio-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    text-align: left;
+    margin: 15px 0;
+    color: #999;
+    font-size: 18px;
+    padding: 10px 10px 10px 5px;
+    border-bottom: 1px solid #757575;
+}
+
+.radio-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.radio-option input[type="radio"] {
+    margin: 0;
+}
+
+input[type="radio"] {
+    cursor: pointer;
+
+}
+
+/* end Radio
+-------------------------- */
+
+
+/* input file
+-------------------------- */
+.file_group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: center;
+    text-align: left;
+    margin: 15px 0;
+    color: #999;
+    font-size: 18px;
+    padding: 10px 10px 10px 5px;
+    border-bottom: 1px solid #757575;
+    gap: 1.5rem;
+}
+
+.users-btn {
+    -webkit-appearance: none;
+    /* Убирает системные стили iOS */
+    appearance: none;
+    color: var(--text-color) !important;
+    background-color: var(--light-color) !important;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    width: 200px;
+    margin: 1rem 0;
+    text-align: center;
+    margin-left: 3rem;
+}
+
+.edit-profile-btn,
+.profile_logaut_btn,
+.product-page-btn {
+    margin-left: 0;
+}
+
+.users-btn:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+.qty-btn {
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.qty-btn:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important;
 }
