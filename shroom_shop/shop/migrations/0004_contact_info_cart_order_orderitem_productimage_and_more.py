@@ -8,195 +8,691 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shop', '0003_product_kit_product_preservation_method_and_more'),
+        ("shop", "0003_product_kit_product_preservation_method_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Contact',
+            name="Contact",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('contact_type', models.CharField(choices=[('phone', 'Телефон'), ('email', 'Email'), ('address', 'Адрес'), ('social', 'Соцсеть / Мессенджер')], default='phone', max_length=20, verbose_name='Тип контакта')),
-                ('label', models.CharField(help_text="Напр: 'Отдел продаж' или 'WhatsApp'", max_length=50, verbose_name='Заголовок')),
-                ('slug', models.SlugField(help_text='Цифры, латиница, дефисы. БЕЗ пробелов!', unique=True, verbose_name='Слаг')),
-                ('value', models.CharField(help_text='Сам номер, почта или адрес', max_length=200, verbose_name='Значение')),
-                ('url', models.URLField(blank=True, help_text='Для соцсетей или кликабельного номера (tel:+7...)', verbose_name='Ссылка')),
-                ('contact_icon', models.ImageField(blank=True, upload_to='contacts/', verbose_name='Иконка')),
-                ('svg_icon', models.TextField(blank=True, help_text='Вставьте XML-код иконки <svg>...</svg> без параметров width/height', verbose_name='SVG иконка, если есть или код карты если это карта)')),
-                ('sort_order', models.PositiveIntegerField(default=0, verbose_name='Порядок сорт.')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Отображать на сайте')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "contact_type",
+                    models.CharField(
+                        choices=[
+                            ("phone", "Телефон"),
+                            ("email", "Email"),
+                            ("address", "Адрес"),
+                            ("social", "Соцсеть / Мессенджер"),
+                        ],
+                        default="phone",
+                        max_length=20,
+                        verbose_name="Тип контакта",
+                    ),
+                ),
+                (
+                    "label",
+                    models.CharField(
+                        help_text="Напр: 'Отдел продаж' или 'WhatsApp'",
+                        max_length=50,
+                        verbose_name="Заголовок",
+                    ),
+                ),
+                (
+                    "slug",
+                    models.SlugField(
+                        help_text="Цифры, латиница, дефисы. БЕЗ пробелов!",
+                        unique=True,
+                        verbose_name="Слаг",
+                    ),
+                ),
+                (
+                    "value",
+                    models.CharField(
+                        help_text="Сам номер, почта или адрес",
+                        max_length=200,
+                        verbose_name="Значение",
+                    ),
+                ),
+                (
+                    "url",
+                    models.URLField(
+                        blank=True,
+                        help_text="Для соцсетей или кликабельного номера (tel:+7...)",
+                        verbose_name="Ссылка",
+                    ),
+                ),
+                (
+                    "contact_icon",
+                    models.ImageField(
+                        blank=True, upload_to="contacts/", verbose_name="Иконка"
+                    ),
+                ),
+                (
+                    "svg_icon",
+                    models.TextField(
+                        blank=True,
+                        help_text="Вставьте XML-код иконки <svg>...</svg> без параметров width/height",
+                        verbose_name="SVG иконка, если есть или код карты если это карта)",
+                    ),
+                ),
+                (
+                    "sort_order",
+                    models.PositiveIntegerField(
+                        default=0, verbose_name="Порядок сорт."
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True, verbose_name="Отображать на сайте"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Контакт',
-                'verbose_name_plural': 'Контакты магазина',
-                'ordering': ['sort_order'],
+                "verbose_name": "Контакт",
+                "verbose_name_plural": "Контакты магазина",
+                "ordering": ["sort_order"],
             },
         ),
         migrations.CreateModel(
-            name='Info',
+            name="Info",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='Информация', max_length=100, verbose_name='Название')),
-                ('title', models.CharField(max_length=100, verbose_name='Заголовок')),
-                ('slug', models.SlugField(help_text='Цифры, латиница, дефисы. БЕЗ пробелов!', unique=True, verbose_name='Слаг')),
-                ('content', models.TextField(verbose_name='Содержимое')),
-                ('image', models.ImageField(blank=True, upload_to='info/', verbose_name='Изображение')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Отображать на сайте')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        default="Информация", max_length=100, verbose_name="Название"
+                    ),
+                ),
+                ("title", models.CharField(max_length=100, verbose_name="Заголовок")),
+                (
+                    "slug",
+                    models.SlugField(
+                        help_text="Цифры, латиница, дефисы. БЕЗ пробелов!",
+                        unique=True,
+                        verbose_name="Слаг",
+                    ),
+                ),
+                ("content", models.TextField(verbose_name="Содержимое")),
+                (
+                    "image",
+                    models.ImageField(
+                        blank=True, upload_to="info/", verbose_name="Изображение"
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True, verbose_name="Отображать на сайте"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Информация',
-                'verbose_name_plural': 'Информация',
+                "verbose_name": "Информация",
+                "verbose_name_plural": "Информация",
             },
         ),
         migrations.CreateModel(
-            name='Cart',
+            name="Cart",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='cart', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cart",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Корзина',
-                'verbose_name_plural': 'Корзины',
+                "verbose_name": "Корзина",
+                "verbose_name_plural": "Корзины",
             },
         ),
         migrations.CreateModel(
-            name='Order',
+            name="Order",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('assigned_manager_note', models.TextField(blank=True, verbose_name='Примечание менеджера')),
-                ('tracking_number', models.CharField(blank=True, max_length=100, verbose_name='Трек-номер')),
-                ('status', models.CharField(choices=[('pending', 'Новый заказ!'), ('confirmed', 'Подтвержден'), ('processing', 'Собран'), ('shipped', 'Отправлен'), ('delivered', 'Доставлен'), ('cancelled', 'Отменен')], default='pending', max_length=20, verbose_name='Статус')),
-                ('payment_status', models.CharField(choices=[('pending', 'Ожидает оплаты'), ('paid', 'Оплачен'), ('failed', 'Ошибка оплаты'), ('refunded', 'Возвращен')], default='pending', max_length=20, verbose_name='Статус оплаты')),
-                ('subtotal', models.IntegerField(verbose_name='Сумма товаров')),
-                ('delivery_cost', models.IntegerField(default=0, verbose_name='Стоимость доставки')),
-                ('total', models.IntegerField(verbose_name='Итого')),
-                ('customer_name', models.CharField(max_length=200, verbose_name='ФИО')),
-                ('customer_email', models.EmailField(max_length=254, verbose_name='Email')),
-                ('customer_phone', models.CharField(max_length=20, verbose_name='Телефон')),
-                ('delivery_address', models.TextField(verbose_name='Адрес доставки')),
-                ('delivery_city', models.CharField(max_length=100, verbose_name='Город')),
-                ('delivery_postal_code', models.CharField(max_length=20, verbose_name='Индекс')),
-                ('is_archived', models.BooleanField(default=False, verbose_name='В архиве')),
-                ('notes', models.TextField(blank=True, verbose_name='Комментарий к заказу')),
-                ('delivered_at', models.DateTimeField(blank=True, null=True, verbose_name='Дата доставки')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('assigned_manager', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='managed_orders', to=settings.AUTH_USER_MODEL, verbose_name='Менеджер')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "assigned_manager_note",
+                    models.TextField(blank=True, verbose_name="Примечание менеджера"),
+                ),
+                (
+                    "tracking_number",
+                    models.CharField(
+                        blank=True, max_length=100, verbose_name="Трек-номер"
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Новый заказ!"),
+                            ("confirmed", "Подтвержден"),
+                            ("processing", "Собран"),
+                            ("shipped", "Отправлен"),
+                            ("delivered", "Доставлен"),
+                            ("cancelled", "Отменен"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                        verbose_name="Статус",
+                    ),
+                ),
+                (
+                    "payment_status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Ожидает оплаты"),
+                            ("paid", "Оплачен"),
+                            ("failed", "Ошибка оплаты"),
+                            ("refunded", "Возвращен"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                        verbose_name="Статус оплаты",
+                    ),
+                ),
+                ("subtotal", models.IntegerField(verbose_name="Сумма товаров")),
+                (
+                    "delivery_cost",
+                    models.IntegerField(default=0, verbose_name="Стоимость доставки"),
+                ),
+                ("total", models.IntegerField(verbose_name="Итого")),
+                ("customer_name", models.CharField(max_length=200, verbose_name="ФИО")),
+                (
+                    "customer_email",
+                    models.EmailField(max_length=254, verbose_name="Email"),
+                ),
+                (
+                    "customer_phone",
+                    models.CharField(max_length=20, verbose_name="Телефон"),
+                ),
+                ("delivery_address", models.TextField(verbose_name="Адрес доставки")),
+                (
+                    "delivery_city",
+                    models.CharField(max_length=100, verbose_name="Город"),
+                ),
+                (
+                    "delivery_postal_code",
+                    models.CharField(max_length=20, verbose_name="Индекс"),
+                ),
+                (
+                    "is_archived",
+                    models.BooleanField(default=False, verbose_name="В архиве"),
+                ),
+                (
+                    "notes",
+                    models.TextField(blank=True, verbose_name="Комментарий к заказу"),
+                ),
+                (
+                    "delivered_at",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Дата доставки"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "assigned_manager",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="managed_orders",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Менеджер",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="orders",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Заказ',
-                'verbose_name_plural': 'Заказы',
-                'ordering': ['-created_at'],
+                "verbose_name": "Заказ",
+                "verbose_name_plural": "Заказы",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='OrderItem',
+            name="OrderItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('product_name', models.CharField(max_length=300, verbose_name='Название товара')),
-                ('product_price', models.PositiveIntegerField(verbose_name='Цена товара')),
-                ('quantity', models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество')),
-                ('is_collected', models.BooleanField(default=False, verbose_name='Товар собран')),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='shop.order', verbose_name='Заказ')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='order_items', to='shop.product', verbose_name='Товар')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "product_name",
+                    models.CharField(max_length=300, verbose_name="Название товара"),
+                ),
+                (
+                    "product_price",
+                    models.PositiveIntegerField(verbose_name="Цена товара"),
+                ),
+                (
+                    "quantity",
+                    models.PositiveIntegerField(
+                        validators=[django.core.validators.MinValueValidator(1)],
+                        verbose_name="Количество",
+                    ),
+                ),
+                (
+                    "is_collected",
+                    models.BooleanField(default=False, verbose_name="Товар собран"),
+                ),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="shop.order",
+                        verbose_name="Заказ",
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="order_items",
+                        to="shop.product",
+                        verbose_name="Товар",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Товар в заказе',
-                'verbose_name_plural': 'Товары в заказе',
+                "verbose_name": "Товар в заказе",
+                "verbose_name_plural": "Товары в заказе",
             },
         ),
         migrations.CreateModel(
-            name='ProductImage',
+            name="ProductImage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('media_type', models.CharField(choices=[('image', 'Изображение'), ('video', 'Видео файл')], default='image', max_length=20)),
-                ('image', models.ImageField(blank=True, null=True, upload_to='products/gallery/', verbose_name='Фото')),
-                ('image_compressed', models.ImageField(blank=True, null=True, upload_to='products/gallery/compressed/', verbose_name='Сжатое фото')),
-                ('video', models.FileField(blank=True, null=True, upload_to='products/videos/', verbose_name='Видео')),
-                ('video_compressed', models.FileField(blank=True, null=True, upload_to='products/videos/compressed/', verbose_name='Сжатое видео')),
-                ('order', models.PositiveIntegerField(default=0)),
-                ('status', models.CharField(choices=[('pending', 'Ожидает обработки'), ('processing', 'Обрабатывается'), ('done', 'Готово'), ('error', 'Ошибка')], default='pending', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='shop.product', verbose_name='Товар')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "media_type",
+                    models.CharField(
+                        choices=[("image", "Изображение"), ("video", "Видео файл")],
+                        default="image",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "image",
+                    models.ImageField(
+                        blank=True,
+                        null=True,
+                        upload_to="products/gallery/",
+                        verbose_name="Фото",
+                    ),
+                ),
+                (
+                    "image_compressed",
+                    models.ImageField(
+                        blank=True,
+                        null=True,
+                        upload_to="products/gallery/compressed/",
+                        verbose_name="Сжатое фото",
+                    ),
+                ),
+                (
+                    "video",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="products/videos/",
+                        verbose_name="Видео",
+                    ),
+                ),
+                (
+                    "video_compressed",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="products/videos/compressed/",
+                        verbose_name="Сжатое видео",
+                    ),
+                ),
+                ("order", models.PositiveIntegerField(default=0)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Ожидает обработки"),
+                            ("processing", "Обрабатывается"),
+                            ("done", "Готово"),
+                            ("error", "Ошибка"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата добавления"
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="images",
+                        to="shop.product",
+                        verbose_name="Товар",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Медиа файл',
-                'verbose_name_plural': 'Галерея товара',
-                'ordering': ['order'],
+                "verbose_name": "Медиа файл",
+                "verbose_name_plural": "Галерея товара",
+                "ordering": ["order"],
             },
         ),
         migrations.CreateModel(
-            name='Review',
+            name="Review",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('rating', models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)], verbose_name='Оценка')),
-                ('title', models.CharField(max_length=200, verbose_name='Заголовок')),
-                ('text', models.TextField(verbose_name='Текст отзыва')),
-                ('is_approved', models.BooleanField(default=False, verbose_name='Одобрен')),
-                ('review_answer', models.TextField(blank=True, null=True, verbose_name='Ответ на отзыв')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to='shop.product', verbose_name='Товар')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "rating",
+                    models.PositiveIntegerField(
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(5),
+                        ],
+                        verbose_name="Оценка",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200, verbose_name="Заголовок")),
+                ("text", models.TextField(verbose_name="Текст отзыва")),
+                (
+                    "is_approved",
+                    models.BooleanField(default=False, verbose_name="Одобрен"),
+                ),
+                (
+                    "review_answer",
+                    models.TextField(
+                        blank=True, null=True, verbose_name="Ответ на отзыв"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reviews",
+                        to="shop.product",
+                        verbose_name="Товар",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reviews",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Отзыв',
-                'verbose_name_plural': 'Отзывы',
-                'ordering': ['-created_at'],
-                'unique_together': {('product', 'user')},
+                "verbose_name": "Отзыв",
+                "verbose_name_plural": "Отзывы",
+                "ordering": ["-created_at"],
+                "unique_together": {("product", "user")},
             },
         ),
         migrations.CreateModel(
-            name='ReviewMedia',
+            name="ReviewMedia",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('media_type', models.CharField(choices=[('photo', 'Фото'), ('video', 'Видео')], max_length=10, verbose_name='Тип')),
-                ('file', models.FileField(blank=True, upload_to='reviews/%Y/%m/', validators=[shop.validators.validate_review_media], verbose_name='Файл')),
-                ('file_compressed', models.FileField(blank=True, null=True, upload_to='reviews/compressed/%Y/%m/', verbose_name='Сжатый файл')),
-                ('status', models.CharField(choices=[('pending', 'Ожидает'), ('processing', 'Обрабатывается'), ('done', 'Готово'), ('error', 'Ошибка')], default='pending', max_length=20)),
-                ('order', models.PositiveIntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('review', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='media', to='shop.review', verbose_name='Отзыв')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "media_type",
+                    models.CharField(
+                        choices=[("photo", "Фото"), ("video", "Видео")],
+                        max_length=10,
+                        verbose_name="Тип",
+                    ),
+                ),
+                (
+                    "file",
+                    models.FileField(
+                        blank=True,
+                        upload_to="reviews/%Y/%m/",
+                        validators=[shop.validators.validate_review_media],
+                        verbose_name="Файл",
+                    ),
+                ),
+                (
+                    "file_compressed",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="reviews/compressed/%Y/%m/",
+                        verbose_name="Сжатый файл",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Ожидает"),
+                            ("processing", "Обрабатывается"),
+                            ("done", "Готово"),
+                            ("error", "Ошибка"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("order", models.PositiveIntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "review",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="media",
+                        to="shop.review",
+                        verbose_name="Отзыв",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Медиафайл отзыва',
-                'verbose_name_plural': 'Медиафайлы отзывов',
-                'ordering': ['order'],
+                "verbose_name": "Медиафайл отзыва",
+                "verbose_name_plural": "Медиафайлы отзывов",
+                "ordering": ["order"],
             },
         ),
         migrations.CreateModel(
-            name='CartItem',
+            name="CartItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveIntegerField(default=1, validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество')),
-                ('added_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')),
-                ('cart', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='shop.cart', verbose_name='Корзина')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cart_items', to='shop.product', verbose_name='Товар')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "quantity",
+                    models.PositiveIntegerField(
+                        default=1,
+                        validators=[django.core.validators.MinValueValidator(1)],
+                        verbose_name="Количество",
+                    ),
+                ),
+                (
+                    "added_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата добавления"
+                    ),
+                ),
+                (
+                    "cart",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="shop.cart",
+                        verbose_name="Корзина",
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cart_items",
+                        to="shop.product",
+                        verbose_name="Товар",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Товар в корзине',
-                'verbose_name_plural': 'Товары в корзине',
-                'unique_together': {('cart', 'product')},
+                "verbose_name": "Товар в корзине",
+                "verbose_name_plural": "Товары в корзине",
+                "unique_together": {("cart", "product")},
             },
         ),
         migrations.CreateModel(
-            name='Favorite',
+            name="Favorite",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorited_by', to='shop.product', verbose_name='Товар')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата добавления"
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="favorited_by",
+                        to="shop.product",
+                        verbose_name="Товар",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="favorites",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Избранное',
-                'verbose_name_plural': 'Избранное',
-                'unique_together': {('user', 'product')},
+                "verbose_name": "Избранное",
+                "verbose_name_plural": "Избранное",
+                "unique_together": {("user", "product")},
             },
         ),
     ]

@@ -2,121 +2,70 @@
 
 {% block content %}
 
+<div class="tabs-wrapper">
+    <div class="tab-list">
+        <button class="tab-btn active" onclick="switchTab(1, this)">Корзина</button>
+        <button class="tab-btn" onclick="switchTab(2, this)">Избранное</button>
+        <button class="tab-btn" onclick="switchTab(3, this)">Личные данные</button>
+        <button class="tab-btn" onclick="switchTab(4, this)">История заказов</button>
+    </div>
 
-    <!-- Начало компонента Alpine -->
-    <!-- x-data хранит состояние: какая вкладка сейчас активна (по умолчанию 1) -->
-    <div x-data="{ activeTab: {{ active_tab }} }" class="accordion">
-
-        <!-- Секция 1 -->
-        <div class="accordion-item cart_section">
-            <button 
-                class="accordion-header" 
-                :class="{ 'active': activeTab === 1 }"
-                @click="activeTab = 1"
-            >
-                <h3 class="profile_title">Товары в корзине</h3> 
-                <span class="icon" :class="{ 'rotate': activeTab === 1 }">▼</span>
-            </button>
-            <!-- x-show скрывает/показывает блок, x-transition добавляет анимацию -->
-            <div 
-                x-show="activeTab === 1" 
-                x-transition 
-                class="accordion-content"
-            >
-               
-              {% include 'users/includes/cart_block.html' %}
-            </div>
-            </div>
+    <div class="tab-panel" id="tab-1">
         
+        {% include 'users/includes/cart_block.html' %}
+    </div>
 
-        <!-- Секция 2 -->
-        <div class="accordion-item favorites_section">
-            <button 
-                class="accordion-header" 
-                :class="{ 'active': activeTab === 2 }"
-                @click="activeTab = 2"
-            >
-                <h3 class="profile_title">Избранные товары</h3>
-                <span class="icon" :class="{ 'rotate': activeTab === 2 }">▼</span>
-            </button>
-            <div 
-                x-show="activeTab === 2" 
-                x-transition 
-                class="accordion-content"
-            >
-                 <div class="catalog-grid">
-            
+    <div class="tab-panel" id="tab-2" style="display:none">
+        <div class="catalog-grid">
             {% for product in favorites %}
                 {% include 'shop/includes/product_card.html' %}
-                {% empty %}
+            {% empty %}
                 <p class="no-items">Нет избранных товаров</p>
             {% endfor %}
         </div>
-            </div>
-        </div>
+    </div>
 
-        <!-- Секция 3 -->
-        <div class="accordion-item profile_section">
-            <button 
-                class="accordion-header" 
-                :class="{ 'active': activeTab === 3 }"
-                @click="activeTab = 3"
-            >
-                <h3 class="profile_title">Личные данные</h3>
-                <span class="icon" :class="{ 'rotate': activeTab === 3 }">▼</span>
-            </button>
-            <div 
-                x-show="activeTab === 3" 
-                x-transition 
-                class="accordion-content"
-            >
-       <div class="user_profile_info">
-<h3 class="profile_title">Личные данные</h3>
-
-<ul>
-    <li>Email: {{ user.email }}</li>
-    <li>Телефон: {{ user.phone_number }}</li>
-    <li>Имя: {{ user.first_name }}</li>
-    <li>Фамилия: {{ user.last_name }}</li>
-    <li>Город доставки: {{ user.delivery_city }}</li>
-    <li>Адрес доставки: {{ user.delivery_address }}</li>
-    <li>Индекс: {{ user.delivery_postal_code }}</li>
-</ul>
-{% if user.is_superuser or user.is_staff %}
- <button class="users-btn edit-profile-btn" onclick="window.location.href='{% url 'dashboard:manage_orders' %}'">Управление заказами</button>
- {% endif %}
-<button class="users-btn edit-profile-btn" onclick="window.location.href='{% url 'users:change_info' %}'">Редактировать профиль</button>
-<button id="disable-push-btn" class="users-btn edit-profile-btn">🔕 Отключить уведомления</button>
-<form class="auth_form" method="post" action="{% url 'users:logout' %}">
-    {% csrf_token %}
-    <button class="users-btn profile_logaut_btn" type="submit">Выйти</button>
-</form>
-</div>
-</div>
-            </div>
-        
-<!-- Секция 4 -->
-        <div class="accordion-item cart_section">
-            <button 
-                class="accordion-header" 
-                :class="{ 'active': activeTab === 4 }"
-                @click="activeTab = 4"
-            >
-                <h3 class="profile_title">История заказов</h3> 
-                <span class="icon" :class="{ 'rotate': activeTab === 4 }">▼</span>
-            </button>
-            <!-- x-show скрывает/показывает блок, x-transition добавляет анимацию -->
-            <div 
-                x-show="activeTab === 4" 
-                x-transition 
-                class="accordion-content"
-            >
-               
-              {% include 'users/includes/orders_history.html' %}
-
-            </div>
-            </div>
+    <div class="tab-panel" id="tab-3" style="display:none">
+        <div class="user_profile_info">
+            <h3 class="profile_title">Личные данные</h3>
+            <ul>
+                <li>Email: {{ user.email }}</li>
+                <li>Телефон: {{ user.phone_number }}</li>
+                <li>Имя: {{ user.first_name }}</li>
+                <li>Фамилия: {{ user.last_name }}</li>
+                <li>Город доставки: {{ user.delivery_city }}</li>
+                <li>Адрес доставки: {{ user.delivery_address }}</li>
+                <li>Индекс: {{ user.delivery_postal_code }}</li>
+            </ul>
+             {% if user.is_superuser or user.is_staff %}
+                <button class="users-btn edit-profile-btn" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">Управление заказами</button>
+            {% endif %} 
+            <button class="users-btn edit-profile-btn" onclick="window.location.href='{% url 'users:change_info' %}'">Редактировать профиль</button>
+            {% comment %} <button id="disable-push-btn" class="users-btn edit-profile-btn">🔕 Отключить уведомления</button> {% endcomment %}
+           
         </div>
     </div>
+
+    <div class="tab-panel" id="tab-4" style="display:none">
+        
+        {% include 'users/includes/orders_history.html' %}
+    </div>
+     <form class="auth_form" method="post" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button class="users-btn profile_logaut_btn" type="submit">Выйти</button>
+            </form>
+</div>
+
+<script>
+function switchTab(n, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + n).style.display = 'block';
+    btn.classList.add('active');
+}
+
+// открыть нужную вкладку при загрузке (из вьюхи)
+switchTab({{ active_tab }}, document.querySelectorAll('.tab-btn')[{{ active_tab }} - 1]);
+</script>
 
 {% endblock content %}

@@ -5,26 +5,18 @@ from unfold.admin import ModelAdmin
 from unfold.contrib.forms.widgets import WysiwygWidget
 
 from .models import (
-    Cart,
     Category,
-    Contact,
-    Favorite,
-    Info,
     MushroomType,
-    Order,
-    OrderItem,
     Product,
     ProductImage,
-    Review,
-    ReviewMedia,
     SiteAssets,
 )
 
 
 @admin.register(SiteAssets)
 class SiteAssetsAdmin(ModelAdmin):
-    list_display = ("site_assets_name", "is_active", "note", "getHtmlPhoto")
-    search_fields = ("site_assets_name",)
+    list_display = ("name", "is_active", "note", "getHtmlPhoto")
+    search_fields = ("name",)
     list_filter = ("is_active",)
     save_on_top = True
 
@@ -37,6 +29,11 @@ class SiteAssetsAdmin(ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(ModelAdmin):
+    formfield_overrides = {
+        models.TextField: {
+            "widget": WysiwygWidget,
+        }
+    }
     list_display = ("name", "slug", "getHtmlPhoto")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}

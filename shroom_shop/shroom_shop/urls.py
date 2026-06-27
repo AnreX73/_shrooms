@@ -1,18 +1,19 @@
-
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetDoneView
 from django.urls import include, path
-from django.views.generic import TemplateView
 
 from users.views import UserPasswordResetConfirmView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',include('shop.urls')),
+    path("admin/", admin.site.urls),
+    path("", include("shop.urls")),
     path("users/", include("users.urls")),
+    path("dashboard/", include("dashboard.urls")),
+    # path("notifications/", include("notifications.urls")),
+    # path("payments/", include("payments.urls")),
     path(
         "password_reset/done/",
         PasswordResetDoneView.as_view(
@@ -32,7 +33,7 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
-]+ debug_toolbar_urls()
+] + debug_toolbar_urls()
 
 
 if settings.DEBUG:

@@ -11,18 +11,18 @@ from users.views import (
     UpdateUserInfo,
     UserPasswordResetConfirmView,
     UserPasswordResetView,
-    # profile,
+    profile,
 )
 
 app_name = "users"
 
 
-# urlpatterns = [
-#     path("profile/", profile, name="profile"),
-# ]
-
-
 urlpatterns = [
+    path("profile/", profile, name="profile"),
+]
+
+
+urlpatterns += [
     path("login/", LoginUser.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("register/", RegisterUser.as_view(), name="register"),

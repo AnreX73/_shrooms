@@ -1,17 +1,18 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (
     LoginView,
     PasswordResetConfirmView,
     PasswordResetView,
 )
-from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic.edit import UpdateView
 
+from shop.models import Cart, Order, Product, ProductImage, Review
 
 
 from .forms import (
@@ -85,86 +86,78 @@ class LoginUser(LoginView):
         if user.is_authenticated and user.is_superuser:
             return reverse("dashboard:admin_area")
         elif user.is_authenticated and user.is_staff:
-            return reverse("dashboard:manage_orders")
+            return reverse("dashboard:admin_area")
+        return reverse("users:profile")
+
         return reverse("users:profile")
 
 
-# @login_required(login_url="/register/")
-# def profile(request):
-#     user = request.user
-#     favorites = Product.objects.filter(favorited_by__user=user).order_by(
-#         "-favorited_by__created_at"
-#     )
-#     try:
-#         cart = user.cart
-#         # для отображения товаров в корзине — как было
-#         user_cart_products = (
-#             cart.items.select_related("product")
-#             .prefetch_related(
-#                 Prefetch(
-#                     "product__images",
-#                     queryset=ProductImage.objects.filter(media_type="image").order_by(
-#                         "order"
-#                     ),
-#                     to_attr="prefetched_images",
-#                 )
-#             )
-#             .order_by("-added_at")
-#         )
-#         # считаем из того же queryset — без доп. запросов
-#         user_cart_total = sum(item.total_price for item in user_cart_products)
-#         total_items = sum(item.quantity for item in user_cart_products)
-#     except Cart.DoesNotExist:
-#         user_cart_products = []
-#         user_cart_total = 0
-#         total_items = 0
+@login_required(login_url="/register/")
+def profile(request):
+    user = request.user
 
-#     # История заказов с товарами за один запрос
-#     orders = (
-#         Order.objects.filter(
-#             user=user,
-#         )
-#         .prefetch_related(
-#             Prefetch(
-#                 "items__product__images",
-#                 queryset=ProductImage.objects.filter(media_type="image").order_by(
-#                     "order"
-#                 ),
-#                 to_attr="prefetched_images",  # именно это использует main_image property
-#             )
-#         )
-#         .order_by("-created_at")
-#     )
-#     # id товаров, на которые пользователь уже оставил отзыв
-#     reviewed_product_ids = set(
-#         Review.objects.filter(user=user).values_list("product_id", flat=True)
-#     )
-#     user_favorite_ids = list(favorites.values_list("id", flat=True))
-#     active_tab = request.GET.get("tab", 1)
-#     # Делаем так:
-#     try:
-#         cart = user.cart
-#         cart_items = cart.items.select_related("product").all()
-#         user_cart_total = sum(item.total_price for item in cart_items)
-#         total_items = sum(item.quantity for item in cart_items)
-#     except Cart.DoesNotExist:
-#         cart_items = []
-#         user_cart_total = 0
-#         total_items = 0
-#     context = {
-#         "user": user,
-#         "title": "Profile",
-#         "favorites": favorites,
-#         "user_cart_products": user_cart_products,
-#         "user_favorite_ids": user_favorite_ids,
-#         "active_tab": active_tab,
-#         "user_cart_total": user_cart_total,
-#         "total_items": total_items,
-#         "orders": orders,
-#         "reviewed_product_ids": reviewed_product_ids,
-#     }
-#     # Render the profile page
-#     return render(request, "users/profile.html", context=context)
+    favorites = Product.objects.filter(favorited_by__user=user).order_by(
+        "-favorited_by__created_at"
+    )
+
+    try:
+        cart = user.cart
+        user_cart_products = (
+            cart.items.select_related("product")
+            .prefetch_related(
+                Prefetch(
+                    "product__images",
+                    queryset=ProductImage.objects.filter(media_type="image").order_by(
+                        "order"
+                    ),
+                    to_attr="prefetched_images",
+                )
+            )
+            .order_by("-added_at")
+        )
+        user_cart_total = sum(item.total_price for item in user_cart_products)
+        total_items = sum(item.quantity for item in user_cart_products)
+    except Cart.DoesNotExist:
+        user_cart_products = []
+        user_cart_total = 0
+        total_items = 0
+
+    orders = (
+        Order.objects.filter(user=user)
+        .prefetch_related(
+            Prefetch(
+                "items__product__images",
+                queryset=ProductImage.objects.filter(media_type="image").order_by(
+                    "order"
+                ),
+                to_attr="prefetched_images",
+            )
+        )
+        .order_by("-created_at")
+    )
+
+    reviewed_product_ids = set(
+        Review.objects.filter(user=user).values_list("product_id", flat=True)
+    )
+    user_favorite_ids = list(favorites.values_list("id", flat=True))
+
+    # int() — чтобы Alpine сравнивал числа с числами, а не "2" === 1
+    active_tab = int(request.GET.get("tab", 1))
+
+    context = {
+        "user": user,
+        "title": "Profile",
+        "favorites": favorites,
+        "user_cart_products": user_cart_products,
+        "user_favorite_ids": user_favorite_ids,
+        "active_tab": active_tab,
+        "user_cart_total": user_cart_total,
+        "total_items": total_items,
+        "orders": orders,
+        "reviewed_product_ids": reviewed_product_ids,
+    }
+
+    return render(request, "users/profile.html", context=context)
 
 
 class UserPasswordResetView(PasswordResetView):

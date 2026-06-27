@@ -1,0 +1,84 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+
+
+{% block content %}
+<div class="order_list_wrapper" x-data="{ filter: 'all' }">
+
+  <h2 style="margin-top:1.5rem;margin-left:1.5rem;font-size:clamp(1rem, 0.513vw + 0.885rem, 1.5rem);">{{ title }} -  {{user.username}}</h2>
+
+  {# ── Переключатель менеджера (только суперюзер) ── #}
+  {% if is_superuser %}
+  <div >
+    <form hx-post="{% url 'dashboard:set_active_manager' %}"
+          hx-trigger="change"
+          >
+      {% csrf_token %}
+      <div class="select-wrapper">
+      
+      <select name="manager_id" class="custom-select">
+        <option value="">— все заказы —</option>
+        {% for manager in managers %}
+          <option value="{{ manager.id }}"
+            {% if active_manager.id == manager.id %}selected{% endif %}>
+            {{ manager.get_full_name|default:manager.username }}
+          </option>
+        {% endfor %}
+      </select>
+      <div class="select-arrow">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  {# ── Фильтр по статусу (Alpine, без запросов) ── #}
+  <div class="select_btn_wrapper">
+    <button class="order_select_btn"
+            :class="{ active: filter === 'all' }"
+            @click="filter = 'all'">Все</button>
+    <button class="order_select_btn"
+            :class="{ active: filter === 'pending' }"       
+            @click="filter = 'pending'">Новый заказы</button>
+    <button class="order_select_btn"
+            :class="{ active: filter === 'confirmed' }"
+            @click="filter = 'confirmed'">Подтверждены</button>
+    <button class="order_select_btn"
+            :class="{ active: filter === 'processing' }"
+            @click="filter = 'processing'">Собраны</button>
+    <button class="order_select_btn"
+            :class="{ active: filter === 'shipped' }"
+            @click="filter = 'shipped'">Отправлены</button>
+    <button class="order_select_btn"
+            :class="{ active: filter === 'delivered' }"
+            @click="filter = 'delivered'">Доставлены</button>
+    <button class="order_select_btn"
+            :class="{ active: filter === 'cancelled' }"
+            @click="filter = 'cancelled'">Отменены</button>
+    <button class="order_select_btn"
+            onclick="window.location.href='{% url 'dashboard:archived_orders' %}'">Архив</button>
+  </div>
+
+  {# ── Список заказов ── #}
+  <div id="orders-list" class="order_list_wrapper">
+    {% for order in orders %}
+      <div x-show="filter === 'all' || filter === '{{ order.status }}'" class="order_admin_item">
+        {% include 'dashboard/partials/_order_card.html' %}
+      </div>
+    {% empty %}
+      <p class="text-muted">Заказов нет.</p>
+    {% endfor %}
+  </div>
+  {% if user.is_superuser %}
+<input type="button" class="order_action_btn manage_exit_btn" value="в панель администратора" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">
+
+{%elif user.is_staff %}
+<input type="button" class="order_action_btn manage_exit_btn" value="На главную" onclick="window.location.href='{% url 'shop:index' %}'">
+{% endif %}
+</div>
+
+
+{% endblock %}

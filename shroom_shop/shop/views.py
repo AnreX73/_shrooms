@@ -1,12 +1,17 @@
 from django.shortcuts import render
 
-from .models import SiteAssets
+from .models import SiteAssets, MushroomType
+
 
 def index(request):
-    header_image = SiteAssets.objects.get(note="header_image")
-    print(header_image)
+    start_banner = SiteAssets.objects.get(note="start_banner", is_active=True)
+    advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
+    shrooms_types = MushroomType.objects.all()
+
     context = {
-        "header_image": header_image,
+        "start_banner": start_banner,
+        "advantages": advantages,
+        "shrooms_types": shrooms_types,
     }
-    
-    return render(request, 'shop/index.html', context)
+
+    return render(request, "shop/index.html", context)

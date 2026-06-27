@@ -1,0 +1,164 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ title }}</h1>
+    <p class="subtitle">{{ product.article }} · {{ product.category }}</p>
+  </div>
+  <div class="header-actions">
+    <a href="{% url 'dashboard:product_edit' product.pk %}" class="btn btn-secondary">✏️ Редактировать товар</a>
+    <a href="{{ product.get_absolute_url }}" target="_blank" class="btn btn-ghost">👁 Смотреть на сайте</a>
+  </div>
+</div>
+
+{# Шаги #}
+<div class="steps-indicator">
+  <div class="step available">
+    <a href="{% url 'dashboard:product_edit' product.pk %}" style="display:contents">
+      <span class="step-num">1</span>
+      <span class="step-label">Основная информация</span>
+    </a>
+  </div>
+  <div class="step-arrow">→</div>
+  <div class="step active">
+    <span class="step-num">2</span>
+    <span class="step-label">Фото и видео</span>
+  </div>
+</div>
+
+{# Скрытые урлы для JS — Django резолвит с неймспейсом, JS читает через data-атрибуты #}
+<span id="js-urls"
+  data-upload="{% url 'dashboard:upload_product_media' product.pk %}"
+  data-reorder="{% url 'dashboard:reorder_product_media' product.pk %}"
+  data-partial-base="{% url 'dashboard:media_item_partial' 0 %}"
+  data-delete-base="{% url 'dashboard:delete_product_media' 0 %}"
+  data-status-base="{% url 'dashboard:media_status' 0 %}"
+></span>
+
+<div class="media-layout">
+
+  {# ── Зона загрузки ── #}
+  <div class="upload-zone-wrapper">
+    <div id="media-dropzone" class="dropzone-custom">
+      <div class="dz-message">
+        <div class="dz-icon">📁</div>
+        <div class="dz-text">Перетащите файлы сюда</div>
+        <div class="dz-subtext">или <span class="dz-link">нажмите для выбора</span></div>
+        <div class="dz-hint">Фото: JPG, PNG, WebP · Видео: MP4, MOV, AVI · до 100 МБ</div>
+      </div>
+    </div>
+
+    {# Прогресс загрузки #}
+    <div id="upload-progress" class="upload-progress hidden">
+      <div class="upload-progress__bar">
+        <div class="upload-progress__fill" id="progress-fill"></div>
+      </div>
+      <div class="upload-progress__text" id="progress-text">Загрузка...</div>
+    </div>
+  </div>
+
+  {# ── Галерея (сортируемая) ── #}
+  <div class="gallery-wrapper">
+    <div class="gallery-header">
+      <h2>Загруженные файлы</h2>
+      <span class="gallery-count" id="media-count">
+        {{ product.images.count }} файл{{ product.images.count|pluralize:",,ов" }}
+      </span>
+    </div>
+
+    <div id="media-grid" class="media-grid">
+      {% for media in product.images.all %}
+        {% include "dashboard/partials/media_item.html" with media=media %}
+      {% empty %}
+        <div class="media-empty" id="empty-placeholder">
+          Пока нет файлов. Загрузите фото или видео выше.
+        </div>
+      {% endfor %}
+    </div>
+
+    <p class="sort-hint">
+      <span>⠿</span> Перетаскивайте карточки чтобы изменить порядок
+    </p>
+  </div>
+
+</div>
+
+<div class="form-actions">
+  <a href="{% url 'dashboard:admin_area' %}" class="btn btn-ghost">← В панель</a>
+  <a href="{{ product.get_absolute_url }}" target="_blank" class="btn btn-primary">
+    Готово · смотреть товар →
+  </a>
+</div>
+{% if has_duplicates %}
+<!-- DEBUG: has_duplicates={{ has_duplicates }}, all_done={{ all_done }} -->
+
+<div id="duplicate-section" class="mt-4">
+    {% if all_done %}
+    <button id="copy-to-duplicates" class="btn btn-primary">
+        Применить медиа к дубликатам
+    </button>
+    {% else %}
+    <p id="processing-notice" class="text-muted">
+        ⏳ Файлы обрабатываются — кнопка появится автоматически...
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const mediaDropzone = document.getElementById('media-dropzone');
+    if (!mediaDropzone) return;
+    Dropzone.autoDiscover = false;
+    // ... остальной код ...
+})();
+
+{% if has_duplicates %}
+(function() {
+    function attachCopyHandler() {
+        const btn = document.getElementById("copy-to-duplicates");
+        if (!btn) return;
+        btn.addEventListener("click", function () {
+            this.disabled = true;
+            this.textContent = "Копирование...";
+            fetch("{% url 'dashboard:copy_media_to_duplicates' product.pk %}", {
+                method: "POST",
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    this.textContent = `✅ Готово, скопировано в ${data.count} товар(а)`;
+                }
+            });
+        });
+    }
+
+    {% if not all_done %}
+    const poll = setInterval(() => {
+        fetch("{% url 'dashboard:media_processing_status' product.pk %}")
+            .then(r => r.json())
+            .then(data => {
+                if (data.all_done) {
+                    clearInterval(poll);
+                    document.getElementById("duplicate-section").innerHTML =
+                        '<button id="copy-to-duplicates" class="btn btn-primary">Применить медиа к дубликатам</button>';
+                    attachCopyHandler();
+                }
+            });
+    }, 3000);
+    {% endif %}
+
+    attachCopyHandler();
+})();
+{% endif %}
+</script>
+{% endblock %}

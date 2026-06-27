@@ -4,25 +4,51 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shop', '0002_product_ingredients'),
+        ("shop", "0002_product_ingredients"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='kit',
-            field=models.CharField(blank=True, default='', max_length=200, verbose_name='Комплектация'),
+            model_name="product",
+            name="kit",
+            field=models.CharField(
+                blank=True, default="", max_length=200, verbose_name="Комплектация"
+            ),
         ),
         migrations.AddField(
-            model_name='product',
-            name='preservation_method',
-            field=models.CharField(blank=True, choices=[('drying', 'Сушка'), ('marinating', 'Маринование'), ('salting', 'Засолка'), ('freezing', 'Заморозка'), ('other', 'Другое')], default='', max_length=20, verbose_name='Способ консервирования'),
+            model_name="product",
+            name="preservation_method",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("drying", "Сушка"),
+                    ("marinating", "Маринование"),
+                    ("salting", "Засолка"),
+                    ("freezing", "Заморозка"),
+                    ("other", "Другое"),
+                ],
+                default="",
+                max_length=20,
+                verbose_name="Способ консервирования",
+            ),
         ),
         migrations.AddField(
-            model_name='product',
-            name='release_form',
-            field=models.CharField(blank=True, choices=[('glass_jar', 'Стеклянная банка'), ('tin_can', 'Жестяная банка'), ('bag', 'Пакет'), ('box', 'Коробка'), ('vacuum', 'Вакуумная упаковка'), ('other', 'Другое')], default='', max_length=20, verbose_name='Форма выпуска'),
+            model_name="product",
+            name="release_form",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("glass_jar", "Стеклянная банка"),
+                    ("tin_can", "Жестяная банка"),
+                    ("bag", "Пакет"),
+                    ("box", "Коробка"),
+                    ("vacuum", "Вакуумная упаковка"),
+                    ("other", "Другое"),
+                ],
+                default="",
+                max_length=20,
+                verbose_name="Форма выпуска",
+            ),
         ),
     ]

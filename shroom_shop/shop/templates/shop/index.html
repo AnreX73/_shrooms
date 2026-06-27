@@ -3,6 +3,60 @@
 {% block title %}Лесная фея - Главная{% endblock %}
 
 {% block content %}
+{% if start_banner.is_active %}
+<div id="startBanner" class="start_banner_wrapper" style="display: none;">
+    <div class="overlay" id="bannerOverlay"></div>
+    <div class="start_banner_content">
+         
+        <!-- Стартовый баннер -->
+        <h1>{{ start_banner.title }}</h1>
+        <div class="start_banner_img">
+            {% if start_banner.image %}
+            <img src="{{ start_banner.image.url }}" alt="{{ start_banner.title }}">
+            {% else %}
+            <img src="{{ site_logo.image.url }}" alt=" логотип ">
+            {% endif %}
+        </div>
+        <div class="banner-content">{{ start_banner.description}}</div>
+       
+        <button type="button" id="bannerClose" class="banner-close-btn">Закрыть</button>
+    </div>
+</div>
+{% endif %}
 
-   {% include 'shop/includes/header.html' %}
+<!-- Приемущества магазина -->
+<section class="advantages_wrapper">
+    <h2>Почему нам доверяют</h2>
+    <div class="advantages">
+        {% for advantage in advantages %}
+        <div class="advantage">
+            <h4>{{ advantage.name}}</h4>
+            <p>{{ advantage.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Типы грибов -->
+<section class="shrooms_types_wrapper">
+    <h2>Наши грибочки</h2>
+    <div class="shrooms_types">
+        {% for shroom_type in shrooms_types %}
+        <div class="shroom_type_box">
+            <div class="shroom_type_img">
+                {% if shroom_type.image %}
+                <img src="{{ shroom_type.image.url }}" alt="{{ shroom_type.name }}">
+                {% else %}
+                <img src="{{ site_logo.image.url }}" alt=" логотип ">
+                {% endif %}
+            </div>
+            <div class="shroom_type_content">
+                <h4>{{ shroom_type.name }}</h4>
+                <p>{{ shroom_type.description }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
 {% endblock %}

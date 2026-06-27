@@ -5,9 +5,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .validators import validate_review_media
 
 
-
 class SiteAssets(models.Model):
-    site_assets_name = models.CharField(max_length=200, verbose_name="Название")
+    name = models.CharField(max_length=200, verbose_name="Название")
     image = models.ImageField(
         upload_to="site_assets/", blank=True, null=True, verbose_name="Изображение"
     )
@@ -20,8 +19,8 @@ class SiteAssets(models.Model):
         verbose_name_plural = "логотипы, слоганы и прочее"
 
     def __str__(self):
-        return self.site_assets_name
-    
+        return self.name
+
 
 class Category(models.Model):
     """Основная категория товаров"""
@@ -50,10 +49,15 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return f"/catalog/{self.slug}/"
-    
+
+
 class MushroomType(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Вид гриба")
     slug = models.SlugField(unique=True, blank=True)
+    description = models.TextField(blank=True, verbose_name="Описание")
+    image = models.ImageField(
+        upload_to="mushroom_types/", blank=True, null=True, verbose_name="Изображение"
+    )
 
     class Meta:
         verbose_name = "Вид гриба"
@@ -62,7 +66,7 @@ class MushroomType(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class Product(models.Model):
     OUT_OF_STOCK_BEHAVIOR = [
@@ -70,21 +74,21 @@ class Product(models.Model):
         ("show", "Показывать с пометкой"),
     ]
     PRESERVATION_METHOD = [
-    ("drying", "Сушка"),
-    ("marinating", "Маринование"),
-    ("salting", "Засолка"),
-    ("freezing", "Заморозка"),
-    ("other", "Другое"),
+        ("drying", "Сушка"),
+        ("marinating", "Маринование"),
+        ("salting", "Засолка"),
+        ("freezing", "Заморозка"),
+        ("other", "Другое"),
     ]
     RELEASE_FORM = [
-    ("glass_jar", "Стеклянная банка"),
-    ("tin_can", "Жестяная банка"),
-    ("bag", "Пакет"),
-    ("box", "Коробка"),
-    ("vacuum", "Вакуумная упаковка"),
-    ("other", "Другое"),
+        ("glass_jar", "Стеклянная банка"),
+        ("tin_can", "Жестяная банка"),
+        ("bag", "Пакет"),
+        ("box", "Коробка"),
+        ("vacuum", "Вакуумная упаковка"),
+        ("other", "Другое"),
     ]
-  
+
     name = models.CharField(max_length=200, verbose_name="Наименование", default="")
     slug = models.SlugField(
         max_length=255,
@@ -94,8 +98,6 @@ class Product(models.Model):
         db_index=True,  # ускоряет фильтрацию, но не запрещает дубли
     )
     article = models.CharField(max_length=200, unique=True, verbose_name="Артикул")
-    
-   
 
     note_for_manager = models.TextField(
         blank=True, default="", verbose_name="Примечание для менеджера"
@@ -109,51 +111,58 @@ class Product(models.Model):
     )
     mushroom_types = models.ManyToManyField(
         MushroomType,
-        blank=True,                    # blank=True — для ассорти не обязательно указывать
+        blank=True,  # blank=True — для ассорти не обязательно указывать
         related_name="products",
         verbose_name="Виды грибов",
     )
     ingredients = models.TextField(
-    blank=True,
-    default="",
-    verbose_name="Состав",
+        blank=True,
+        default="",
+        verbose_name="Состав",
     )
     preservation_method = models.CharField(
-    max_length=20,
-    choices=PRESERVATION_METHOD,
-    blank=True,
-    default="",
-    verbose_name="Способ консервирования",
+        max_length=20,
+        choices=PRESERVATION_METHOD,
+        blank=True,
+        default="",
+        verbose_name="Способ консервирования",
     )
     release_form = models.CharField(
-    max_length=20,
-    choices=RELEASE_FORM,
-    blank=True,
-    default="",
-    verbose_name="Форма выпуска",
+        max_length=20,
+        choices=RELEASE_FORM,
+        blank=True,
+        default="",
+        verbose_name="Форма выпуска",
     )
     description = models.TextField(blank=True, default="", verbose_name="Описание")
     country_of_origin = models.CharField(
         max_length=200, blank=True, default="", verbose_name="Страна производства"
     )
-    
+
     nutrition_fat = models.DecimalField(
-        max_digits=5, decimal_places=1,
-        null=True, blank=True,
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True,
         verbose_name="Жиры (г/100г)",
     )
     nutrition_protein = models.DecimalField(
-        max_digits=5, decimal_places=1,
-        null=True, blank=True,
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True,
         verbose_name="Белки (г/100г)",
     )
     nutrition_carbs = models.DecimalField(
-        max_digits=5, decimal_places=1,
-        null=True, blank=True,
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True,
         verbose_name="Углеводы (г/100г)",
     )
     nutrition_calories = models.PositiveIntegerField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Калорийность (ккал/100г)",
     )
 
@@ -163,22 +172,26 @@ class Product(models.Model):
 
     # --- Хранение ---
     storage_temp_min = models.IntegerField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Мин. температура хранения (°C)",
     )
     storage_temp_max = models.IntegerField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Макс. температура хранения (°C)",
     )
 
     # --- Вес товара ---
     # expiration_date замените на shelf_life_months:
     shelf_life_months = models.PositiveSmallIntegerField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Срок годности (мес.)",
     )
     net_weight = models.PositiveSmallIntegerField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Вес товара без упаковки (г)",
     )
 
@@ -222,7 +235,7 @@ class Product(models.Model):
         verbose_name="Скидка",
         validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
-   
+
     stock = models.PositiveIntegerField(default=10, verbose_name="Количество на складе")
     out_of_stock_behavior = models.CharField(
         "При отсутствии товара",
@@ -240,7 +253,7 @@ class Product(models.Model):
     popularity = models.IntegerField(
         default=0, verbose_name="Популярность", db_index=True
     )
-    
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
@@ -312,7 +325,6 @@ class Product(models.Model):
         return first.image if first else None
 
 
-
 class ProductImage(models.Model):
     TYPE_CHOICES = (
         ("image", "Изображение"),
@@ -371,7 +383,7 @@ class ProductImage(models.Model):
         if self.image_compressed:
             return self.image_compressed
         return self.image
-    
+
 
 class Favorite(models.Model):
     """Избранные товары"""
