@@ -44,43 +44,14 @@ html {
 
   }
 
-  .wood-btn {
-  display: inline-block;
-  padding: 12px 28px;
-  /* Имитация текстуры дерева градиентом */
-  background: linear-gradient(to bottom, #a67c52 0%, #8b5a2b 50%, #6f4e37 100%);
-  border: 2px solid #4a3728;
-  border-radius: 6px; /* Можно сделать 0 или добавить специфичную форму */
-  color: #fff8dc; /* Цвет "слоновая кость" для контраста */
-  font-family: 'Georgia', serif; /* Шрифт с засечками для атмосферности */
-  font-size: 18px;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
-  /* Объем и тени */
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.2), /* Блик сверху */
-    0 4px 6px rgba(0, 0, 0, 0.4); /* Тень под кнопкой */
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  text-decoration: none;
+.all_content_wrapper {
+    position: relative;
+    max-width: var(--all-content-width);
+    margin: 0 auto;
+
 }
 
-/* Состояние при наведении */
-.wood-btn:hover {
-  background: linear-gradient(to bottom, #b88a5e 0%, #9c6530 50%, #7d583e 100%);
-  transform: translateY(-2px);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 6px 10px rgba(0, 0, 0, 0.5);
-}
 
-/* Состояние при нажатии */
-.wood-btn:active {
-  transform: translateY(1px);
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.5), /* Вдавленная тень */
-    0 1px 2px rgba(0, 0, 0, 0.3);
-}
 
 
 /*forms section */
@@ -468,10 +439,21 @@ input[type="radio"] {
 }
 
 /*виды грибов*/
+.shrooms_types{
+    
+    max-width: var(--all-content-width);
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+}
 .shroom_type_box {
     display:grid;
     grid-template-columns: 1fr 3fr;
-    max-width: 260px;
+    gap: 1rem;
+    width: clamp(20rem, 6.41vw + 18.558rem, 26.25rem);
+    min-height: fit-content;
     margin: 10px;
     text-align: center;
     background-color: var(--secondary-color);
@@ -480,7 +462,33 @@ input[type="radio"] {
     box-shadow: var(--shadow);
 }
 
-
+.shroom_type_img{
+    
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    padding: 0.5rem;
+    align-self: center;
+}
+.shroom_type_img > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.shroom_type_content{
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    justify-content: center;
+    font-size: clamp(0.875rem, 0.128vw + 0.846rem, 1rem);
+}
+.shroom_type_content > p {
+    margin: 0.5rem 0;
+    font-size: clamp(0.813rem, 0.192vw + 0.769rem, 1rem);
+    text-align: justify;
+}
 /*табы в профиле*/
 .tabs-wrapper{
     display: flex;
@@ -526,4 +534,303 @@ input[type="radio"] {
     gap: 1rem;
     align-items: center;
 }
+
+/* оболочка каталога */
+
+#catalog-section {
+    width: 100%;
+}
+
+.categories-grid,
+.sales_hits-grid,
+.catalog-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(3px, 2vw, 24px);
+    width: 100%;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+
+/* Карточка продукта */
+
+.product-card {
+    position: relative;
+    width: clamp(150px, 45vw, 280px);
+    flex-grow: 1;
+    /* Чтобы карточки красиво заполняли пустоты */
+    max-width: 280px;
+    /* Ограничиваем сверху, чтобы на больших экранах не стали гигантскими */
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: inset 0px 0px 74px 30px rgba(136, 119, 111, 0.3);
+    transition: 0.3s;
+}
+
+.product-card img {
+    transition: 0.3s;
+}
+.product-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+
+}
+
+
+.product-card:hover img {
+    transform: scale(1.2);
+    transition: 0.3s;
+    box-shadow: var(--active-shadow);
+}
+
+.product-image-container {
+    position: relative;
+    width: 100%;
+    max-height: 350px;
+    overflow: hidden;
+
+}
+
+.ribbon {
+    position: absolute;
+    top: 18px;
+    right: -75px;
+    width: 220px;
+    text-align: center;
+    transform: rotate(45deg);
+    line-height: 24px;
+    background: #C43F44;
+    color: #FFFFFF;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+
+}
+
+
+.favorite-btn {
+    position: absolute;
+    bottom:  1px;
+    right: 1px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+}
+
+
+.favorite-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    50% {
+        transform: translateX(4px);
+    }
+
+    75% {
+        transform: translateX(-4px);
+    }
+}
+
+.shake-animation {
+    animation: shake 0.3s ease-in-out;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    /* Опционально: легкое покраснение границ */
+}
+
+
+.discount-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: var(--accent-color);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0px 0px 30px 8px rgba(255, 255, 255, 1);
+}
+
+.product-info {
+    position: relative;
+    padding: clamp(0.5rem, 0.513vw + 0.385rem, 1rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.25rem, 0.256vw + 0.192rem, 0.5rem);
+}
+
+
+
+.price-container {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(0.5rem, 0.256vw + 0.442rem, 0.75rem);
+
+}
+
+.current-price {
+    font-size: clamp(1rem, 0.513vw + 0.885rem, 1.5rem);
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.old-price {
+    font-size: clamp(0.75rem, 0.256vw + 0.692rem, 1rem);
+    color: #999;
+    text-decoration: line-through;
+}
+
+
+.product-title {
+    font-size: clamp(1rem, 0.256vw + 0.942rem, 1.25rem);
+    color: #333;
+    line-height: 1.4;
+    text-align: left;
+    display: -webkit-box;
+    line-clamp: 1;
+    -webkit-line-clamp: 1;
+    /* Ограничение в 1 строку */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    position: relative;
+    /* Настройте под ваш дизайн */
+    max-height: 1.5em;
+    /* 1 строка * line-height */
+}
+
+.rating-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content:flex-start;
+    text-align: left;
+}
+
+.add-to-cart-btn,
+.page-add-to-cart-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: clamp(0.375rem, 0.256vw + 0.317rem, 0.625rem);
+    border-radius: clamp(0.375rem, 0.385vw + 0.288rem, 0.75rem);
+    font-size: clamp(1rem, 0.256vw + 0.942rem, 1.25rem);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.25rem, 0.256vw + 0.192rem, 0.5rem);
+    transition: background 0.2s;
+}
+
+
+.add-to-cart-btn:hover,
+.page-add-to-cart-btn:hover {
+    background: var(--accent-color);
+}
+
+.add-to-cart-btn svg,
+.page-add-to-cart-btn svg {
+    width: 25px;
+    height: 25px;
+    fill: white;
+}
+
+.delivery-date {
+    font-size: 14px;
+    color: var(--secondary-color);
+
+}
+
+.mini-add-to-cart-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: var(--primary-color);
+    align-self: flex-end;
+    padding: 4px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: none;
+}
+
+.mini-add-to-cart-btn:hover {
+    background: var(--accent-color);
+}
+
+.mini-add-to-cart-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+@media (max-width: 533px) {
+    .add-to-cart-btn {
+        display: none;
+    }
+
+    .mini-add-to-cart-btn {
+        display: block;
+    }
+}
+
+/* Star Rating Styles */
+.star-container {
+    display: inline-block;
+    font-size: clamp(1rem, 0.513vw + 0.885rem, 1.5rem);
+    line-height: 1;
+    position: relative;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.stars-empty {
+    color: #d1d1d1;
+}
+
+.stars-filled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Теперь это значение будет браться из инлайнового стиля конкретной карточки */
+    width: calc(var(--rating-val) / 5 * 100%);
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--accent-color);
+}
+
+.rating-value {
+    font-size: clamp(0.875rem, 0.513vw + 0.769rem, 1.125rem);
+}
+
+.reviews-count {
+    margin-left: 10px;
+}
+
+
+
 

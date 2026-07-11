@@ -24,25 +24,14 @@
 </div>
 {% endif %}
 
-<!-- Приемущества магазина -->
-<section class="advantages_wrapper">
-    <h2>Почему нам доверяют</h2>
-    <div class="advantages">
-        {% for advantage in advantages %}
-        <div class="advantage">
-            <h4>{{ advantage.name}}</h4>
-            <p>{{ advantage.description }}</p>
-        </div>
-        {% endfor %}
-    </div>
-</section>
+
 
 <!-- Типы грибов -->
 <section class="shrooms_types_wrapper">
     <h2>Наши грибочки</h2>
     <div class="shrooms_types">
         {% for shroom_type in shrooms_types %}
-        <div class="shroom_type_box">
+        <div class="shroom_type_box ">
             <div class="shroom_type_img">
                 {% if shroom_type.image %}
                 <img src="{{ shroom_type.image.url }}" alt="{{ shroom_type.name }}">
@@ -54,6 +43,19 @@
                 <h4>{{ shroom_type.name }}</h4>
                 <p>{{ shroom_type.description }}</p>
             </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Приемущества магазина -->
+<section class="advantages_wrapper ">
+    <h2>Почему нам доверяют</h2>
+    <div class="advantages">
+        {% for advantage in advantages %}
+        <div class="advantage ">
+            <h4>{{ advantage.name}}</h4>
+            <p>{{ advantage.description }}</p>
         </div>
         {% endfor %}
     </div>

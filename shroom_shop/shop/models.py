@@ -205,6 +205,13 @@ class Product(models.Model):
         null=True,
         verbose_name="Вес упаковки (кг)",
     )
+    total_weight = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Общий вес (кг)",
+    )
     packaging_length = models.DecimalField(
         max_digits=5,
         decimal_places=1,
@@ -267,16 +274,18 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Первое сохранение — slug пока без id
             super().save(*args, **kwargs)
+            # После первого INSERT объект уже существует — второй save должен быть UPDATE
+            kwargs = {**kwargs, "force_insert": False}
+            args = ()
         if not self.slug:
             self.slug = make_slug(f"{self.name}_{self.pk}")
-            super().save(*args, **kwargs)  # второй save с уже известным pk
+            super().save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)
 
-    def __str__(self):
-        return f"{self.name} — {self.article}"
+        def __str__(self):
+            return f"{self.name} — {self.article}"
 
     def get_absolute_url(self):
         return f"/product_page/{self.slug}/"
@@ -312,6 +321,7 @@ class Product(models.Model):
         if self.stock > 0:
             return True
         return self.out_of_stock_behavior == "show"
+   
 
     @property
     def main_image(self):

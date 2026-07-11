@@ -1,0 +1,15 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Лесная фея - Каталог{% endblock %}
+
+{% block content %}
+    <h2 style="text-align: center;">Каталог грибов</h2>
+    <div class="catalog-grid" id="catalog-section">
+        {% if products|length == 0 %}
+            <p>Нет товаров в каталоге.</p>
+        {% endif %}
+        {% for product in products %}
+            {% include 'shop/includes/product_card.html' %}
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,90 @@
+
+<a href="{{ product.get_absolute_url }}"><div class="product-card" x-data="{ show: false, isFavorite: {% if product.id in user_favorite_ids %}true{% else %}false{% endif %}}">
+    <div class="product-image-container" >
+        <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="product-image">
+
+        <button class="favorite-btn" type="button"
+        @click.prevent.stop="isFavorite = !isFavorite; $nextTick(() => $dispatch('toggle-fav', isFavorite))"
+        hx-post="{% url 'shop:toggle_favorite' product.id %}"
+        hx-trigger="toggle-fav" 
+        :hx-vals="JSON.stringify({ is_favorite: isFavorite })"
+        hx-swap="none">
+            <svg viewBox="0 0 24 24" :fill="isFavorite ? 'red' : 'none'">
+                <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                </path>
+            </svg>
+        </button>
+        {% if product.discount_percentage > 0 %}
+        <div class="discount-badge"> - {{ product.discount_percentage }}%</div>
+        {% endif %}
+        {% if product.pk in hit_ids %}
+        <div class="box">
+            <div class="ribbon">хит продаж</div>
+        </div>
+        {% endif %}
+        {% if user.is_superuser %}
+        <div class="admin_edit_product box">
+            <a href="{% url 'dashboard:product_edit' product.id %}">Редактировать товар</a>
+        </div>
+        <div class="admin_clone_product box">
+            <a href="{% url 'dashboard:product_clone' product.id %}">Добавить похожий товар</a>
+        </div>
+        <div class="admin_updated_product box">
+            <p>Отредактирован: {{ product.updated_at|date:"d.m.Y " }}</p>
+        </div>
+        {% endif %}
+        {% if not product.is_available and product.out_of_stock_behavior == 'show' %}
+        <span class="wait_for_arrival box">Товар закончился. Ожидаем поступления</span>
+        {% endif %}
+    </div>
+    <div class="product-info" x-data="{ isCart: {% if product.id in user_cart_products %}true{% else %}false{% endif %} }">
+        <div class="price-container">
+            <span class="current-price">{{ product.final_price }} ₽</span>
+            {% if product.discount_percentage > 0 %}
+            <span class="old-price">{{ product.price }} ₽</span>
+            {% endif %}
+
+        </div>
+        
+
+
+        <div class="product-title">
+            {{ product.name }}
+            {% if product.hair_length %}
+                <span style='font-size:1rem;opacity:0.8'>{{ product.hair_length }} см</span>
+            {% endif %}
+        </div>
+        <div class="rating-wrapper">
+            <span class="rating-badge">
+                {% include 'shop/includes/rating_stars.html' with rating=product.rating %}
+            </span>
+            <span class="rating-value">{{ product.rating }} </span>
+            <span class="reviews-count">{{ product.reviews_count }} отзывов</span>
+            
+            
+        </div>
+
+       {% include 'shop/includes/add_cart_button.html' %}
+        <button  class="mini-add-to-cart-btn"
+                    {% if product.stock == 0 %}disabled{% endif %} 
+                    x-data="{ 
+                    isAuth: {{ user.is_authenticated|yesno:'true,false' }},
+                    handleCart() {
+                        if (!this.isAuth) return alert('Нужно авторизоваться!');
+            
+                        htmx.ajax('POST', '{% url 'shop:toggle_cart' product.id %}', {
+                            values: { is_cart: true },
+                            swap: 'none'
+                     });
+                 }
+                }"
+             @click.prevent="handleCart">
+            <svg fill="#8a5944" viewBox="0 0 24 24">
+                <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5h2c0 1.66 1.34 3 3 3s3-1.34 3-3h2c0 2.76-2.24 5-5 5z"/>
+            </svg>
+        </button> 
+        </div>
+
+        
+</div></a>
