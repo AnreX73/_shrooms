@@ -12,13 +12,13 @@ from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
-from django_q.tasks import async_task
+# from django_q.tasks import async_task
 
 from .models import Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review
 
 
 def index(request):
-    start_banner = SiteAssets.objects.get(note="start_banner", is_active=True)
+    start_banner = SiteAssets.objects.filter(note="start_banner", is_active=True).first()
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
     shrooms_types = MushroomType.objects.all()
 

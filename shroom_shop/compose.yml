@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx:stable-alpine
-    container_name: hair_shop_nginx
+    container_name: shroom_shop_nginx
     restart: unless-stopped
     ports:
       - "8002:80"  # Оставляем, если NPM на другом VPS. Если NPM на этом же VPS — меняем на "8002:80"
@@ -18,7 +18,7 @@ services:
 
   web:
     build: .  # Т.к. файл теперь в корне рядом с Dockerfile
-    container_name: hair_shop_web
+    container_name: shroom_shop_web
     restart: unless-stopped
     env_file:
       - .env
@@ -40,7 +40,7 @@ services:
 
   adminer:
     image: adminer
-    container_name: hair_shop_adminer
+    container_name: shroom_shop_adminer
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -54,7 +54,7 @@ services:
     # Внимание: на текущий момент стабильная версия Postgres — 17. 
     # Версии 18 еще нет в официальном Docker Hub (используйте 17 или 16).
     image: postgres:17-alpine 
-    container_name: hair_shop_db
+    container_name: shroom_shop_db
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -76,7 +76,7 @@ networks:
   web:
     driver: bridge
   npm_default:
-    external: true  # ← эта сеть уже существует, не создаём новую
+    driver: bridge  
 
 volumes:
   postgres_data:

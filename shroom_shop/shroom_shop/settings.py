@@ -17,8 +17,8 @@ SECRET_KEY = config("SECRET_KEY")
 
 
 # ALLOWED_HOSTS = ['thirstily-attractive-bird.cloudpub.ru', 'localhost', '127.0.0.1']
-DEBUG = config("DEBUG", default=False, cast=bool)
-# DEBUG = True
+# DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = True
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
 
@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     "dashboard.apps.DashboardConfig",
     "django_extensions",
     "debug_toolbar",
-    "django_q",
     "notifications.apps.NotificationsConfig",
     "django_cleanup.apps.CleanupConfig",
 ]
