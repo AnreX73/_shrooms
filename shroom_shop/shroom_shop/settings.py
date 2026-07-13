@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "payments.apps.PaymentsConfig",
     "dashboard.apps.DashboardConfig",
     "django_extensions",
+    'django_q',
     "debug_toolbar",
     "notifications.apps.NotificationsConfig",
     "django_cleanup.apps.CleanupConfig",
@@ -191,3 +192,16 @@ PASSWORD_HASHERS = [
     "users.hashers.FastPBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",  # для старых паролей
 ]
+
+
+Q_CLUSTER = {
+    "name": "myshop",
+    "workers": 2,
+    "recycle": 500,
+    "timeout": 60,
+    "retry": 120,
+    "queue_limit": 50,
+    "bulk": 10,
+    "orm": "default",  # используем БД как брокер — Redis не нужен!
+    "save_limit": 10000,  # <-- Спасательный круг от переполнения
+}
