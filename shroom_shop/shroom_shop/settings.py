@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from decouple import config
+from decouple import Csv, config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -166,6 +166,13 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_USER_MODEL = "users.User"
 LOGOUT_REDIRECT_URL = "shop:index"
+
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://localhost:8002,http://127.0.0.1:8002",
+    cast=Csv(),
+)
+
 
 UNFOLD = {
     "SITE_TITLE": "Управление студия НР",
