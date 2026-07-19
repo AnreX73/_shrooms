@@ -14,18 +14,33 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 # from django_q.tasks import async_task
 
-from .models import Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review
+from .models import Category, Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review, ProductImage
+
+
+
+def get_hit_ids():
+    from django.core.cache import cache
+
+    hit_ids = cache.get("hit_product_ids")
+    if hit_ids is None:
+        hit_ids = set(
+            Product.objects.order_by("-popularity").values_list("id", flat=True)[:24]
+        )
+        cache.set("hit_product_ids", hit_ids, timeout=3600)
+    return hit_ids
 
 
 def index(request):
     start_banner = SiteAssets.objects.filter(note="start_banner", is_active=True).first()
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
     shrooms_types = MushroomType.objects.all()
+    categories = Category.objects.filter(is_active=True).order_by("created_at")
 
     context = {
         "start_banner": start_banner,
         "advantages": advantages,
         "shrooms_types": shrooms_types,
+        "categories": categories,
     }
 
     return render(request, "shop/index.html", context)
@@ -80,3 +95,51 @@ def toggle_cart(request, product_id):
         f'class="cart_count" x-show="{cart_count} > 0">{cart_count}</span>'
     )
 
+
+
+def product_page(request, slug):
+    product = get_object_or_404(
+        Product.objects.select_related("category").defer("created_at", "updated_at"),
+        slug=slug,
+    )
+    product_id = product.id
+
+    product_gallery = ProductImage.objects.filter(product=product).order_by(
+        "-created_at"
+    )
+    video_poster = product_gallery.filter(media_type="image").first()
+
+    images_prefetch = Prefetch(
+        "images",
+        queryset=ProductImage.objects.filter(media_type="image").order_by("order"),
+        to_attr="prefetched_images",
+    )
+    reviews = Review.objects.filter(product=product, is_approved=True).prefetch_related(
+        "media"
+    )
+    stock_filter = Q(stock__gt=0) | Q(out_of_stock_behavior="show")
+    related_products = (
+        Product.objects.filter(
+            stock_filter,
+            category=product.category,
+            mushroom_types__in=product.mushroom_types.all(),
+            
+        )
+        .exclude(id=product_id)
+        .select_related("category")
+        .prefetch_related(images_prefetch)
+    )
+    
+
+    return render(
+        request,
+        "shop/product_page.html",
+        {
+            "product": product,
+            "product_gallery": product_gallery,
+            "video_poster": video_poster,
+            "related_products": related_products,
+            "reviews": reviews,
+            "hit_ids": get_hit_ids(),
+        },
+    )

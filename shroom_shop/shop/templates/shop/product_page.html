@@ -1,0 +1,270 @@
+{% extends 'shop/base.html' %}
+{% load shop_filters %}
+
+{% block title %}{{ product.name }}{% endblock %}
+{% block description %}{{ product.description|truncatechars:160 }}{% endblock %}
+
+{% block content %}
+   <section class="product_page_container" x-data="{ showPopup: false }">
+    <div class="product_page_info_wrapper">
+        
+    
+        
+        <h2 class="product_page_title">{{ product.name }}
+            {% if product.hair_length %}
+                <span style='font-size:1rem;opacity:0.8'>{{ product.hair_length }} см</span>
+            {% endif %}
+        </h2>
+        {% if user.is_superuser %}
+        <div class="admin_edit_link">
+            <a href="{% url 'dashboard:product_edit' product.id %}">Редактировать товар</a>
+        </div>
+        {% endif %}
+        {% if product.stock == 0 %}
+        <span style="color: #ff6b6b;">Товар закончился. Ожидаем поступления</span>
+        {% endif %}
+        <div class="product_page_categories">
+        
+           <a class="product_page_category" href="{% url 'shop:catalog' %}?category={{ product.category.id }}">{{ product.category.name }} </a>
+        
+        </div> 
+        <div class="price-container">
+            <span class="current-price">{{ product.final_price }} ₽</span>
+            {% if product.discount_percentage > 0 %}
+            <span class="old-price">{{ product.price }} ₽</span>
+            
+            <span class="product_page_discount"> - {{ product.discount_percentage }}%</span>
+            {% endif %}
+            
+
+        </div>
+         <div class="rating-wrapper">
+            <span class="rating-badge">
+                {% include 'shop/includes/rating_stars.html' with rating=product.rating %}
+            </span>
+            <span class="rating-value">{{ product.rating }}</span>   
+            <a style="margin-left: 3rem;" href="#reviews_section">{{ product.reviews_count }} отзывов</a>   
+        </div>
+        
+     {# Блок характеристик волос #} 
+     <div class="specs-grid">
+     {% for field in product|get_visible_fields:"name,rating,discount_percentage,price,final_price,description"|slice:":10" %}
+        {% if not field.is_empty %}
+     <div class="spec-item">
+            <span class="spec-label">{{ field.verbose_name }}</span>
+            <span class="spec-dots"></span>
+            <span class="spec-value">{{ field.value }}</span>
+        </div>
+        {% endif %}
+    {% endfor %}
+    </div>
+
+
+        
+        
+        <div class="users-btn product-page-btn" style="margin-bottom: 0.5rem;" @click="showPopup = !showPopup">Показать все характеристики</div>
+        {% comment %} {% include 'shop/includes/add_cart_button.html' %}    {% endcomment %}
+          <button {% if product.stock == 0 %}disabled{% endif %}  class="page-add-to-cart-btn" style="margin-top:1rem;" 
+                    x-data="{ 
+                    isAuth: {{ user.is_authenticated|yesno:'true,false' }},
+                    handleCart() {
+                        if (!this.isAuth) return alert('Нужно авторизоваться!');
+            
+                        htmx.ajax('POST', '{% url 'shop:toggle_cart' product.id %}', {
+                            values: { is_cart: true },
+                            swap: 'none'
+                     });
+                 }
+                }"
+             @click.prevent="handleCart">
+            <svg fill="#8a5944" viewBox="0 0 24 24">
+                <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5h2c0 1.66 1.34 3 3 3s3-1.34 3-3h2c0 2.76-2.24 5-5 5z"/>
+            </svg>
+            <p>В корзину</p>
+            
+        </button> 
+       
+    </div>
+
+        <div class="overlay" 
+     x-show="showPopup" 
+     x-cloak
+     x-transition:enter="transition-opacity"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-opacity"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     x-on:click="showPopup = false"
+     style="display: none;">
+    </div>
+
+<div x-show="showPopup"
+     x-cloak
+     x-transition:enter="transition-slide-left"
+     x-transition:enter-start="slide-left-start"
+     x-transition:enter-end="slide-left-end"
+     x-transition:leave="transition-slide-left"
+     x-transition:leave-start="slide-left-end"
+     x-transition:leave-end="slide-left-start"
+     class="product_info_popup"
+     style="display: none;">
+     <div class="close_icon" @click="showPopup = false">×</div>
+    <h2 class="product_page_title">{{ product.name }}</h2>
+    <div class="product_page_categories" style="margin-bottom: 1rem;">
+        {% for category in product.category.all %}
+            <span class="product_page_category"> {{ category.name }} </span>
+        {% endfor %}
+    </div>
+    <div class="price-container">
+        <span class="current-price">{{ product.final_price }} ₽</span>
+        {% if product.discount_percentage > 0 %}
+        <span class="old-price">{{ product.price }} ₽</span>
+        
+        <span class="product_page_discount"> - {{ product.discount_percentage }}%</span>
+        {% endif %}
+    </div>
+    <div class="rating-wrapper">
+        <span class="rating-badge">
+            {% include 'shop/includes/rating_stars.html' with rating=product.rating %}
+        </span>
+        <span class="rating-value">{{ product.rating }}</span>   
+    </div>
+            
+             {# Блок характеристик волос #}  
+
+             <div class="specs-grid">
+     {% for field in product|get_visible_fields:"name,rating,discount_percentage,price,final_price,description" %}
+        {% if not field.is_empty %}
+     <div class="spec-item">
+            <span class="spec-label">{{ field.verbose_name }}</span>
+            <span class="spec-dots"></span>
+            <span class="spec-value">{{ field.value }}</span>
+        </div>
+        {% endif %}
+    {% endfor %}
+    </div>
+
+ 
+    
+            <p>{{ product.description }}</p>
+        
+    
+     <button {% if product.stock == 0 %}disabled{% endif %}   class="page-add-to-cart-btn" style="margin-top:1rem;" 
+                    x-data="{ 
+                    isAuth: {{ user.is_authenticated|yesno:'true,false' }},
+                    handleCart() {
+                        if (!this.isAuth) return alert('Нужно авторизоваться!');
+            
+                        htmx.ajax('POST', '{% url 'shop:toggle_cart' product.id %}', {
+                            values: { is_cart: true },
+                            swap: 'none'
+                     });
+                 }
+                }"
+             @click.prevent="handleCart">
+            <svg fill="#8a5944" viewBox="0 0 24 24">
+                <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5h2c0 1.66 1.34 3 3 3s3-1.34 3-3h2c0 2.76-2.24 5-5 5z"/>
+            </svg>
+            <p>В корзину</p>
+            
+        </button>
+        
+         
+    </div>
+        
+  
+  
+<div class="product_page_image_wrapper">
+     
+    <!-- Slider main container -->
+<div class="swiper">
+  <!-- Additional required wrapper -->
+  <div class="swiper-wrapper">
+    
+    <!-- Slides -->
+    {% for image in product_gallery.all %}
+    {% if image.media_type == 'image' %}
+        <div class="swiper-slide"><img src="{{ image.image.url }}" alt="{{ product.name }}" ><span class="color_info">{{product.color|default:"-"}}</span></div>
+    {% elif image.media_type == 'video' %}
+        <div class="swiper-slide">
+    <div class="video-wrapper">
+        <!-- Кнопка Play (видна всегда, пока видео на паузе) -->
+        <div class="play-btn">
+            <svg viewBox="0 0 24 24" width="60" height="60">
+                <path fill="currentColor" d="M8 5v14l11-7z"/>
+            </svg>
+        </div>
+
+        <!-- Само видео -->
+        <video muted playsinline preload="metadata" poster="{{ video_poster.image.url }}"> 
+            <source src="{{ image.video.url }}" type="video/mp4">
+        </video>
+    </div>
+</div>
+    {% endif %}
+    {% endfor %}
+    ...
+  </div>
+  
+  <!-- If we need pagination -->
+  <div class="swiper-pagination"></div>
+
+  <!-- If we need navigation buttons -->
+  <div class="swiper-button-prev"></div>
+  <div class="swiper-button-next"></div>
+
+  <!-- If we need scrollbar -->
+  <div class="swiper-scrollbar"></div>
+</div>
+  
+</div>
+
+    <div class="other_products_wrapper">
+        <h3>Варианты товара</h3>
+    <div class="related_product_gallery">
+             {% for related_product in related_products %}
+            <a href="{{ related_product.get_absolute_url }}" class="related_product_link">
+                <img src="{{ related_product.main_image.url }}" alt="{{ related_product.name }}" class="related_product_image">
+                <span class="mini_price">{{ related_product.final_price }} ₽</span>
+                <span class="mini_color">{{ related_product.color|default:"-" }}</span>
+                {{ related_product.name }}
+            </a>
+            {% endfor %} 
+        </div> 
+    </div>
+
+    </section>
+    <hr style='margin-top:1rem;'>
+
+
+    <h3 style="text-align:center; margin: 1rem auto;" >Может понравиться </h3>
+    <div class="catalog-grid recommendations_section">
+         {% for recommendation in recommended_products %}
+        {% include 'shop/includes/product_card.html' with product=recommendation %}
+    {% endfor %}  
+    </div>
+    {% if reviews %}
+<div id="reviews_section" class="reviews_section">
+    <h3 style="text-align:center; margin-top:1rem;" >Отзывы покупателей </h3>
+         {% for review in reviews %}
+        {% include 'shop/includes/product_page_review.html' with review=review %}
+    {% endfor %}  
+</div>
+{% endif %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.name }}",
+  "description": "{{ product.description }}",
+  "image": "{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ product.price }}",
+    "priceCurrency": "RUB",
+    "availability": "{% if product.in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  }
+}
+</script>
+{% endblock %}

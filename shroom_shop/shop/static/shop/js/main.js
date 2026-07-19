@@ -14,3 +14,6 @@ const banner = document.getElementById('startBanner');
 
     if (closeBtn) closeBtn.addEventListener('click', hideBanner);
     if (overlay) overlay.addEventListener('click', hideBanner);
+
+
+// swiper

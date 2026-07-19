@@ -1,0 +1,20 @@
+ <!-- Categories Section -->
+    <section class="categories" id="categories">
+        
+            <div class="section-title">
+                <h2 style="text-align: center;margin-bottom: 20px; margin-top: 20px;">Категории товаров</h2>
+                
+            </div>
+            <div class="categories-grid">
+                {% for category in categories %}
+                <a href="{% url 'shop:catalog' %}?category={{ category.id }}" class="category-card">
+                    <img src="{{ category.image.url }}" class="category-img">
+                    <div class="category-overlay">
+                        <h3>{{ category.name }}</h3>
+                        {{ category.description|safe }}
+                    </div>
+                </a>
+                {% endfor %}              
+            </div>
+       
+    </section>

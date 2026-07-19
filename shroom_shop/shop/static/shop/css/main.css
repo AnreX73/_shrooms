@@ -413,6 +413,8 @@ input[type="radio"] {
     flex-direction: column;
     align-items: center;
 }
+
+
 .advantages {
     max-width: var(--all-content-width);
     margin: 0 auto;
@@ -464,12 +466,11 @@ input[type="radio"] {
 
 .shroom_type_img{
     
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     overflow: hidden;
     border-radius: 0.5rem;
     background-color: #fff;
-    padding: 0.5rem;
     align-self: center;
 }
 .shroom_type_img > img {
@@ -582,7 +583,7 @@ input[type="radio"] {
 
 
 .product-card:hover img {
-    transform: scale(1.2);
+    transform: scale(1.05) translateY(10px);
     transition: 0.3s;
     box-shadow: var(--active-shadow);
 }
@@ -831,6 +832,87 @@ input[type="radio"] {
     margin-left: 10px;
 }
 
+/* Product Page Styles */
+.product_page_container {
+    max-width: var(--all-content-width);
+    margin: 0 auto;
+    padding: clamp(0rem, 1.282vw - 0.288rem, 1.25rem);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: clamp(0.5rem, 0.769vw + 0.327rem, 1.25rem);
+    justify-items: center;
+}
 
 
+.product_page_image_wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    overflow: hidden;
+}
 
+
+/* Категории товаров */
+.category-card {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    width: clamp(150px, 45vw, 280px);
+    flex-grow: 1;
+    /* Чтобы карточки красиво заполняли пустоты */
+    max-width: 280px;
+    /* Ограничиваем сверху, чтобы на больших экранах не стали гигантскими */
+    box-shadow: var(--shadow);
+    font-size: 0.9rem;
+    cursor: pointer;
+    /* Добавляем фиксированное соотношение сторон */
+    aspect-ratio: 3 / 4;
+    /* или другое соотношение, например 4/3 */
+}
+@media (max-width: 533px) {
+    .category-card {
+        
+        aspect-ratio: 3 / 5; 
+    }
+}
+
+.category-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.category-card:hover .category-img {
+    transform: scale(1.05);
+}
+
+.category-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    padding: 30px;
+}
+
+.category-overlay h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-shadow:
+    -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px 1px 0 black,
+    1px 1px 0 black;
+}
+
+.category-overlay > div {
+    font-size: clamp(0.813rem, 0.321vw + 0.74rem, 1.125rem);
+    text-shadow:
+    -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px 1px 0 black,
+    1px 1px 0 black;
+}

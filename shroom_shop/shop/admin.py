@@ -34,10 +34,11 @@ class CategoryAdmin(ModelAdmin):
             "widget": WysiwygWidget,
         }
     }
-    list_display = ("name", "slug", "getHtmlPhoto")
+    list_display = ("name", "slug", "getHtmlPhoto", "is_active")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     save_on_top = True
+    list_editable = ("is_active",)
 
     def getHtmlPhoto(self, image):
         if image.image:

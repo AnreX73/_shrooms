@@ -24,7 +24,7 @@
 </div>
 {% endif %}
 
-
+{% include 'shop/includes/categories.html' %}
 
 <!-- Типы грибов -->
 <section class="shrooms_types_wrapper">
@@ -32,6 +32,8 @@
     <div class="shrooms_types">
         {% for shroom_type in shrooms_types %}
         <div class="shroom_type_box ">
+            <div class="shroom_type_content">
+                <h4 style="margin-bottom: 4px;">{{ shroom_type.name }}</h4>
             <div class="shroom_type_img">
                 {% if shroom_type.image %}
                 <img src="{{ shroom_type.image.url }}" alt="{{ shroom_type.name }}">
@@ -39,8 +41,8 @@
                 <img src="{{ site_logo.image.url }}" alt=" логотип ">
                 {% endif %}
             </div>
+            </div>
             <div class="shroom_type_content">
-                <h4>{{ shroom_type.name }}</h4>
                 <p>{{ shroom_type.description }}</p>
             </div>
         </div>
