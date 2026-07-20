@@ -48,10 +48,10 @@ def index(request):
 
 
 def catalog(request):
-    shrooms_types = MushroomType.objects.all()
-    products = Product.objects.all().order_by("-popularity")  # Получаем все продукты
+    
+    products = Product.objects.all().prefetch_related("mushroom_types").order_by("-popularity")  # Получаем все продукты
     context = {
-        "shrooms_types": shrooms_types,
+        
         "products": products,
     }
     return render(request, "shop/catalog.html", context)
