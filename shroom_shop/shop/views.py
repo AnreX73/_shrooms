@@ -143,3 +143,24 @@ def product_page(request, slug):
             "hit_ids": get_hit_ids(),
         },
     )
+
+@login_required
+@require_POST
+def toggle_cart(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+
+    is_cart = request.POST.get("is_cart") == "true"
+
+    if is_cart:
+        CartItem.objects.get_or_create(cart=cart, product=product)
+    else:
+        CartItem.objects.filter(cart=cart, product=product).delete()
+
+    # Обновляем счётчик в иконке через OOB swap
+    cart_count = cart.total_items
+    return HttpResponse(
+        f'<span id="cart-counter" hx-swap-oob="true" '
+        f'x-data="{{ cart_count: {cart_count} }}" '
+        f'class="cart_count" x-show="{cart_count} > 0">{cart_count}</span>'
+    )

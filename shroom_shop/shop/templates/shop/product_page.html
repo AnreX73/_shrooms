@@ -1,156 +1,154 @@
+<!-- shop/product_page.html -->
 {% extends 'shop/base.html' %}
-{% load shop_filters %}
-
-{% block title %}{{ product.name }}{% endblock %}
-{% block description %}{{ product.description|truncatechars:160 }}{% endblock %}
+{% load static %}
 
 {% block content %}
-   <section class="product_page_container" x-data="{ showPopup: false }">
-    <div class="product_page_info_wrapper">
+<div class="product-detail">
+    <div class="product-layout">
         
-    
-        
-        <h2 class="product_page_title">{{ product.name }}
-            {% if product.hair_length %}
-                <span style='font-size:1rem;opacity:0.8'>{{ product.hair_length }} см</span>
-            {% endif %}
-        </h2>
-        {% if user.is_superuser %}
-        <div class="admin_edit_link">
-            <a href="{% url 'dashboard:product_edit' product.id %}">Редактировать товар</a>
+        <!-- Колонка 1: Галерея товара -->
+        <div class="product-gallery">
+            <div class="gallery-container">
+                <!-- Миниатюры слева -->
+                <div class="gallery-thumbs swiper">
+                    <div class="swiper-wrapper">
+                        {% for img in product_gallery %}
+                        {% if img.media_type == "image" %}
+                        <div class="swiper-slide gallery-thumb">
+                            <img src="{{ img.image.url }}" alt="{{ product.name }}" loading="lazy">
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Основное изображение -->
+                <div class="gallery-main swiper">
+                    <div class="swiper-wrapper">
+                        {% for img in product_gallery %}
+                        {% if img.media_type == "image" %}
+                        <div class="swiper-slide gallery-main-slide">
+                            <img src="{{ img.image.url }}" alt="{{ product.name }}">
+                            <button class="favorite-btn" aria-label="Добавить в избранное" data-product-id="{{ product.id }}">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                            {% if product.id in hit_ids %}
+                            <span class="hit-badge">Хит</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="swiper-button-next">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#e3e3e3"><path d="M480-334 438-376l74-74H330v-60h182l-74-74 42-42 146 146-146 146Zm0 254q82 0 155-31.5t127.5-86Q817-252 848.5-325T880-480q0-83-31.5-156t-86-127Q708-817 635.5-848.5T480-880q-83 0-156 31.5T197.5-763q-54 54.5-85.5 127T80-480q0 82 31.5 155T197.5-197.5q54 54 127 85.5T480-80Zm0-60q-142 0-241-99.5T140-480q0-142 99.5-241t241-99q141 0 240.5 99T820-480q0 141-99.5 240.5T480-140Zm0-340Z"/></svg>
+                    </div>
+                    <div class="swiper-button-prev">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#e3e3e3"><path d="m480-334 42-42-74-74h182v-60H448l74-74-42-42-146 146 146 146Zm0 254q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z"/></svg>
+                    </div>
+                </div>
+            </div>
         </div>
-        {% endif %}
-        {% if product.stock == 0 %}
-        <span style="color: #ff6b6b;">Товар закончился. Ожидаем поступления</span>
-        {% endif %}
-        <div class="product_page_categories">
-        
-           <a class="product_page_category" href="{% url 'shop:catalog' %}?category={{ product.category.id }}">{{ product.category.name }} </a>
-        
-        </div> 
-        <div class="price-container">
-            <span class="current-price">{{ product.final_price }} ₽</span>
-            {% if product.discount_percentage > 0 %}
-            <span class="old-price">{{ product.price }} ₽</span>
+
+        <!-- Колонка 2: Описание товара -->
+        <div class="product-info">
+            <h1 class="product-title">{{ product.name }}</h1>
             
-            <span class="product_page_discount"> - {{ product.discount_percentage }}%</span>
-            {% endif %}
-            
+            <div class="product-rating">
+                <span class="rating-value">★ {{ product.rating|default:"4.9" }}</span>
+                <span class="rating-count">{{ product.reviews_count|default:"0" }} оценки</span>
+                <span class="questions-count">{{ product.questions_count|default:"0" }} вопросов</span>
+            </div>
 
-        </div>
-         <div class="rating-wrapper">
-            <span class="rating-badge">
-                {% include 'shop/includes/rating_stars.html' with rating=product.rating %}
-            </span>
-            <span class="rating-value">{{ product.rating }}</span>   
-            <a style="margin-left: 3rem;" href="#reviews_section">{{ product.reviews_count }} отзывов</a>   
-        </div>
-        
-     {# Блок характеристик волос #} 
-     <div class="specs-grid">
-     {% for field in product|get_visible_fields:"name,rating,discount_percentage,price,final_price,description"|slice:":10" %}
-        {% if not field.is_empty %}
-     <div class="spec-item">
-            <span class="spec-label">{{ field.verbose_name }}</span>
-            <span class="spec-dots"></span>
-            <span class="spec-value">{{ field.value }}</span>
-        </div>
-        {% endif %}
-    {% endfor %}
-    </div>
+            <div class="product-sku">
+                <span class="sku-label">Артикул</span>
+                <span class="sku-value">{{ product.article}}</span>
+            </div>
 
+            <!-- Свойства товара (первые 6) -->
+            <div class="product-properties">
+                {% if product.mushroom_type %}
+                <div class="property-row">
+                    <span class="property-name">Вид грибов</span>
+                    <span class="property-value">{{ product.mushroom_type }}</span>
+                </div>
+                {% endif %}
+                
+                {% if product.shelf_life %}
+                <div class="property-row">
+                    <span class="property-name">Срок годности</span>
+                    <span class="property-value">{{ product.shelf_life }} мес</span>
+                </div>
+                {% endif %}
+                
+                {% if product.country %}
+                <div class="property-row">
+                    <span class="property-name">Страна производства</span>
+                    <span class="property-value">{{ product.country }}</span>
+                </div>
+                {% endif %}
+                
+                {% if product.nutrition_fat is not None %}
+                <div class="property-row">
+                    <span class="property-name">Пищевая ценность жиры</span>
+                    <span class="property-value">{{ product.nutrition_fat }} г/100г</span>
+                </div>
+                {% endif %}
+                
+                {% if product.nutrition_protein is not None %}
+                <div class="property-row">
+                    <span class="property-name">Пищевая ценность белки</span>
+                    <span class="property-value">{{ product.nutrition_protein }} г/100г</span>
+                </div>
+                {% endif %}
+                
+                {% if product.nutrition_carbs is not None %}
+                <div class="property-row">
+                    <span class="property-name">Пищевая ценность углеводы</span>
+                    <span class="property-value">{{ product.nutrition_carbs }} г/100г</span>
+                </div>
+                {% endif %}
+            </div>
 
-        
-        
-        <div class="users-btn product-page-btn" style="margin-bottom: 0.5rem;" @click="showPopup = !showPopup">Показать все характеристики</div>
-        {% comment %} {% include 'shop/includes/add_cart_button.html' %}    {% endcomment %}
-          <button {% if product.stock == 0 %}disabled{% endif %}  class="page-add-to-cart-btn" style="margin-top:1rem;" 
-                    x-data="{ 
-                    isAuth: {{ user.is_authenticated|yesno:'true,false' }},
-                    handleCart() {
-                        if (!this.isAuth) return alert('Нужно авторизоваться!');
-            
-                        htmx.ajax('POST', '{% url 'shop:toggle_cart' product.id %}', {
-                            values: { is_cart: true },
-                            swap: 'none'
-                     });
-                 }
-                }"
-             @click.prevent="handleCart">
-            <svg fill="#8a5944" viewBox="0 0 24 24">
-                <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5h2c0 1.66 1.34 3 3 3s3-1.34 3-3h2c0 2.76-2.24 5-5 5z"/>
-            </svg>
-            <p>В корзину</p>
-            
-        </button> 
-       
-    </div>
+            <!-- Кнопка подробного описания -->
+            <button class="details-btn" id="openDetailsModal" type="button">
+                Характеристики и описание
+            </button>
 
-        <div class="overlay" 
-     x-show="showPopup" 
-     x-cloak
-     x-transition:enter="transition-opacity"
-     x-transition:enter-start="opacity-0"
-     x-transition:enter-end="opacity-100"
-     x-transition:leave="transition-opacity"
-     x-transition:leave-start="opacity-100"
-     x-transition:leave-end="opacity-0"
-     x-on:click="showPopup = false"
-     style="display: none;">
-    </div>
+           
 
-<div x-show="showPopup"
-     x-cloak
-     x-transition:enter="transition-slide-left"
-     x-transition:enter-start="slide-left-start"
-     x-transition:enter-end="slide-left-end"
-     x-transition:leave="transition-slide-left"
-     x-transition:leave-start="slide-left-end"
-     x-transition:leave-end="slide-left-start"
-     class="product_info_popup"
-     style="display: none;">
-     <div class="close_icon" @click="showPopup = false">×</div>
-    <h2 class="product_page_title">{{ product.name }}</h2>
-    <div class="product_page_categories" style="margin-bottom: 1rem;">
-        {% for category in product.category.all %}
-            <span class="product_page_category"> {{ category.name }} </span>
-        {% endfor %}
-    </div>
-    <div class="price-container">
-        <span class="current-price">{{ product.final_price }} ₽</span>
-        {% if product.discount_percentage > 0 %}
-        <span class="old-price">{{ product.price }} ₽</span>
-        
-        <span class="product_page_discount"> - {{ product.discount_percentage }}%</span>
-        {% endif %}
-    </div>
-    <div class="rating-wrapper">
-        <span class="rating-badge">
-            {% include 'shop/includes/rating_stars.html' with rating=product.rating %}
-        </span>
-        <span class="rating-value">{{ product.rating }}</span>   
-    </div>
-            
-             {# Блок характеристик волос #}  
+            <!-- Бренд и категория -->
+            <div class="product-brand">
+                <div class="brand-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                    {% if product.category %}
+                    <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+                    {% endif %}
+                </div>
+                <div class="category-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                    {% if product.category %}
+                    <a href="{{ product.category.get_absolute_url }}">Все товары категории</a>
+                    {% endif %}
+                </div>
+            </div>
 
-             <div class="specs-grid">
-     {% for field in product|get_visible_fields:"name,rating,discount_percentage,price,final_price,description" %}
-        {% if not field.is_empty %}
-     <div class="spec-item">
-            <span class="spec-label">{{ field.verbose_name }}</span>
-            <span class="spec-dots"></span>
-            <span class="spec-value">{{ field.value }}</span>
-        </div>
-        {% endif %}
-    {% endfor %}
-    </div>
-
- 
-    
-            <p>{{ product.description }}</p>
-        
-    
-     <button {% if product.stock == 0 %}disabled{% endif %}   class="page-add-to-cart-btn" style="margin-top:1rem;" 
+            <!-- Цена и кнопки -->
+            <div class="product-purchase">
+                <div class="price-block">
+                    <span class="current-price">{{ product.price }} ₽</span>
+                    {% if product.old_price %}
+                    <span class="old-price">{{ product.old_price }} ₽</span>
+                    {% endif %}
+                </div>
+                
+                <button {% if product.stock == 0 %}disabled{% endif %}   class="page-add-to-cart-btn" style="margin-top:1rem;" 
                     x-data="{ 
                     isAuth: {{ user.is_authenticated|yesno:'true,false' }},
                     handleCart() {
@@ -169,102 +167,746 @@
             <p>В корзину</p>
             
         </button>
-        
-         
-    </div>
-        
-  
-  
-<div class="product_page_image_wrapper">
-     
-    <!-- Slider main container -->
-<div class="swiper">
-  <!-- Additional required wrapper -->
-  <div class="swiper-wrapper">
-    
-    <!-- Slides -->
-    {% for image in product_gallery.all %}
-    {% if image.media_type == 'image' %}
-        <div class="swiper-slide"><img src="{{ image.image.url }}" alt="{{ product.name }}" ><span class="color_info">{{product.color|default:"-"}}</span></div>
-    {% elif image.media_type == 'video' %}
-        <div class="swiper-slide">
-    <div class="video-wrapper">
-        <!-- Кнопка Play (видна всегда, пока видео на паузе) -->
-        <div class="play-btn">
-            <svg viewBox="0 0 24 24" width="60" height="60">
-                <path fill="currentColor" d="M8 5v14l11-7z"/>
-            </svg>
+                
+            </div>
         </div>
 
-        <!-- Само видео -->
-        <video muted playsinline preload="metadata" poster="{{ video_poster.image.url }}"> 
-            <source src="{{ image.video.url }}" type="video/mp4">
-        </video>
+        <!-- Колонка 3: Похожие товары -->
+        <aside class="related-products">
+            <h3 
+            class="related-title">И еще
+            {% for type in product.mushroom_types.all %}
+                <span class="related-type">{{ type.name }}</span>
+            {% endfor %}
+        </h3>
+            <div class="related-grid">
+                {% for related in related_products %}
+                <a href="{{ related.get_absolute_url }}" class="related-item" title="{{ related.name }}">
+                    {% with related.prefetched_images|first as main_img %}
+                    {% if main_img %}
+                    <img src="{{ main_img.image.url }}" alt="{{ related.name }}" loading="lazy">
+                    {% else %}
+                    <img src="{% static 'img/no-image.png' %}" alt="{{ related.name }}" loading="lazy">
+                    {% endif %}
+                    {% endwith %}
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+
     </div>
 </div>
-    {% endif %}
-    {% endfor %}
-    ...
-  </div>
-  
-  <!-- If we need pagination -->
-  <div class="swiper-pagination"></div>
 
-  <!-- If we need navigation buttons -->
-  <div class="swiper-button-prev"></div>
-  <div class="swiper-button-next"></div>
+<!-- Модальное окно с полным описанием -->
+<div class="modal" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button class="modal-close" id="closeDetailsModal" type="button" aria-label="Закрыть">&times;</button>
+        <h2 id="modalTitle">Характеристики и описание</h2>
+        
+        <div class="full-properties">
+            {% if product.mushroom_type %}
+            <div class="property-row">
+                <span class="property-name">Вид грибов</span>
+                <span class="property-value">{{ product.mushroom_type }}</span>
+            </div>
+            {% endif %}
+            
+            {% if product.shelf_life %}
+            <div class="property-row">
+                <span class="property-name">Срок годности</span>
+                <span class="property-value">{{ product.shelf_life }} мес</span>
+            </div>
+            {% endif %}
+            
+            {% if product.country %}
+            <div class="property-row">
+                <span class="property-name">Страна производства</span>
+                <span class="property-value">{{ product.country }}</span>
+            </div>
+            {% endif %}
+            
+            {% if product.nutrition_fat is not None %}
+            <div class="property-row">
+                <span class="property-name">Пищевая ценность жиры</span>
+                <span class="property-value">{{ product.nutrition_fat }} г/100г</span>
+            </div>
+            {% endif %}
+            
+            {% if product.nutrition_protein is not None %}
+            <div class="property-row">
+                <span class="property-name">Пищевая ценность белки</span>
+                <span class="property-value">{{ product.nutrition_protein }} г/100г</span>
+            </div>
+            {% endif %}
+            
+            {% if product.nutrition_carbs is not None %}
+            <div class="property-row">
+                <span class="property-name">Пищевая ценность углеводы</span>
+                <span class="property-value">{{ product.nutrition_carbs }} г/100г</span>
+            </div>
+            {% endif %}
 
-  <!-- If we need scrollbar -->
-  <div class="swiper-scrollbar"></div>
-</div>
-  
-</div>
+            {% if product.weight %}
+            <div class="property-row">
+                <span class="property-name">Вес</span>
+                <span class="property-value">{{ product.weight }} г</span>
+            </div>
+            {% endif %}
 
-    <div class="other_products_wrapper">
-        <h3>Варианты товара</h3>
-    <div class="related_product_gallery">
-             {% for related_product in related_products %}
-            <a href="{{ related_product.get_absolute_url }}" class="related_product_link">
-                <img src="{{ related_product.main_image.url }}" alt="{{ related_product.name }}" class="related_product_image">
-                <span class="mini_price">{{ related_product.final_price }} ₽</span>
-                <span class="mini_color">{{ related_product.color|default:"-" }}</span>
-                {{ related_product.name }}
-            </a>
-            {% endfor %} 
-        </div> 
+            {% if product.article or product.sku %}
+            <div class="property-row">
+                <span class="property-name">Артикул</span>
+                <span class="property-value">{{ product.article}}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if product.description %}
+        <div class="product-description">
+            <h3>Описание</h3>
+            {{ product.description|safe }}
+        </div>
+        {% endif %}
     </div>
-
-    </section>
-    <hr style='margin-top:1rem;'>
-
-
-    <h3 style="text-align:center; margin: 1rem auto;" >Может понравиться </h3>
-    <div class="catalog-grid recommendations_section">
-         {% for recommendation in recommended_products %}
-        {% include 'shop/includes/product_card.html' with product=recommendation %}
-    {% endfor %}  
-    </div>
-    {% if reviews %}
-<div id="reviews_section" class="reviews_section">
-    <h3 style="text-align:center; margin-top:1rem;" >Отзывы покупателей </h3>
-         {% for review in reviews %}
-        {% include 'shop/includes/product_page_review.html' with review=review %}
-    {% endfor %}  
 </div>
-{% endif %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org/",
-  "@type": "Product",
-  "name": "{{ product.name }}",
-  "description": "{{ product.description }}",
-  "image": "{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}",
-  "offers": {
-    "@type": "Offer",
-    "price": "{{ product.price }}",
-    "priceCurrency": "RUB",
-    "availability": "{% if product.in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
-  }
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.product-detail {
+    max-width: var(--all-content-width);
+    margin: 0 auto;
+    padding: 24px 20px 60px;
 }
+
+.product-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.85fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+
+/* ===== Информация о товаре ===== */
+.product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.product-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text-color, #3F4A3E);
+    margin: 0;
+    line-height: 1.25;
+}
+
+.product-rating {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-color, #3F4A3E);
+    flex-wrap: wrap;
+}
+
+.rating-value {
+    color: var(--accent-color, #bd5d25);
+    font-weight: 600;
+}
+
+.rating-count,
+.questions-count {
+    color: var(--transparent-color, rgba(63, 74, 62, 0.4));
+}
+
+.product-sku {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--secondary-color, #E6DFD3);
+}
+
+.sku-label {
+    color: var(--transparent-color, rgba(63, 74, 62, 0.4));
+    min-width: 70px;
+}
+
+.sku-value {
+    color: var(--text-color, #3F4A3E);
+    font-weight: 500;
+}
+
+/* Свойства */
+.product-properties {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.property-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    font-size: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dotted var(--secondary-color, #E6DFD3);
+}
+
+.property-row:last-child {
+    border-bottom: none;
+}
+
+.property-name {
+    color: var(--transparent-color, rgba(63, 74, 62, 0.4));
+    flex-shrink: 0;
+}
+
+.property-value {
+    color: var(--text-color, #3F4A3E);
+    font-weight: 500;
+    text-align: right;
+}
+
+.details-btn {
+    background: transparent;
+    border: 1px solid var(--primary-color, #7BA88E);
+    color: var(--primary-color, #7BA88E);
+    padding: 12px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    align-self: flex-start;
+    font-family: inherit;
+}
+
+.details-btn:hover {
+    background: var(--primary-color, #7BA88E);
+    color: white;
+    box-shadow: var(--active-shadow, 0 5px 15px rgba(123, 168, 142, 0.35));
+}
+
+.return-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-color, #3F4A3E);
+}
+
+.info-icon {
+    color: var(--transparent-color, rgba(63, 74, 62, 0.4));
+    cursor: help;
+    font-size: 13px;
+}
+
+.product-brand {
+    display: flex;
+    gap: 24px;
+    font-size: 14px;
+    flex-wrap: wrap;
+}
+
+.brand-link,
+.category-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--transparent-color, rgba(63, 74, 62, 0.4));
+}
+
+.brand-link a,
+.category-link a {
+    color: var(--primary-color, #7BA88E);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.brand-link a:hover,
+.category-link a:hover {
+    color: var(--dark-color, #2E3A2D);
+    text-decoration: underline;
+}
+
+/* Цена и кнопки */
+.product-purchase {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 10px;
+    padding-top: 22px;
+    border-top: 1px solid var(--secondary-color, #E6DFD3);
+}
+
+.price-block {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+}
+
+.current-price {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-color, #3F4A3E);
+    letter-spacing: -0.5px;
+}
+
+.old-price {
+    font-size: 17px;
+    color: var(--transparent-color, rgba(63, 74, 62, 0.4));
+    text-decoration: line-through;
+}
+
+.add-to-cart-form {
+    margin: 0;
+}
+
+.btn-add-cart {
+    width: 100%;
+    background: var(--primary-color, #7BA88E);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+}
+
+.btn-add-cart:hover {
+    background: var(--dark-color, #2E3A2D);
+    box-shadow: var(--active-shadow, 0 5px 15px rgba(123, 168, 142, 0.35));
+}
+
+.btn-buy-now {
+    width: 100%;
+    background: white;
+    color: var(--primary-color, #7BA88E);
+    border: 2px solid var(--primary-color, #7BA88E);
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+}
+
+.btn-buy-now:hover {
+    background: var(--primary-color, #7BA88E);
+    color: white;
+}
+
+/* ===== Похожие товары ===== */
+.related-products {
+    position: sticky;
+    top: 24px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.related-products::-webkit-scrollbar {
+    width: 6px;
+}
+
+.related-products::-webkit-scrollbar-track {
+    background: var(--secondary-color, #E6DFD3);
+    border-radius: 3px;
+}
+
+.related-products::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #7BA88E);
+    border-radius: 3px;
+}
+/* Левая колонка (1-я, 4-я, 7-я и т.д.) увеличивается вправо */
+.related-grid .related-item:nth-child(3n+1) {
+    transform-origin: left center;
+}
+
+/* Правая колонка (3-я, 6-я, 9-я и т.д.) увеличивается влево */
+.related-grid .related-item:nth-child(3n) {
+    transform-origin: right center;
+}
+
+/* Элементы в самом низу списка увеличиваются вверх, чтобы не уходить под скролл */
+.related-grid .related-item:nth-last-child(-n+3) {
+    transform-origin: bottom center;
+}
+
+/* Комбинация для нижнего левого элемента */
+.related-grid .related-item:nth-child(3n+1):nth-last-child(-n+3) {
+    transform-origin: bottom left;
+}
+
+/* Комбинация для нижнего правого элемента */
+.related-grid .related-item:nth-child(3n):nth-last-child(-n+3) {
+    transform-origin: bottom right;
+}
+
+.related-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color, #3F4A3E);
+    margin: 0 0 16px;
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    align-content: start;
+}
+
+.related-item {
+    aspect-ratio: 3 / 4;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    background: var(--secondary-color, #E6DFD3);
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.related-item:hover {
+    transform: scale(1.5);
+    z-index: 100;
+    box-shadow: var(--shadow, 0 5px 15px rgba(63, 74, 62, 0.12));
+    overflow: visible;
+    border: 1px solid #fff;
+}
+
+.related-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ===== Модальное окно ===== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(46, 58, 45, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: white;
+    padding: 36px 40px;
+    border-radius: 14px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 20px 60px rgba(46, 58, 45, 0.25);
+}
+
+.modal-content h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+    color: var(--text-color, #3F4A3E);
+}
+
+.modal-content h3 {
+    margin: 24px 0 12px;
+    font-size: 18px;
+    color: var(--text-color, #3F4A3E);
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: var(--text-color, #3F4A3E);
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--secondary-color, #E6DFD3);
+}
+
+.full-properties {
+    margin: 0;
+}
+
+.product-description {
+    line-height: 1.65;
+    color: var(--text-color, #3F4A3E);
+    font-size: 15px;
+}
+
+.product-description p {
+    margin: 0 0 12px;
+}
+
+
+.product-gallery { 
+    top: 24px;
+    min-width: 0;
+}
+
+.gallery-container {
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+}
+
+.gallery-thumbs {
+    width: 80px;
+    min-width: 0;
+    flex-shrink: 0;
+    height: clamp(28.125rem, 7.813vw + 23.125rem, 32.5rem);
+}
+
+.gallery-thumb {
+    cursor: pointer;
+    border: 2px solid var(--secondary-color, #E6DFD3);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.25s ease;
+    background: var(--secondary-color, #E6DFD3);
+}
+
+.gallery-thumb:hover,
+.gallery-thumb.swiper-slide-thumb-active {
+    border-color: var(--primary-color, #7BA88E);
+}
+
+.gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-main {
+    min-width: 340px;
+    min-height: 0;
+    height: clamp(28.125rem, 7.813vw + 23.125rem, 32.5rem);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    background: var(--secondary-color, #E6DFD3);
+    aspect-ratio: 3 / 4;
+}
+
+.gallery-main-slide {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.gallery-main-slide img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ===== Адаптивность ===== */
+@media (max-width: 1024px) {
+    .product-layout {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .related-products {
+        grid-column: 1 / -1;
+        max-height: none;
+        position: static;
+    }
+    
+    .related-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .gallery-thumbs {
+        width: 80px;
+        height: clamp(26.25rem, 11.719vw + 20.625rem, 28.125rem);
+    }
+    .gallery-main {
+        min-width: 0;
+        height: clamp(26.25rem, 11.719vw + 20.625rem, 28.125rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .product-layout {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+ 
+    
+    .product-title {
+        font-size: 22px;
+    }
+    
+    .current-price {
+        font-size: 28px;
+    }
+    
+    .related-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .related-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .gallery-container {
+        flex-direction: column-reverse;
+        min-height: 0;
+    }
+    .gallery-thumbs {
+        width: 100%;
+        min-width: 0;
+        height: clamp(5.625rem, 33.333vw - 1.875rem, 8.125rem);
+    }
+    
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  content: ''; /* убираем стандартную стрелку Swiper */
+}
+
+/* Стилизуем сами кнопки-контейнеры */
+.swiper-button-next,
+.swiper-button-prev {
+  width: clamp(2.25rem, 0.769vw + 2.077rem, 3rem);  /* увеличиваем размер под рамку */
+  height: clamp(2.25rem, 0.769vw + 2.077rem, 3rem); /* увеличиваем размер под рамку */
+  border: 2px solid #ffffff; /* цвет и толщина обводки */
+  border-radius: 50%;       /* делает рамку круглой (для квадрата — уберите) */
+  background: rgba(0, 0, 0, 0.3);  /* прозрачный фон внутри */
+  
+  /* Центрируем SVG внутри рамки */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Стили для SVG внутри рамки */
+.swiper-button-next svg,
+.swiper-button-prev svg {
+  width: clamp(1.75rem, 0.513vw + 1.635rem, 2.25rem);
+  height: clamp(1.75rem, 0.513vw + 1.635rem, 2.25rem);
+  color: #ffffff;
+  fill: #ffffff;
+  filter: none; /* полностью убираем старое свечение */
+  
+}
+
+/* Эффект при наведении (опционально: инверсия цветов) */
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background-color: #ffffff;
+}
+.swiper-button-next:hover svg,
+.swiper-button-prev:hover svg {
+  color: #000000;
+  fill: #000000;
+}
+
+
+
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const galleryThumbs = new Swiper('.gallery-thumbs', {
+        spaceBetween: 10,
+        slidesPerView: 4,
+        freeMode: true,
+        watchSlidesProgress: true,
+        slideToClickedSlide: true,
+        direction: 'horizontal', // база — мобильный вариант
+        breakpoints: {
+            481: {
+                direction: 'vertical', // с 769px переключаем в колонку
+                slidesPerView: 4,
+            }
+        }
+    });
+
+    const galleryMain = new Swiper('.gallery-main', {
+        spaceBetween: 10,
+        navigation: {
+            nextEl: '.gallery-main .swiper-button-next',
+            prevEl: '.gallery-main .swiper-button-prev',
+        },
+        thumbs: {
+            swiper: galleryThumbs,
+        },
+        loop: true,
+        loopedSlides: galleryThumbs.slides.length, // чтобы зациклить все
+    });
+
+    // Пересчитать размеры после полной загрузки картинок (у тебя loading="lazy")
+    window.addEventListener('load', () => {
+        galleryThumbs.update();
+        galleryMain.update();
+    });
+
+    // Кнопка избранного
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            this.classList.toggle('active');
+        });
+    });
+
+    // Модальное окно
+    const modal = document.getElementById('detailsModal');
+    const openBtn = document.getElementById('openDetailsModal');
+    const closeBtn = document.getElementById('closeDetailsModal');
+
+    openBtn?.addEventListener('click', () => modal.classList.add('active'));
+    closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
+    modal?.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+});
 </script>
 {% endblock %}
+

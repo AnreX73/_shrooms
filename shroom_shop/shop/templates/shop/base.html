@@ -14,7 +14,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
      <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-    {% comment %} <link type="text/css" rel="stylesheet" href="{% static 'shop/css/swiper-bundle.min.css' %}" /> {% endcomment %}
+    <link type="text/css" rel="stylesheet" href="{% static 'shop/css/swiper-bundle.min.css' %}" />
     {% comment %} <link rel="stylesheet" href="{% static 'shop/css/dropzone.min.css' %}"> {% endcomment %}
     <link type="text/css" rel="stylesheet" href="{% static 'shop/css/main.css' %}" />
     {% comment %} <link rel="manifest" href="{% static 'manifest.json' %}"> {% endcomment %}
@@ -45,7 +45,7 @@
 <script  src="{% static 'shop/js/dropzone.min.js' %}"></script>
 <script  src="{% static 'shop/js/sortable.min.js' %}"></script>
 <script  src="{% static 'shop/js/main.js' %}"></script>
-
+{% block extra_js %}{% endblock extra_js %}
 
 </body>
 </html>
