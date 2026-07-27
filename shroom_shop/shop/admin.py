@@ -5,7 +5,12 @@ from unfold.admin import ModelAdmin
 from unfold.contrib.forms.widgets import WysiwygWidget
 
 from .models import (
+    Cart,
+    CartItem,
     Category,
+    Contact,
+    Favorite,
+    Info,
     MushroomType,
     Product,
     ProductImage,
@@ -104,3 +109,47 @@ class ProductAdmin(ModelAdmin):
         return "—"
 
     main_image_preview.short_description = "Превью"
+
+
+@admin.register(Contact)
+class ContactAdmin(ModelAdmin):
+    list_display = ("label", "value", "contact_type", "is_active")
+    list_filter = ("contact_type", "is_active")
+    search_fields = ("label", "value")
+    list_editable = ("is_active",)
+    save_on_top = True
+
+
+@admin.register(Info)
+class InfoAdmin(ModelAdmin):
+    formfield_overrides = {
+        models.TextField: {
+            "widget": WysiwygWidget,
+        }
+    }
+    list_display = ("name", "title", "slug", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("name", "title", "slug")
+    list_editable = ("is_active",)
+    prepopulated_fields = {"slug": ("name",)}
+    save_on_top = True
+
+
+@admin.register(Cart)
+class CartAdmin(ModelAdmin):
+    list_display = ("user", "total_price", "total_items")
+    search_fields = ("user",)
+    save_on_top = True
+
+@admin.register(CartItem)
+class CartItemAdmin(ModelAdmin):
+    list_display = ("cart", "product", "quantity")
+    search_fields = ("cart", "product")
+    save_on_top = True
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(ModelAdmin):
+    list_display = ("user", "product")
+    search_fields = ("user", "product")
+    save_on_top = True

@@ -1,7 +1,7 @@
 from django.urls import path
 
 
-from .views import index, catalog, toggle_cart, toggle_favorite, product_page
+from .views import index, catalog, info_page, toggle_cart, toggle_favorite, product_page
 
 app_name = "shop"
 
@@ -13,5 +13,6 @@ urlpatterns = [
     path(
         "product_page/<slug:slug>/", product_page, name="product_page"
     ),
+    path("info/", info_page, name="info_page"),
 
 ]

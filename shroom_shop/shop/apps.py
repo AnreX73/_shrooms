@@ -6,4 +6,4 @@ class ShopConfig(AppConfig):
     name = "shop"
 
     def ready(self):
-        pass
+        import shop.signals  # noqa: F401

@@ -25,6 +25,11 @@ header{
       </div>
    </div>
        {% include "shop/includes/user_icons.html" %}
+       {% if request.path != '/catalog/' %}
+      <button class="btn" onclick="window.location.href='{% url 'shop:catalog' %}'">
+         <span class="btn-text">В КАТАЛОГ</span>
+      </button>
+      {% endif %}
    </div>
     
 </header>

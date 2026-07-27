@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 # from django_q.tasks import async_task
 
-from .models import Category, Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review, ProductImage
+from .models import Category, Info, Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review, ProductImage
 
 
 
@@ -35,12 +35,14 @@ def index(request):
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
     shrooms_types = MushroomType.objects.all()
     categories = Category.objects.filter(is_active=True).order_by("created_at")
+    info_objects = Info.objects.all()
 
     context = {
         "start_banner": start_banner,
         "advantages": advantages,
         "shrooms_types": shrooms_types,
         "categories": categories,
+        "info": info_objects,
     }
 
     return render(request, "shop/index.html", context)
@@ -163,4 +165,21 @@ def toggle_cart(request, product_id):
         f'<span id="cart-counter" hx-swap-oob="true" '
         f'x-data="{{ cart_count: {cart_count} }}" '
         f'class="cart_count" x-show="{cart_count} > 0">{cart_count}</span>'
+    )
+
+
+def info_page(request):
+    # Получаем все активные записи
+    info_items = Info.objects.filter(is_active=True)
+
+    # Получаем активную вкладку из GET-параметра
+    active_tab = request.GET.get("tab", None)
+
+    return render(
+        request,
+        "shop/info_page.html",
+        {
+            "info_items": info_items,
+            "active_tab": active_tab,
+        },
     )

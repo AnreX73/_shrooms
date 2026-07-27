@@ -1,0 +1,114 @@
+<!-- templates/shop/info_page.html -->
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block content %}
+<h2 style="margin: 1rem auto;">Информация</h2>
+<div class="info__container">
+    <div class="tabs">
+        <!-- Заголовки табов -->
+        <div class="tabs__header">
+            {% for info in info_items %}
+            <button 
+                class="tabs__btn" 
+                data-slug="{{ info.slug }}"
+                onclick="openTab(event, 'tab-{{ info.slug }}')"
+            >
+                {{ info.title }}
+            </button>
+            {% endfor %}
+            {% if user.is_authenticated %}
+            <a  class="tabs__btn" href="/install-guide/">Установка приложения</a>
+            {% endif %}
+        </div>
+
+        <!-- Содержимое табов -->
+        <div class="tabs__content">
+            {% for info in info_items %}
+            <div class="tabs__panel" id="tab-{{ info.slug }}">
+                <div class="tabs__body">
+                    {% if info.image %}
+                    <div class="tabs__image">
+                        <img src="{{ info.image.url }}" alt="{{ info.title }}">
+                    </div>
+                    {% endif %}
+                    <div class="tabs__text">
+                        {{ info.content|safe }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>Информация временно недоступна</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function openTab(event, tabId) {
+    // Скрываем все панели
+    const panels = document.querySelectorAll('.tabs__panel');
+    panels.forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    // Убираем активный класс со всех кнопок
+    const buttons = document.querySelectorAll('.tabs__btn');
+    buttons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Показываем нужную панель
+    const activePanel = document.getElementById(tabId);
+    if (activePanel) {
+        activePanel.classList.add('active');
+    }
+    
+    // Активируем нужную кнопку
+    event.currentTarget.classList.add('active');
+    
+    // Обновляем URL
+    const slug = event.currentTarget.dataset.slug;
+    history.pushState(null, '', `?tab=${slug}`);
+}
+
+// Открываем нужный таб при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab');
+    
+    let targetSlug = activeTab;
+    
+    // Если нет параметра, берём первый таб
+    if (!targetSlug) {
+        const firstBtn = document.querySelector('.tabs__btn');
+        if (firstBtn) {
+            targetSlug = firstBtn.dataset.slug;
+        }
+    }
+    
+    // Открываем нужный таб
+    if (targetSlug) {
+        const targetBtn = document.querySelector(`.tabs__btn[data-slug="${targetSlug}"]`);
+        if (targetBtn) {
+            targetBtn.click();
+        }
+    }
+});
+
+// Работа кнопок назад/вперёд браузера
+window.addEventListener('popstate', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab');
+    
+    if (activeTab) {
+        const targetBtn = document.querySelector(`.tabs__btn[data-slug="${activeTab}"]`);
+        if (targetBtn) {
+            targetBtn.click();
+        }
+    }
+});
+</script>
+
+
+{% endblock %}

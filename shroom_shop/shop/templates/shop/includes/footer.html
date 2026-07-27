@@ -1,0 +1,65 @@
+<!-- Footer -->
+<footer id="footer" >
+    
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h3>Лесная фея</h3>
+                <p>Интернет-магазин лесных грибов</p>
+                <div class="social-links">
+                    <a href="{{contacts.vk.url}}">{{contacts.vk.svg_icon|safe}}</a>
+                    <a href="{{contacts.telegram.url}}">{{contacts.telegram.svg_icon|safe}}</a>
+                    <a href="{{contacts.instagram.url}}">{{contacts.instagram.svg_icon|safe}}</a>
+                    <a href="{{contacts.odnoklassniki.url}}">{{contacts.odnoklassniki.svg_icon|safe}}</a>
+                    {% comment %} <a href="{{contacts.max.url}}">{{contacts.max.svg_icon|safe}}</a> {% endcomment %}
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Категории</h3>
+                <ul class="footer-links">
+                  {% for category in categories %}
+                  <li><a href="{% url 'shop:catalog' %}?category={{ category.id }}">{{ category.name }}</a></li>
+                  {% endfor %}
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Информация</h3>
+                <ul class="footer-links">
+                {% for item in info %}
+                {% if item.is_active %}
+                <li>
+                    <a href="{% url 'shop:info_page' %}?tab={{ item.slug }}">
+                        {{ item.title }}
+                    </a>
+                </li>
+                {% endif %}
+                {% endfor %}  
+                {% if user.is_authenticated %}  
+                <li>
+                    <a href="/install-guide/">Установка приложения</a>
+                </li>
+                {% endif %}
+            </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Контакты</h3>
+                <ul class="footer-links" id="contact">
+                    <li>
+                        <span class="fas fa-map-marker-alt">{{ contacts.adress.label }}: </span> {{ contacts.adress.value }}
+                    
+                    </li>
+                    <li>
+                        <span class="fas fa-phone">{{ contacts.phone.label }}: </span> {{ contacts.phone.value }}
+                    </li>
+                    <li>
+                        <span class="fas fa-envelope">{{ contacts.raspisanie.label }}: </span> {{ contacts.raspisanie.value }}
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 SMSTUDIO. Все права защищены.</p>
+        </div>
+   
+    
+</footer>
