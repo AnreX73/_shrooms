@@ -4,17 +4,24 @@ register = template.Library()
 
 ALWAYS_EXCLUDE = {
     "id",
-    "product_group",
+    "name",
     "slug",
+    "category",
     "note_for_manager",
     "created_at",
     "updated_at",
+    "is_set",
+    "packaging_weight",
+    "is_vegetarian",
     "is_available",
     "is_hit",
     "popularity",
     "stock",
     "out_of_stock_behavior",
-    "hair_shade",
+    "price",
+    "discount_percentage",
+    "rating",
+    "reviews_count"
 }
 
 
@@ -30,18 +37,28 @@ def get_visible_fields(obj, exclude_fields=None):
         if (
             hasattr(field, "verbose_name")
             and hasattr(field, "name")
-            and field.name not in ALWAYS_EXCLUDE  # ← всегда исключаем
-            and field.name not in exclude_list  # ← исключаем из шаблона
+            and field.name not in ALWAYS_EXCLUDE
+            and field.name not in exclude_list
             and not field.auto_created
             and not field.is_relation
         ):
+            raw_value = getattr(obj, field.name)
+            
+            # 🔑 НОВОЕ: получаем человекочитаемое значение для полей с choices
+            display_value = raw_value
+            if field.choices:
+                display_method = getattr(obj, f"get_{field.name}_display", None)
+                if display_method:
+                    display_value = display_method()
+
             fields.append(
                 {
                     "name": field.name,
                     "verbose_name": str(field.verbose_name),
-                    "value": getattr(obj, field.name),
+                    "value": raw_value,
+                    "display_value": display_value,  # ← новое поле
                     "field_type": field.get_internal_type(),
-                    "is_empty": getattr(obj, field.name) in (None, "", 0, [], {}),
+                    "is_empty": raw_value in (None, "", 0, [], {}),
                 }
             )
     return fields

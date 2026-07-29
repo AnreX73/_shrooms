@@ -1,5 +1,6 @@
 <!-- shop/product_page.html -->
 {% extends 'shop/base.html' %}
+{% load shop_filters %}
 {% load static %}
 
 {% block content %}
@@ -53,63 +54,39 @@
 
         <!-- Колонка 2: Описание товара -->
         <div class="product-info">
-            <h1 class="product-title">{{ product.name }}</h1>
-            
-            <div class="product-rating">
-                <span class="rating-value">★ {{ product.rating|default:"4.9" }}</span>
-                <span class="rating-count">{{ product.reviews_count|default:"0" }} оценки</span>
-                <span class="questions-count">{{ product.questions_count|default:"0" }} вопросов</span>
-            </div>
-
-            <div class="product-sku">
-                <span class="sku-label">Артикул</span>
-                <span class="sku-value">{{ product.article}}</span>
-            </div>
-
-            <!-- Свойства товара (первые 6) -->
+            <h3 class="product-title">{{ product.name }}</h3>
+        <div class="rating-wrapper">
+            <span class="rating-value">{{ product.rating }} </span>
+            <span class="rating-badge">
+                {% include 'shop/includes/rating_stars.html' with rating=product.rating %}
+            </span>
+            <span class="reviews-count"> отзывов: {{ product.reviews_count }} </span>  
+        </div>
+           
+            <!-- Свойства товара (первые 5) -->
             <div class="product-properties">
-                {% if product.mushroom_type %}
-                <div class="property-row">
-                    <span class="property-name">Вид грибов</span>
-                    <span class="property-value">{{ product.mushroom_type }}</span>
+                <div class="specs-grid">
+                    
+                    <div class="spec-item">
+                        <span class="spec-label">Вид грибов</span>
+                        <span class="spec-dots"></span>
+                        {% for types in product.mushroom_types.all %}
+                        <span class="spec-value">. {{ types.name }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    {% for field in product|get_visible_fields:"name,rating,discount_percentage,price,final_price,description"|slice:":5" %}
+                        {% if not field.is_empty %}
+                    <div class="spec-item">
+                            <span class="spec-label">{{ field.verbose_name }}</span>
+                            <span class="spec-dots"></span>
+                            <span class="spec-value">{{ field.display_value }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
-                {% endif %}
-                
-                {% if product.shelf_life %}
-                <div class="property-row">
-                    <span class="property-name">Срок годности</span>
-                    <span class="property-value">{{ product.shelf_life }} мес</span>
-                </div>
-                {% endif %}
-                
-                {% if product.country %}
-                <div class="property-row">
-                    <span class="property-name">Страна производства</span>
-                    <span class="property-value">{{ product.country }}</span>
-                </div>
-                {% endif %}
-                
-                {% if product.nutrition_fat is not None %}
-                <div class="property-row">
-                    <span class="property-name">Пищевая ценность жиры</span>
-                    <span class="property-value">{{ product.nutrition_fat }} г/100г</span>
-                </div>
-                {% endif %}
-                
-                {% if product.nutrition_protein is not None %}
-                <div class="property-row">
-                    <span class="property-name">Пищевая ценность белки</span>
-                    <span class="property-value">{{ product.nutrition_protein }} г/100г</span>
-                </div>
-                {% endif %}
-                
-                {% if product.nutrition_carbs is not None %}
-                <div class="property-row">
-                    <span class="property-name">Пищевая ценность углеводы</span>
-                    <span class="property-value">{{ product.nutrition_carbs }} г/100г</span>
-                </div>
-                {% endif %}
             </div>
+                
 
             <!-- Кнопка подробного описания -->
             <button class="details-btn" id="openDetailsModal" type="button">
@@ -118,7 +95,7 @@
 
            
 
-            <!-- Бренд и категория -->
+            <!-- категория -->
             <div class="product-brand">
                 <div class="brand-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -126,25 +103,19 @@
                         <line x1="7" y1="7" x2="7.01" y2="7"></line>
                     </svg>
                     {% if product.category %}
-                    <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+                    <a href="{{ product.category.get_absolute_url }}">Все товары категории {{ product.category.name }}</a>
                     {% endif %}
                 </div>
-                <div class="category-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    </svg>
-                    {% if product.category %}
-                    <a href="{{ product.category.get_absolute_url }}">Все товары категории</a>
-                    {% endif %}
-                </div>
+                
             </div>
 
             <!-- Цена и кнопки -->
             <div class="product-purchase">
                 <div class="price-block">
-                    <span class="current-price">{{ product.price }} ₽</span>
-                    {% if product.old_price %}
-                    <span class="old-price">{{ product.old_price }} ₽</span>
+                    <span class="current-price">{{ product.final_price }} ₽</span>
+                    {% if product.price %}
+                    <span class="old-price">{{ product.price }} ₽</span>
+                    <span class="product_page_discount"> - {{ product.discount_percentage }}%</span>
                     {% endif %}
                 </div>
                 
@@ -161,9 +132,15 @@
                  }
                 }"
              @click.prevent="handleCart">
-            <svg fill="#8a5944" viewBox="0 0 24 24">
-                <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5h2c0 1.66 1.34 3 3 3s3-1.34 3-3h2c0 2.76-2.24 5-5 5z"/>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+                <!-- Ручка -->
+                <path d="M 20 28 A 12 12 0 0 1 44 28" 
+                        stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <!-- Обodok -->
+                <rect x="4" y="26" width="56" height="6" rx="3" fill="#fff"/>
+                <!-- Чаша корзины -->
+                <path d="M 6 32 L 58 32 A 26 22 0 0 1 6 32 Z" fill="#fff"/>
+                </svg>
             <p>В корзину</p>
             
         </button>
@@ -203,75 +180,31 @@
 
 <!-- Модальное окно с полным описанием -->
 <div class="modal" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-overlay"></div>
+    <div class="modal-overlay" id="detailsModalOverlay"></div>
     <div class="modal-content">
         <button class="modal-close" id="closeDetailsModal" type="button" aria-label="Закрыть">&times;</button>
         <h2 id="modalTitle">Характеристики и описание</h2>
         
         <div class="full-properties">
-            {% if product.mushroom_type %}
-            <div class="property-row">
-                <span class="property-name">Вид грибов</span>
-                <span class="property-value">{{ product.mushroom_type }}</span>
-            </div>
-            {% endif %}
-            
-            {% if product.shelf_life %}
-            <div class="property-row">
-                <span class="property-name">Срок годности</span>
-                <span class="property-value">{{ product.shelf_life }} мес</span>
-            </div>
-            {% endif %}
-            
-            {% if product.country %}
-            <div class="property-row">
-                <span class="property-name">Страна производства</span>
-                <span class="property-value">{{ product.country }}</span>
-            </div>
-            {% endif %}
-            
-            {% if product.nutrition_fat is not None %}
-            <div class="property-row">
-                <span class="property-name">Пищевая ценность жиры</span>
-                <span class="property-value">{{ product.nutrition_fat }} г/100г</span>
-            </div>
-            {% endif %}
-            
-            {% if product.nutrition_protein is not None %}
-            <div class="property-row">
-                <span class="property-name">Пищевая ценность белки</span>
-                <span class="property-value">{{ product.nutrition_protein }} г/100г</span>
-            </div>
-            {% endif %}
-            
-            {% if product.nutrition_carbs is not None %}
-            <div class="property-row">
-                <span class="property-name">Пищевая ценность углеводы</span>
-                <span class="property-value">{{ product.nutrition_carbs }} г/100г</span>
-            </div>
-            {% endif %}
-
-            {% if product.weight %}
-            <div class="property-row">
-                <span class="property-name">Вес</span>
-                <span class="property-value">{{ product.weight }} г</span>
-            </div>
-            {% endif %}
-
-            {% if product.article or product.sku %}
-            <div class="property-row">
-                <span class="property-name">Артикул</span>
-                <span class="property-value">{{ product.article}}</span>
-            </div>
-            {% endif %}
-        </div>
-
-        {% if product.description %}
-        <div class="product-description">
-            <h3>Описание</h3>
-            {{ product.description|safe }}
+    <div class="spec-item">
+                <span class="spec-label">Вид грибов</span>
+                <span class="spec-dots"></span>
+                {% for types in product.mushroom_types.all %}
+                <span class="spec-value">. {{ types.name }}</span>
+                {% endfor %}
+    </div>
+    <div class="specs-grid">
+     {% for field in product|get_visible_fields:"name,rating,discount_percentage,price,final_price,description" %}
+        {% if not field.is_empty %}
+     <div class="spec-item">
+            <span class="spec-label">{{ field.verbose_name }}</span>
+            <span class="spec-dots"></span>
+            <span class="spec-value">{{ field.display_value }}</span>
         </div>
         {% endif %}
+    {% endfor %}
+    </div>
+    <p style="line-height: 1.65; color: var(--text-color, #3F4A3E); font-size: 15px; text-align: justify;">{{ product.description|safe }}</p>
     </div>
 </div>
 {% endblock %}

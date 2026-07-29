@@ -63,10 +63,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('detailsModal');
     const openBtn = document.getElementById('openDetailsModal');
     const closeBtn = document.getElementById('closeDetailsModal');
+    const modalOverlay = document.getElementById('detailsModalOverlay');
 
     openBtn?.addEventListener('click', () => modal.classList.add('active'));
     closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
+    modalOverlay?.addEventListener('click', () => modal.classList.remove('active'));
     modal?.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.remove('active');
     });
 });
+
+
+

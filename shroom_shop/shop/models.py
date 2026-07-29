@@ -84,7 +84,7 @@ class Product(models.Model):
     RELEASE_FORM = [
         ("glass_jar", "Стеклянная банка"),
         ("tin_can", "Жестяная банка"),
-        ("bag", "Пакет"),
+        ("bag", "Дой-пак"),
         ("box", "Коробка"),
         ("vacuum", "Вакуумная упаковка"),
         ("other", "Другое"),

@@ -50,6 +50,19 @@ html {
     margin: 0 auto;
 
 }
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 30;
+}
+.transition-opacity {
+    transition: opacity 0.4s ease;
+}
+
 
 
 
@@ -670,7 +683,7 @@ input[type="radio"] {
     text-align: center;
     transform: rotate(45deg);
     line-height: 24px;
-    background: #C43F44;
+    background: var(--accent-color);
     color: #FFFFFF;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
     font-size: 13px;
@@ -918,6 +931,35 @@ input[type="radio"] {
     overflow: hidden;
 }
 
+.product_info_popup {
+    position: fixed;
+    top: 1rem;
+    left: clamp(0.25rem, 17.692vw - 3.731rem, 17.5rem);
+    z-index: 40;
+    width: clamp(21.25rem, 7.051vw + 19.663rem, 28.125rem);
+    height: auto;
+    background-color: white;
+    padding: clamp(0.5rem, 0.769vw + 0.327rem, 1.25rem);
+    border-radius: 12px;
+    font-size: 0.9rem;
+
+}
+
+.product_info_popup p {
+    font-size: 0.8rem;
+    text-align: justify;
+}
+
+.close_icon {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    position: absolute;
+    top: 5px;
+    right: 10px;
+}
+
+
 
 /* Категории товаров */
 .category-card {
@@ -1054,9 +1096,12 @@ input[type="radio"] {
 
 /* Свойства */
 .product-properties {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 10px;
+    width: 100%;
+    padding: 0.5rem;
 }
 
 .property-row {
@@ -1150,9 +1195,8 @@ input[type="radio"] {
 .product-purchase {
     display: flex;
     flex-direction: column;
-    gap: 14px;
     margin-top: 10px;
-    padding-top: 22px;
+    padding-top: 10px;
     border-top: 1px solid var(--secondary-color, #E6DFD3);
 }
 
@@ -1173,6 +1217,10 @@ input[type="radio"] {
     font-size: 17px;
     color: var(--transparent-color, rgba(63, 74, 62, 0.4));
     text-decoration: line-through;
+}
+.product_page_discount {
+    color: var(--accent-color);
+    font-weight: 600;
 }
 
 .add-to-cart-form {
@@ -1336,7 +1384,7 @@ input[type="radio"] {
 
 .modal-content {
     background: white;
-    padding: 36px 40px;
+    padding: clamp(0.75rem, 1.154vw + 0.49rem, 1.875rem);
     border-radius: 14px;
     max-width: 640px;
     width: 100%;
@@ -1769,6 +1817,46 @@ footer {
     }
 }
 
+/* Specs Grid Styles */
+.spec-item {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    /* Выравнивание по тексту */
+    margin-bottom: 8px;
+}
+
+.spec-label {
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+    /* Чтобы название не переносилось */
+}
+
+.spec-dots {
+    flex-grow: 1;
+    /* Занимает всё свободное место */
+    border-bottom: 1px dotted var(--transparent-color);
+    /* Сами точки */
+    margin: 0 10px;
+    position: relative;
+    top: 0px;
+    /* Поднимаем точки до уровня середины текста */
+    height: 1px;
+}
+
+.spec-value {
+    white-space: normal;
+    /* РАЗРЕШЕН перенос текста значения */
+    word-break: break-word;
+    /* Перенос длинных слов */
+    text-align: right;
+    /* Выравнивание значения по правому краю (опционально) */
+    flex-shrink: 1;
+    /* РАЗРЕШЕНО сжиматься этому блоку, чтобы текст переносился */
+    /* Важно: блок значения должен иметь возможность уменьшиться в ширину,
+       тогда текст внутри него пойдет на вторую строку */
+}
 
 
 

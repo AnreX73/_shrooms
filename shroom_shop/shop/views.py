@@ -31,7 +31,7 @@ def get_hit_ids():
 
 
 def index(request):
-    start_banner = SiteAssets.objects.filter(note="start_banner", is_active=True).first()
+    start_banner = Info.objects.filter(name="Стартовый баннер", is_active=True).first()
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
     shrooms_types = MushroomType.objects.all()
     categories = Category.objects.filter(is_active=True).order_by("created_at")
@@ -50,11 +50,12 @@ def index(request):
 
 
 def catalog(request):
-    
+    hit_ids = get_hit_ids()
     products = Product.objects.all().prefetch_related("mushroom_types").order_by("-popularity")  # Получаем все продукты
     context = {
         
         "products": products,
+        "hit_ids": hit_ids,
     }
     return render(request, "shop/catalog.html", context)
 
@@ -101,10 +102,11 @@ def toggle_cart(request, product_id):
 
 def product_page(request, slug):
     product = get_object_or_404(
-        Product.objects.select_related("category").defer("created_at", "updated_at"),
+        Product.objects.select_related("category").prefetch_related("mushroom_types"),
         slug=slug,
     )
     product_id = product.id
+    
 
     product_gallery = ProductImage.objects.filter(product=product).order_by(
         "-created_at"
@@ -170,7 +172,7 @@ def toggle_cart(request, product_id):
 
 def info_page(request):
     # Получаем все активные записи
-    info_items = Info.objects.filter(is_active=True)
+    info_items = Info.objects.filter(is_active=True).exclude(name="Стартовый баннер").order_by("created_at")
 
     # Получаем активную вкладку из GET-параметра
     active_tab = request.GET.get("tab", None)
