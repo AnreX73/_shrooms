@@ -1,0 +1,23 @@
+<div id="filter-controls-wrapper">
+    <div id="category-wrapper"
+         hx-get="{% url 'shop:catalog' %}"
+         hx-trigger="change"
+         hx-target="#catalog-results"
+         hx-swap="innerHTML"
+         hx-push-url="true"
+         hx-include="#filter-form">
+        <label>{{ form.category.label }}</label>
+        {{ form.category }}
+    </div>
+
+    <fieldset id="mushroom-types-fieldset"
+              hx-get="{% url 'shop:catalog' %}"
+              hx-trigger="change"
+              hx-target="#catalog-results"
+              hx-swap="innerHTML"
+              hx-push-url="true"
+              hx-include="#filter-form">
+        <legend>{{ form.mushroom_types.label }}</legend>
+        {{ form.mushroom_types }}
+    </fieldset>
+</div>

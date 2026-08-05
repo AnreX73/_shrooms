@@ -358,3 +358,46 @@ document.body.addEventListener('htmx:afterSwap', function(e) {
     }
 });
 
+(function () {
+    var panel = document.getElementById("catalog-filters");
+    var toggle = document.getElementById("filters-toggle");
+    var overlay = document.getElementById("filters-overlay");
+    var closeBtn = document.getElementById("filters-close");
+    var applyBtn = document.getElementById("filters-apply-mobile");
+
+    if (!panel || !toggle) return;
+
+    function openPanel() {
+        panel.classList.add("is-open");
+        overlay.classList.add("is-open");
+        toggle.setAttribute("aria-expanded", "true");
+        document.body.classList.add("no-scroll");
+    }
+
+    function closePanel() {
+        panel.classList.remove("is-open");
+        overlay.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("no-scroll");
+    }
+
+    toggle.addEventListener("click", openPanel);
+    overlay.addEventListener("click", closePanel);
+    closeBtn.addEventListener("click", closePanel);
+    applyBtn.addEventListener("click", closePanel);
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closePanel();
+    });
+
+    // Закрываем панель после успешной htmx-подмены результатов —
+    // на случай если пользователь не нажал "Показать результаты",
+    // а фильтр применился сам через change (селект/чекбокс)
+    document.body.addEventListener("htmx:afterSwap", function (e) {
+        if (e.detail.target && e.detail.target.id === "catalog-results") {
+            if (window.matchMedia("(max-width: 900px)").matches) {
+                closePanel();
+            }
+        }
+    });
+})();

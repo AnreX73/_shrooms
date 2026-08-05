@@ -1,15 +1,43 @@
-{% extends 'shop/base.html' %}
-
-{% block title %}Лесная фея - Каталог{% endblock %}
-
+{% extends "shop/base.html" %}
 {% block content %}
-    <h2 style="text-align: center;margin-bottom: 20px;">Каталог грибов</h2>
-    <div class="catalog-grid" id="catalog-section">
-        {% if products|length == 0 %}
-            <p>Нет товаров в каталоге.</p>
-        {% endif %}
-        {% for product in products %}
-            {% include 'shop/includes/product_card.html' %}
-        {% endfor %}
+<div class="catalog">
+
+    <button type="button" class="filters-toggle" id="filters-toggle" aria-controls="catalog-filters" aria-expanded="false">
+        <span class="filters-toggle__icon">⚙</span> Фильтры
+    </button>
+
+    <div class="filters-overlay" id="filters-overlay"></div>
+
+    <aside class="catalog__filters" id="catalog-filters">
+        <div class="catalog__filters-header">
+            <span class="catalog__filters-title">Фильтры</span>
+            <button type="button" class="filters-close" id="filters-close" aria-label="Закрыть фильтры">✕</button>
+        </div>
+
+        <form id="filter-form"
+            hx-get="{% url 'shop:catalog' %}"
+            hx-target="#catalog-results"
+            hx-swap="innerHTML"
+            hx-push-url="true">
+
+            {% include "shop/includes/filter_controls.html" %}
+
+            {% include "shop/includes/price_slider.html" %}
+        </form>
+
+        <a href="{% url 'shop:catalog' %}" class="filters-reset"
+           hx-get="{% url 'shop:catalog' %}"
+           hx-target="#catalog-results"
+           hx-swap="innerHTML"
+           hx-push-url="true">Сбросить фильтры</a>
+
+        <button type="button" class="filters-apply-mobile" id="filters-apply-mobile">Показать результаты</button>
+    </aside>
+
+    <div id="catalog-results">
+        {% include "shop/includes/catalog_products.html" %}
     </div>
+</div>
+
+
 {% endblock %}

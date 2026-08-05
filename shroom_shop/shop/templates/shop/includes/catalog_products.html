@@ -1,0 +1,36 @@
+{% if active_filters %}
+<div class="active-filters">
+    {% for f in active_filters %}
+        <a class="chip" hx-get="{% url 'shop:catalog' %}?{{ f.remove_url }}"
+           hx-target="#catalog-results" hx-swap="innerHTML" hx-push-url="true">
+            {{ f.label }} ✕
+        </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="catalog-grid" id="catalog-section">
+    {% if products|length == 0 %}
+        <p>Нет товаров в каталоге.</p>
+    {% endif %}
+    {% for product in products %}
+        {% include 'shop/includes/product_card.html' %}
+    {% empty %}
+    <p>По вашему запросу ничего не найдено</p>
+    {% endfor %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination" hx-target="#catalog-results" hx-swap="innerHTML"
+     hx-push-url="true" hx-include="#filter-form">
+    {% if page_obj.has_previous %}
+        <a hx-get="?page={{ page_obj.previous_page_number }}"
+           href="?page={{ page_obj.previous_page_number }}">←</a>
+    {% endif %}
+    <span>{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a hx-get="?page={{ page_obj.next_page_number }}"
+           href="?page={{ page_obj.next_page_number }}">→</a>
+    {% endif %}
+</nav>
+{% endif %}

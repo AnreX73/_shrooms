@@ -1,0 +1,22 @@
+<div id="price-slider-wrapper">
+    <label>
+        Цена: <span id="price-slider-value">{{ current_price_max }} ₽</span>
+    </label>
+    <div class="price-slider-scale">
+        <span>{{ min_price }} ₽</span>
+        <input type="range"
+               name="price_max"
+               id="id_price_max"
+               min="{{ min_price }}"
+               max="{{ max_price }}"
+               value="{{ current_price_max }}"
+               oninput="document.getElementById('price-slider-value').textContent = this.value + ' ₽'"
+               hx-get="{% url 'shop:catalog' %}"
+               hx-trigger="change delay:200ms"
+               hx-target="#catalog-results"
+               hx-swap="innerHTML"
+               hx-push-url="true"
+               hx-include="#filter-form">
+        <span>{{ max_price }} ₽</span>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+<div id="filter-controls-wrapper" hx-swap-oob="true">
+    {% include "shop/includes/filter_controls.html" %}
+</div>
+
+{% if show_price_oob %}
+<div id="price-slider-wrapper" hx-swap-oob="true">
+    {% include "shop/includes/price_slider.html" %}
+</div>
+{% endif %}
+
+{% include "shop/includes/catalog_products.html" %}

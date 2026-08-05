@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (
     AuthenticationForm,
@@ -6,8 +7,36 @@ from django.contrib.auth.forms import (
     SetPasswordForm,
     UserCreationForm,
 )
+from django.core.exceptions import ValidationError
+import re
 
 User = get_user_model()
+
+
+import re
+from django.core.exceptions import ValidationError
+
+
+
+def validate_russian_email(value):
+    if not value or "@" not in value:
+        raise ValidationError("Некорректный адрес электронной почты.")
+
+    # 1. Проверяем по регулярному выражению (зону .ru)
+    pattern = getattr(
+        settings, "RU_EMAIL_PATTERN", r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.ru$"
+    )
+    if re.match(pattern, value):
+        return True  # Email подходит, завершаем проверку успешным исходом
+
+    # 2. Если не .ru, проверяем по списку исключений (by, kz и т.д.)
+    domain = value.split("@")[-1].lower()
+    extra_domains = getattr(settings, "EXTRA_ALLOWED_DOMAINS", [])
+
+    if domain not in extra_domains:
+        raise ValidationError(
+            "Регистрация доступна только через российские почтовые сервисы."
+        )
 
 
 class RegisterUserForm(UserCreationForm):
@@ -26,6 +55,7 @@ class RegisterUserForm(UserCreationForm):
                 self.fields[field].required = False
 
     email = forms.EmailField(
+        validators=[validate_russian_email],
         required=True,
         label="Email",
         widget=forms.TextInput(

@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, request
 from django.shortcuts import render
 import os
 
@@ -10,11 +10,21 @@ from django.db import models as db_models
 from django.db.models import ExpressionWrapper, F, IntegerField, Max, Min, Prefetch, Q
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template import context
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 # from django_q.tasks import async_task
 
 from .models import Category, Info, Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review, ProductImage, Contact
+from django.core.paginator import Paginator
+from django.db.models import (
+    Case, When, Value, IntegerField, Count, Subquery, OuterRef,
+    ExpressionWrapper, F, Min, Max, Q, Prefetch,
+)
+from django.shortcuts import render
+
+from .forms import ProductFilterForm
+from .models import Product, ProductImage
 
 
 
@@ -35,7 +45,7 @@ def index(request):
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
     shrooms_types = MushroomType.objects.all()
     categories = Category.objects.filter(is_active=True).order_by("created_at")
-    info_objects = Info.objects.all()
+    info_objects = Info.objects.all().exclude(name="Стартовый баннер").order_by("created_at")
     contacts = Contact.objects.all()
 
     context = {
@@ -51,14 +61,198 @@ def index(request):
 
 
 
+def _build_remove_url(get_params, key, value=None):
+    params = get_params.copy()
+    if value is None:
+        params.pop(key, None)
+    else:
+        values = params.getlist(key)
+        if value in values:
+            values.remove(value)
+        if values:
+            params.setlist(key, values)
+        else:
+            params.pop(key, None)
+    params.pop("page", None)
+    return params.urlencode()
+
+
 def catalog(request):
+    data = request.GET.copy()
+    hx_trigger_id = request.headers.get("HX-Trigger", "")
+    is_htmx = bool(request.headers.get("HX-Request"))
+
+    # При смене category/mushroom_types сбрасываем ручной price_max —
+    # иначе слайдер уедет "выключенным" в новую (возможно более дешёвую) выборку
+    if hx_trigger_id in ("category", "mushroom_types"):
+        data.pop("price_max", None)
+
+    form = ProductFilterForm(data or None)
+
+    images_prefetch = Prefetch(
+        "images",
+        queryset=ProductImage.objects.filter(media_type="image").order_by("order"),
+        to_attr="prefetched_images",
+    )
+
+    products = Product.objects.filter(
+        Q(stock__gt=0) | Q(out_of_stock_behavior="show")
+    ).annotate(
+        computed_final_price=ExpressionWrapper(
+            F("price") * (100 - F("discount_percentage")) / 100.0,
+            output_field=IntegerField(),
+        )
+    )
+
+    selected_category = None
+    selected_types = []
+
+    if form.is_valid():
+        selected_category = form.cleaned_data.get("category")
+        selected_types = list(form.cleaned_data.get("mushroom_types"))
+
+        if selected_category:
+            products = products.filter(category=selected_category)
+
+    # --- Границы цены считаем ДО фильтра по price_max, но ПОСЛЕ category/mushroom_types ---
+    price_scope = products
+    if selected_types:
+        price_scope = price_scope.filter(mushroom_types__in=[t.pk for t in selected_types]).distinct()
+
+    price_agg = price_scope.aggregate(
+        min_price=Min("computed_final_price"),
+        max_price=Max("computed_final_price"),
+    )
+    min_price = price_agg["min_price"] or 0
+    max_price = price_agg["max_price"] or 0
+
+    # --- Фильтр: не дороже выбранного значения слайдера ---
+    if form.is_valid():
+        if (pmax := form.cleaned_data.get("price_max")) is not None:
+            products = products.filter(computed_final_price__lte=pmax)
+
+    # --- Фильтр + приоритет по видам грибов ---
+    if selected_types:
+        type_ids = [t.pk for t in selected_types]
+        num_selected = len(type_ids)
+
+        # Общее число типов у продукта
+        mt_total_sq = (
+            Product.objects.filter(pk=OuterRef("pk"))
+            .annotate(c=Count("mushroom_types"))
+            .values("c")[:1]
+        )
+
+        # Сколько из ВЫБРАННЫХ типов есть у продукта
+        matched_sq = (
+            Product.objects.filter(pk=OuterRef("pk"))
+            .annotate(c=Count("mushroom_types", filter=Q(mushroom_types__in=type_ids)))
+            .values("c")[:1]
+        )
+
+        products = (
+            products.annotate(
+                mt_total=Subquery(mt_total_sq, output_field=IntegerField()),
+                matched=Subquery(matched_sq, output_field=IntegerField()),
+            )
+            .filter(mushroom_types__in=type_ids)
+            .distinct()
+        )
+
+        if num_selected == 1:
+            # Один тип: чистый гриб первым, потом наборы
+            priority = Case(
+                When(mt_total=1, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+            products = products.annotate(priority=priority).order_by(
+                "priority", "-popularity", "article"
+            )
+        else:
+            # Несколько типов:
+            # 0 — строгое совпадение (только выбранные типы)
+            # 1 — нестрогое совпадение (все выбранные + ещё другие)
+            # 2 — по отдельности (одиночные грибы)
+            # 3 — частичное совпадение (не все выбранные)
+            priority = Case(
+                When(matched=num_selected, mt_total=num_selected, then=Value(0)),
+                When(matched=num_selected, mt_total__gt=num_selected, then=Value(1)),
+                When(mt_total=1, then=Value(2)),
+                default=Value(3),
+                output_field=IntegerField(),
+            )
+            products = products.annotate(priority=priority).order_by(
+                "priority", "-matched", "-popularity", "article"
+            )
+    else:
+        products = products.order_by("-popularity", "article")
+
+    products = products.prefetch_related(images_prefetch)
+
+    # --- Пагинация ---
+    filter_keys = {"category", "mushroom_types", "price_max"}
+    is_filter_change = any(k in request.GET for k in filter_keys) and "page" not in request.GET
+
+    if is_filter_change:
+        page_number = 1
+    else:
+        page_number = request.GET.get("page", 1)
+        request.session["catalog_last_page"] = page_number
+
+    paginator = Paginator(products, 12)
+    page_obj = paginator.get_page(page_number)
+
     hit_ids = get_hit_ids()
-    products = Product.objects.all().prefetch_related("mushroom_types").order_by("-popularity")  # Получаем все продукты
+
+    # --- Атрибуты слайдера ---
+    form.fields["price_max"].widget.attrs["min"] = min_price
+    form.fields["price_max"].widget.attrs["max"] = max_price
+
+    current_price_max = (
+        form.cleaned_data.get("price_max")
+        if form.is_valid() and form.cleaned_data.get("price_max") is not None
+        else max_price
+    )
+    form.fields["price_max"].widget.attrs["value"] = current_price_max
+
+    # Обновляем слайдер через OOB, если запрос пришёл НЕ от самого слайдера
+    show_price_oob = hx_trigger_id != "price_max" and is_htmx
+
+    # --- Активные фильтры (чипы) ---
+    active_filters = []
+    if form.is_valid():
+        if selected_category:
+            active_filters.append({
+                "label": selected_category.name,
+                "remove_url": _build_remove_url(request.GET, "category"),
+            })
+        for mt in selected_types:
+            active_filters.append({
+                "label": mt.name,
+                "remove_url": _build_remove_url(request.GET, "mushroom_types", str(mt.pk)),
+            })
+        if current_price_max < max_price:
+            active_filters.append({
+                "label": f"до {current_price_max} ₽",
+                "remove_url": _build_remove_url(request.GET, "price_max"),
+            })
+
     context = {
-        
-        "products": products,
+        "form": form,
+        "page_obj": page_obj,
+        "products": page_obj.object_list,
         "hit_ids": hit_ids,
+        "min_price": min_price,
+        "max_price": max_price,
+        "current_price_max": current_price_max,
+        "show_price_oob": show_price_oob,
+        "active_filters": active_filters,
     }
+
+    if is_htmx:
+        return render(request, "shop/includes/catalog_results.html", context)
+
     return render(request, "shop/catalog.html", context)
 
 
