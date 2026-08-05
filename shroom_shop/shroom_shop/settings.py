@@ -75,6 +75,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "shroom_shop.context_processors.get_logo",
+                "shop.context_processors.cart_context",
             ],
         },
     },

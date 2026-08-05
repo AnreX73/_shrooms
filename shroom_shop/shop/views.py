@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 # from django_q.tasks import async_task
 
-from .models import Category, Info, Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review, ProductImage
+from .models import Category, Info, Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review, ProductImage, Contact
 
 
 
@@ -36,6 +36,7 @@ def index(request):
     shrooms_types = MushroomType.objects.all()
     categories = Category.objects.filter(is_active=True).order_by("created_at")
     info_objects = Info.objects.all()
+    contacts = Contact.objects.all()
 
     context = {
         "start_banner": start_banner,
@@ -43,6 +44,7 @@ def index(request):
         "shrooms_types": shrooms_types,
         "categories": categories,
         "info": info_objects,
+        "contacts": contacts
     }
 
     return render(request, "shop/index.html", context)
@@ -99,6 +101,81 @@ def toggle_cart(request, product_id):
     )
 
 
+@login_required
+def update_cart(request, item_id):
+    action = request.POST.get("action")
+    cart = request.user.cart
+    item = get_object_or_404(CartItem, id=item_id, cart=cart)  # ищем по id CartItem
+
+    if action == "plus":
+        item.quantity += 1
+    elif action == "minus" and item.quantity > 1:
+        item.quantity -= 1
+
+    item.save()
+
+    total = sum(i.total_price for i in cart.items.all())
+    context = {
+        "user_cart_products": cart.items.select_related("product")
+        .prefetch_related(
+            Prefetch(
+                "product__images",
+                queryset=ProductImage.objects.filter(media_type="image").order_by(
+                    "order"
+                ),
+                to_attr="prefetched_images",
+            )
+        )
+        .order_by("-added_at"),
+        "user_cart_total": total,
+        "user": request.user,
+    }
+    return render(request, "users/includes/cart_block.html", context)
+
+
+def remove_from_cart(request, item_id):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+
+    # ищем CartItem напрямую по id
+    CartItem.objects.filter(id=item_id, cart=cart).delete()
+
+    user_cart_products = (
+        cart.items.select_related("product")
+        .prefetch_related(
+            Prefetch(
+                "product__images",
+                queryset=ProductImage.objects.filter(media_type="image").order_by(
+                    "order"
+                ),
+                to_attr="prefetched_images",
+            )
+        )
+        .order_by("-added_at")
+    )
+
+    user_cart_total = sum(i.total_price for i in user_cart_products)
+
+    partial = render_to_string(
+        "users/includes/cart_block.html",
+        {
+            "user_cart_products": user_cart_products,
+            "user_cart_total": user_cart_total,
+        },
+        request=request,
+    )
+
+    cart_count = cart.total_items
+    display = "none" if cart_count == 0 else "flex"
+
+    oob_counter = (
+        f'<span id="cart-counter" hx-swap-oob="true" '
+        f'class="cart_count" style="display:{display}">'
+        f"{cart_count}</span>"
+    )
+
+    return HttpResponse(oob_counter + partial)
+
+
 
 def product_page(request, slug):
     product = get_object_or_404(
@@ -148,26 +225,115 @@ def product_page(request, slug):
         },
     )
 
-@login_required
-@require_POST
-def toggle_cart(request, product_id):
-    product = Product.objects.get(pk=product_id)
-    cart, _ = Cart.objects.get_or_create(user=request.user)
 
-    is_cart = request.POST.get("is_cart") == "true"
+@login_required(login_url="/register/")
+def order_create(request):
+    user = request.user
 
-    if is_cart:
-        CartItem.objects.get_or_create(cart=cart, product=product)
+    try:
+        cart = user.cart
+        cart_items = cart.items.select_related("product").all()
+    except Cart.DoesNotExist:
+        return redirect("shop:catalog")
+
+    if not cart_items.exists():
+        return redirect("users:profile")
+
+    if request.method == "POST":
+        form = OrderForm(user, request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+
+            subtotal = cart.total_price
+            delivery_cost = 0
+            total = subtotal + delivery_cost
+
+            order = Order.objects.create(
+                user=user,
+                subtotal=subtotal,
+                delivery_cost=delivery_cost,
+                total=total,
+                customer_name=f"{data['first_name']} {data['last_name']}".strip(),
+                customer_email=data["customer_email"],
+                customer_phone=data["customer_phone"],
+                delivery_address=data["delivery_address"],
+                delivery_city=data["delivery_city"],
+                delivery_postal_code=data["delivery_postal_code"],
+                notes=data.get("notes", ""),
+            )
+
+            OrderItem.objects.bulk_create(
+                [
+                    OrderItem(
+                        order=order,
+                        product=item.product,
+                        product_name=item.product.name,
+                        product_price=item.product.final_price,
+                        quantity=item.quantity,
+                    )
+                    for item in cart_items
+                ]
+            )
+
+            for item in cart_items:
+                item.product.stock -= item.quantity
+                item.product.save(update_fields=["stock"])
+
+            cart_items.delete()
+
+            _update_profile_from_order(user, data)
+
+            return redirect("payments:create_payment", order_id=order.id)
+            # return redirect('shop:order_success', order_id=order.id)
+
     else:
-        CartItem.objects.filter(cart=cart, product=product).delete()
+        form = OrderForm(user)
 
-    # Обновляем счётчик в иконке через OOB swap
-    cart_count = cart.total_items
-    return HttpResponse(
-        f'<span id="cart-counter" hx-swap-oob="true" '
-        f'x-data="{{ cart_count: {cart_count} }}" '
-        f'class="cart_count" x-show="{cart_count} > 0">{cart_count}</span>'
-    )
+    context = {
+        "form": form,
+        "cart_items": cart_items,
+        "subtotal": cart.total_price,
+        "delivery_cost": 0,
+        "total": cart.total_price,
+    }
+    return render(request, "shop/order_create.html", context)
+
+
+def _update_profile_from_order(user, data):
+    user_changed = False
+    profile_changed = False
+
+    user_fields = {
+        "first_name": data["first_name"],
+        "last_name": data["last_name"],
+    }
+    for attr, value in user_fields.items():
+        if value and getattr(user, attr) != value:
+            setattr(user, attr, value)
+            user_changed = True
+
+    if user_changed:
+        user.save(update_fields=list(user_fields.keys()))
+
+    profile_fields = {
+        "phone_number": data["customer_phone"],
+        "delivery_city": data["delivery_city"],
+        "delivery_address": data["delivery_address"],
+        "delivery_postal_code": data["delivery_postal_code"],
+    }
+    for attr, value in profile_fields.items():
+        if value and getattr(user, attr, None) != value:
+            setattr(user, attr, value)
+            profile_changed = True
+
+    if profile_changed:
+        user.save(update_fields=list(profile_fields.keys()))
+
+
+@login_required(login_url="/register/")
+def order_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, "shop/order_success.html", {"order": order})
 
 
 def info_page(request):
@@ -185,3 +351,5 @@ def info_page(request):
             "active_tab": active_tab,
         },
     )
+
+

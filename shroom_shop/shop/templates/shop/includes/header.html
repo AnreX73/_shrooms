@@ -17,9 +17,16 @@ header{
 <header>
    <div class="header_content">
      {% include "shop/includes/nav_icons.html" %}
+     {% if user.is_superuser %}
+         
+         <a href="{% url 'dashboard:admin_area' %}" class="admin-btn">АДМИН ПАНЕЛЬ</a>
+           
+            {% elif user.is_staff %}
+             <a href="{% url 'dashboard:manage_orders' %}" class="admin-btn">АДМИН ПАНЕЛЬ</a>
+            {% endif %}
 
    <div class="logo_wrapper">
-      <img src="{{ site_logo.image.url }}" alt="logo">
+      <img onclick="window.location.href='{% url 'shop:index' %}'"  src="{{ site_logo.image.url }}" alt="logo">
       <div class="nice_basket">
          <img src="{{ basket.image.url }}" alt="basket">
       </div>

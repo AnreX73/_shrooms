@@ -44,17 +44,11 @@
             <div class="footer-col">
                 <h3>Контакты</h3>
                 <ul class="footer-links" id="contact">
+                    {% for contact in contacts %}
                     <li>
-                        <span class="fas fa-map-marker-alt">{{ contacts.adress.label }}: </span> {{ contacts.adress.value }}
-                    
+                        <span class="fas fa-map-marker-alt">{{ contact.label }}: </span> {{ contact.value }}
                     </li>
-                    <li>
-                        <span class="fas fa-phone">{{ contacts.phone.label }}: </span> {{ contacts.phone.value }}
-                    </li>
-                    <li>
-                        <span class="fas fa-envelope">{{ contacts.raspisanie.label }}: </span> {{ contacts.raspisanie.value }}
-                    </li>
-                    
+                    {% endfor %}
                 </ul>
             </div>
         </div>

@@ -87,8 +87,8 @@
 </div>
 
 <div class="form-actions">
-  <a href="{% url 'dashboard:admin_area' %}" class="btn btn-ghost">← В панель</a>
-  <a href="{{ product.get_absolute_url }}" target="_blank" class="btn btn-primary">
+  <a href="{% url 'dashboard:admin_area' %}" class=" btn-ghost">← В панель</a>
+  <a href="{{ product.get_absolute_url }}" target="_blank" class="users-btn">
     Готово · смотреть товар →
   </a>
 </div>
@@ -97,7 +97,7 @@
 
 <div id="duplicate-section" class="mt-4">
     {% if all_done %}
-    <button id="copy-to-duplicates" class="btn btn-primary">
+    <button id="copy-to-duplicates" class="">
         Применить медиа к дубликатам
     </button>
     {% else %}

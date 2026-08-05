@@ -810,6 +810,9 @@ class Info(models.Model):
     image = models.ImageField("Изображение", upload_to="info/", blank=True)
     is_active = models.BooleanField("Отображать на сайте", default=True)
 
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
     def __str__(self):
         return self.name
 
