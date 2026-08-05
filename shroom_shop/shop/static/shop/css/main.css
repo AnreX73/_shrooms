@@ -2564,14 +2564,16 @@ footer {
     grid-template-columns: var(--select-width) 1fr;
     gap: 32px;
     max-width: var(--all-content-width);
-    margin: 0 auto;
-    padding: 24px 16px 64px;
+    margin: 2rem auto;
+   
     color: var(--text-color);
 }
 
 @media (max-width: 900px) {
     .catalog {
         grid-template-columns: 1fr;
+        margin: 0.5rem auto;
+        gap: 0.5rem;
     }
     
 }
