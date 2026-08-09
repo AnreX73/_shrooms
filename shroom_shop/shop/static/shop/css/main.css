@@ -566,7 +566,7 @@ input[type="radio"] {
     flex-direction: row;
     justify-content: center;
 }
-.shroom_type_box {
+a.shroom_type_box {
     display:grid;
     grid-template-columns: 1fr 3fr;
     gap: 1rem;
@@ -578,7 +578,11 @@ input[type="radio"] {
     padding: 1rem;
     border-radius: 0.5rem;
     box-shadow: var(--shadow);
+    text-decoration: none;
+    color: inherit;
 }
+
+
 
 .shroom_type_img{
     

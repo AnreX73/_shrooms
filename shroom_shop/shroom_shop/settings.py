@@ -217,3 +217,13 @@ RU_EMAIL_PATTERN = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.ru$"
 
 # Дополнительные разрешенные домены, которые не заканчиваются на .ru
 EXTRA_ALLOWED_DOMAINS = ["yandex.by", "yandex.kz", "yandex.com"]
+
+
+# Настройки cookie для CSRF и сессий
+CSRF_COOKIE_NAME = "csrftoken_shroomsshop" # убрать на деплое, хотя это не критично, т.к. CSRF токен генерируется заново при каждой сессии
+
+SESSION_COOKIE_NAME = "sessionid_shroomsshop"  # убрать на деплое, хотя это не критично, т.к. сессия генерируется заново при каждой авторизации
+
+# SESSION_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
+# CSRF_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Куки сессии недоступны через JavaScript

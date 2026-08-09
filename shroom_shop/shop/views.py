@@ -139,14 +139,14 @@ def catalog(request):
         # Общее число типов у продукта
         mt_total_sq = (
             Product.objects.filter(pk=OuterRef("pk"))
-            .annotate(c=Count("mushroom_types"))
+            .annotate(c=Count("mushroom_types", distinct=True))
             .values("c")[:1]
         )
 
         # Сколько из ВЫБРАННЫХ типов есть у продукта
         matched_sq = (
             Product.objects.filter(pk=OuterRef("pk"))
-            .annotate(c=Count("mushroom_types", filter=Q(mushroom_types__in=type_ids)))
+            .annotate(c=Count("mushroom_types", filter=Q(mushroom_types__in=type_ids), distinct=True))
             .values("c")[:1]
         )
 

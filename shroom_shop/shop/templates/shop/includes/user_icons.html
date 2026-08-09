@@ -1,7 +1,7 @@
  <div class="user_icons_wrapper">
 
             {% if user.is_authenticated %}
-                <a href="" class="cart_box" title="Корзина">
+                <a href="{% url 'users:profile' %}?tab=1" class="cart_box" title="Корзина">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
                         <!-- Ручка -->
                         <path d="M 20 28 A 12 12 0 0 1 44 28" 
@@ -17,7 +17,7 @@
                     </span>
                 </a>
                 
-                <a href="" 
+                <a href="{% url 'users:profile' %}?tab=2" 
                     class="favorite_box" 
                     title="Избранное" 
                     x-data="{ favorite_count: {{ user_favorite_ids|length }} }" 
