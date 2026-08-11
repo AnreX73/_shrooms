@@ -54,11 +54,12 @@
                 <div x-data="{ open: false }">
   
   {# Кнопка открывает модалку вместо прямого перехода #}
+  
   <input type="button" 
          class="users-btn start_order_btn" 
          value="Оформить заказ" 
          @click="open = true">
-
+  
   {# Модалка #}
   <div x-show="open" 
        x-cloak
@@ -69,7 +70,7 @@
          style="background:#fff;border-radius:12px;padding:2rem;max-width:420px;width:90%;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
          @click.stop>
       
-      <h2 class="mb-3">{{atantion.title}}</h2>
+      <h2 class="mb-3">{{atantion.title|default:"Перейти к оформлению заказа"}}</h2>
       
       <p class="mb-3">{{atantion.content|safe}}</p>
       
@@ -85,7 +86,6 @@
     </div>
   </div>
 
-</div> 
             {% endif %}
              </div> {# закрывает cart_products_list #}
 

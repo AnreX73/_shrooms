@@ -60,7 +60,7 @@
             <span class="rating-badge">
                 {% include 'shop/includes/rating_stars.html' with rating=product.rating %}
             </span>
-            <span class="reviews-count"> отзывов: {{ product.reviews_count }} </span>  
+            <a style="margin-left: 3rem;" href="#reviews_section">{{ product.reviews_count }} отзывов</a>    
         </div>
            
             <!-- Свойства товара (первые 5) -->
@@ -178,6 +178,16 @@
     </div>
 </div>
 
+
+    {% if reviews %}
+<div id="reviews_section" class="reviews_section">
+    <h3 style="text-align:center; margin-top:1rem;" >Отзывы покупателей </h3>
+         {% for review in reviews %}
+        {% include 'shop/includes/product_page_review.html' with review=review %}
+    {% endfor %}  
+</div>
+{% endif %}
+
 <!-- Модальное окно с полным описанием -->
 <div class="modal" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-overlay" id="detailsModalOverlay"></div>
@@ -207,6 +217,22 @@
     <p style="line-height: 1.65; color: var(--text-color, #3F4A3E); font-size: 15px; text-align: justify;">{{ product.description|safe }}</p>
     </div>
 </div>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.name }}",
+  "description": "{{ product.description }}",
+  "image": "{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ product.price }}",
+    "priceCurrency": "RUB",
+    "availability": "{% if product.in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  }
+}
+</script>
+
 {% endblock %}
 
 

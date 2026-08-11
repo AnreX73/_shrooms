@@ -37,27 +37,7 @@
 
   {# ── Фильтр по статусу (Alpine, без запросов) ── #}
   <div class="select_btn_wrapper">
-    <button class="order_select_btn"
-            :class="{ active: filter === 'all' }"
-            @click="filter = 'all'">Все</button>
-    <button class="order_select_btn"
-            :class="{ active: filter === 'pending' }"       
-            @click="filter = 'pending'">Новый заказы</button>
-    <button class="order_select_btn"
-            :class="{ active: filter === 'confirmed' }"
-            @click="filter = 'confirmed'">Подтверждены</button>
-    <button class="order_select_btn"
-            :class="{ active: filter === 'processing' }"
-            @click="filter = 'processing'">Собраны</button>
-    <button class="order_select_btn"
-            :class="{ active: filter === 'shipped' }"
-            @click="filter = 'shipped'">Отправлены</button>
-    <button class="order_select_btn"
-            :class="{ active: filter === 'delivered' }"
-            @click="filter = 'delivered'">Доставлены</button>
-    <button class="order_select_btn"
-            :class="{ active: filter === 'cancelled' }"
-            @click="filter = 'cancelled'">Отменены</button>
+   
     <button class="order_select_btn"
             onclick="window.location.href='{% url 'dashboard:archived_orders' %}'">Архив</button>
   </div>

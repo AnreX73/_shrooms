@@ -12,7 +12,7 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic.edit import UpdateView
 
-from shop.models import Cart, Order, Product, ProductImage, Review
+from shop.models import Cart, Info, Order, Product, ProductImage, Review
 
 
 from .forms import (
@@ -87,9 +87,9 @@ class LoginUser(LoginView):
             return reverse("dashboard:admin_area")
         elif user.is_authenticated and user.is_staff:
             return reverse("dashboard:admin_area")
-        return reverse("users:profile")
+        return reverse("shop:index")
 
-        return reverse("users:profile")
+        
 
 
 @login_required(login_url="/register/")
@@ -144,6 +144,8 @@ def profile(request):
     # int() — чтобы Alpine сравнивал числа с числами, а не "2" === 1
     active_tab = int(request.GET.get("tab", 1))
 
+    atantion = Info.objects.filter(slug="atantion", is_active=True).first()
+
     context = {
         "user": user,
         "title": "Profile",
@@ -155,6 +157,7 @@ def profile(request):
         "total_items": total_items,
         "orders": orders,
         "reviewed_product_ids": reviewed_product_ids,
+        "atantion": atantion,
     }
 
     return render(request, "users/profile.html", context=context)

@@ -93,12 +93,3 @@ class ProductForm(forms.ModelForm):
             )
         return cleaned_data
 
-# class ProductHairLengthForm(forms.Form):
-#     product_id = forms.IntegerField(widget=forms.HiddenInput())
-#     hair_length = forms.IntegerField(
-#         required=True,
-#         min_value=0,
-#         widget=forms.NumberInput(
-#             attrs={"class": "form-control", "placeholder": "Введите длину волос"}
-#         ),
-#     )

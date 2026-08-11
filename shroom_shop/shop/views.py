@@ -13,9 +13,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template import context
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
-# from django_q.tasks import async_task
-
-from .models import Category, Info, Product, SiteAssets, MushroomType, Favorite, Cart,CartItem, Order, Review, ProductImage, Contact
+from django_q.tasks import async_task
 from django.core.paginator import Paginator
 from django.db.models import (
     Case, When, Value, IntegerField, Count, Subquery, OuterRef,
@@ -23,8 +21,8 @@ from django.db.models import (
 )
 from django.shortcuts import render
 
-from .forms import ProductFilterForm
-from .models import Product, ProductImage
+from .forms import ProductFilterForm, OrderForm, ReviewForm
+from .models import Product, ProductImage, Category, MushroomType, Info, SiteAssets, Favorite, Cart, CartItem, Order, OrderItem, Review, Contact, ReviewMedia
 
 
 
@@ -477,8 +475,8 @@ def order_create(request):
 
             _update_profile_from_order(user, data)
 
-            return redirect("payments:create_payment", order_id=order.id)
-            # return redirect('shop:order_success', order_id=order.id)
+            # return redirect("payments:create_payment", order_id=order.id)
+            return redirect('shop:order_success', order_id=order.id)
 
     else:
         form = OrderForm(user)
@@ -547,3 +545,207 @@ def info_page(request):
     )
 
 
+@login_required(login_url="/register/")
+def review_create(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    user = request.user
+
+    has_valid_order = Order.objects.filter(
+        user=user, status="delivered", payment_status="paid", items__product=product
+    ).exists()
+
+    if not has_valid_order:
+        messages.error(request, "Вы можете оставить отзыв только на купленный товар.")
+        return redirect("users:profile")
+
+    if Review.objects.filter(user=user, product=product).exists():
+        messages.info(request, "Вы уже оставляли отзыв на этот товар.")
+        return redirect("users:profile")
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = Review.objects.create(
+                product=product,
+                user=user,
+                author_name=form.cleaned_data["author_name"],
+                rating=form.cleaned_data["rating"],
+                title=form.cleaned_data["title"],
+                advantages=form.cleaned_data["advantages"],
+                disadvantages=form.cleaned_data["disadvantages"],
+                text=form.cleaned_data["text"],
+                is_approved=True,
+            )
+            return redirect("shop:review_media", review_id=review.pk)
+    else:
+        form = ReviewForm()
+
+    return render(
+        request,
+        "shop/review_create.html",
+        {
+            "form": form,
+            "product": product,
+        },
+    )
+
+
+@login_required(login_url="/register/")
+def review_media(request, review_id):
+    """Шаг 2 — загрузка медиафайлов к отзыву"""
+    review = get_object_or_404(
+        Review.objects.prefetch_related("media"),
+        pk=review_id,
+        user=request.user,  # только свой отзыв
+    )
+    return render(
+        request,
+        "shop/review_media.html",
+        {
+            "review": review,
+            "product": review.product,
+            "max_photos": Review.MAX_PHOTOS,
+            "max_videos": Review.MAX_VIDEOS,
+        },
+    )
+
+
+@login_required(login_url="/register/")
+@require_POST
+def upload_review_media(request, review_id):
+    """AJAX: загрузка одного файла"""
+    review = get_object_or_404(Review, pk=review_id, user=request.user)
+    file = request.FILES.get("file")
+    if not file:
+        return JsonResponse({"error": "Файл не передан"}, status=400)
+
+    ext = os.path.splitext(file.name)[1].lower()
+    is_video = ext in {".mp4", ".mov", ".avi", ".webm"}
+    media_type = "video" if is_video else "photo"
+
+    # Проверяем лимиты до сохранения
+    existing_count = review.media.filter(media_type=media_type).count()
+    limit = Review.MAX_VIDEOS if is_video else Review.MAX_PHOTOS
+    if existing_count >= limit:
+        return JsonResponse(
+            {"error": f"Максимум {limit} файлов типа {media_type}"}, status=400
+        )
+
+    last_order = (
+        review.media.aggregate(max_order=db_models.Max("order"))["max_order"] or 0
+    )
+
+    obj = ReviewMedia(
+        review=review,
+        media_type=media_type,
+        file=file,
+        order=last_order + 1,
+        status="pending",
+    )
+    obj.save()
+
+    async_task(
+        "shop.tasks.compress_review_media",  # поправь путь
+        obj.pk,
+        task_name=f"compress_review_media_{obj.pk}",
+    )
+
+    return JsonResponse(
+        {
+            "id": obj.pk,
+            "media_type": media_type,
+            "status": obj.status,
+            "preview_url": obj.preview_url,
+        }
+    )
+
+
+@login_required(login_url="/register/")
+@require_POST
+def delete_review_media(request, media_id):
+    obj = get_object_or_404(ReviewMedia, pk=media_id, review__user=request.user)
+    if obj.file:
+        obj.file.delete(save=False)
+    if obj.file_compressed:
+        obj.file_compressed.delete(save=False)
+    obj.delete()
+    return JsonResponse({"ok": True})
+
+
+@login_required(login_url="/register/")
+def review_media_status(request, media_id):
+    obj = get_object_or_404(ReviewMedia, pk=media_id, review__user=request.user)
+    return JsonResponse(
+        {
+            "status": obj.status,
+            "preview_url": obj.preview_url,
+        }
+    )
+
+
+@login_required(login_url="/register/")
+def review_media_item_partial(request, media_id):
+    obj = get_object_or_404(ReviewMedia, pk=media_id, review__user=request.user)
+    return render(request, "shop/includes/review_media_item.html", {"media": obj})
+
+
+def review_popup(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    return render(
+        request,
+        "shop/includes/review_popup.html",
+        {"review": review, "media": review.media.all()},
+    )
+
+
+# ответ на отзыв
+@login_required
+def add_admin_reply(request, review_id):
+    """HTMX-эндпоинт: администратор добавляет ответ на отзыв"""
+
+    # 🔐 Только суперпользователи
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Доступ запрещён")
+
+    review = get_object_or_404(
+        Review, id=review_id, product_id=request.POST.get("product_id")
+    )
+
+    if request.method == "POST":
+        answer_text = request.POST.get("answer", "").strip()
+
+        if not answer_text:
+            return JsonResponse({"error": "Ответ не может быть пустым"}, status=400)
+
+        # Обновляем только поле ответа
+        review.review_answer = answer_text
+        review.save(update_fields=["review_answer", "updated_at"])
+
+        # 🔹 Возвращаем готовый HTML-фрагмент для вставки на страницу
+        return render(
+            request,
+            "shop/includes/review_answer_fragment.html",
+            {
+                "review": review,
+                "is_htmx": True,
+            },
+        )
+
+    return JsonResponse({"error": "Метод не разрешён"}, status=405)
+
+
+
+# ===== ЗАГЛУШКА ОПЛАТЫ — УДАЛИТЬ ПОСЛЕ ПОДКЛЮЧЕНИЯ ЭКВАЙРИНГА =====
+@login_required(login_url="/register/")
+def payment_stub(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.method == "POST":
+        order.payment_status = "paid"
+        order.status = "pending"
+        order.save()
+        messages.success(request, "Заказ оплачен  (тестовый режим).")
+        return redirect("users:profile")
+    return redirect("shop:order_success", order_id=order.id)
+
+
+# ===== КОНЕЦ ЗАГЛУШКИ =====

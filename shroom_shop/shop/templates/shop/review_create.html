@@ -1,0 +1,64 @@
+{% extends 'shop/base.html' %}
+{% block content %}
+
+<div class="checkout-wrap">
+  <h2 class="checkout-title">Отзыв о товаре</h2>
+  <div class="steps-indicator" style="margin-bottom:1.5rem">
+  <div class="step active" style="display:flex;align-items:center;gap:.5rem">
+    <span style="width:28px;height:28px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem">1</span>
+    <span style="font-size:.9rem;font-weight:500">Текст отзыва</span>
+  </div>
+  <span style="color:#9ca3af;margin:0 .75rem">→</span>
+  <div class="step" style="display:flex;align-items:center;gap:.5rem;opacity:.4">
+    <span style="width:28px;height:28px;border-radius:50%;background:#e5e7eb;color:#374151;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem">2</span>
+    <span style="font-size:.9rem;font-weight:500">Фото и видео</span>
+  </div>
+</div>
+
+  <div class="review-product-header">
+    {% if product.main_image %}
+      <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="review-product-img">
+    {% endif %}
+    <span class="review-product-name">{{ product.name }}</span>
+  </div>
+
+  <form method="post" class="checkout-form">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label>Оценка: <strong id="rating-value">5</strong> из 5</label>
+      {{ form.rating }}
+    </div>
+    <div class="form-group">
+      <label>{{ form.title.label }}</label>
+      {{ form.title }}
+      {% if form.title.errors %}<span class="form-error">{{ form.title.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.advantages.label }}</label>
+      {{ form.advantages }}
+      {% if form.advantages.errors %}<span class="form-error">{{ form.advantages.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.disadvantages.label }}</label>
+      {{ form.disadvantages }}
+      {% if form.disadvantages.errors %}<span class="form-error">{{ form.disadvantages.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.text.label }}</label>
+      {{ form.text }}
+      {% if form.text.errors %}<span class="form-error">{{ form.text.errors.0 }}</span>{% endif %}
+    </div>
+    
+
+    <button type="submit" class="btn-checkout">Далее: добавить фото →</button>
+  </form>
+</div>
+
+<script>
+  const slider = document.querySelector('input[type=range]');
+  const label = document.getElementById('rating-value');
+  slider.addEventListener('input', () => label.textContent = slider.value);
+</script>
+
+{% endblock %}

@@ -12,9 +12,13 @@ from .models import (
     Favorite,
     Info,
     MushroomType,
+    OrderItem,
+    Order,
     Product,
     ProductImage,
     SiteAssets,
+    Review,
+    ReviewMedia,
 )
 
 
@@ -153,3 +157,55 @@ class FavoriteAdmin(ModelAdmin):
     list_display = ("user", "product")
     search_fields = ("user", "product")
     save_on_top = True
+
+
+@admin.register(Order)
+class OrderAdmin(ModelAdmin):
+    list_display = ("user", "order_number", "status", "payment_status")
+    list_editable = ("status", "payment_status")
+    search_fields = ("user",)
+    save_on_top = True
+
+
+@admin.register(OrderItem)
+class OrderItemAdmin(ModelAdmin):
+    list_display = ("order", "product_name", "quantity", "product_price")
+    search_fields = ("order", "product_name")
+    save_on_top = True
+
+
+# отзывы
+class ReviewMediaInline(admin.TabularInline):
+    model = ReviewMedia
+    extra = 0  # Чтобы не плодить пустые поля для новых фото
+    readonly_fields = ("preview",)  # Поле только для чтения, где будет картинка
+
+    def preview(self, obj):
+        if obj.file:  # Предположим, поле в ReviewMedia называется file
+            return mark_safe(f'<img src="{obj.file.url}" style="max-height: 100px;">')
+        return "Нет изображения"
+
+    preview.short_description = "Предпросмотр"
+
+
+@admin.register(Review)
+class ReviewAdmin(ModelAdmin):
+    inlines = [ReviewMediaInline]
+    list_display = (
+        "product",
+        "user",
+        "rating",
+        "is_approved",
+        "get_media_count",
+        "created_at",
+    )
+    list_filter = ("is_approved", "rating", "created_at")
+    search_fields = ("title", "text", "user__username", "product__name")
+    list_editable = ("is_approved",)
+    date_hierarchy = "created_at"
+    save_on_top = True
+
+    def get_media_count(self, obj):
+        return obj.media.count()
+
+    get_media_count.short_description = "Кол-во медиа"

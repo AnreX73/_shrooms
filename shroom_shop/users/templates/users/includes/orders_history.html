@@ -25,7 +25,7 @@
       <!-- Товары -->
       <div class="order-card__items">
         {% for item in order.items.all %}
-        <div class="order-item">
+        <a href="{{ item.product.get_absolute_url }}" class="order-item">
           {% if item.product.main_image %}
           <img src="{{ item.product.main_image.url }}" alt="{{ item.product_name }}" class="order-item__img">
           {% endif %}
@@ -42,7 +42,7 @@
             <a href="{% url 'shop:review_create' item.product.id %}" class="btn-review">Оставить отзыв</a>
           {% endif %}
 
-        </div>
+        </a>
         {% endfor %}
       </div>
 

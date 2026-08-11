@@ -1,0 +1,36 @@
+<!-- ===== ЗАГЛУШКА ОПЛАТЫ — УДАЛИТЬ ПОСЛЕ ПОДКЛЮЧЕНИЯ ЭКВАЙРИНГА ===== -->
+<div class="payment-stub">
+  <p class="payment-stub__label">⚠ Здесь будет форма оплаты (ОПЛАТА НЕ ПОДКЛЮЧЕНА!!!). Сайт работает в тестовом режиме</p>
+  <form method="post" action="{% url 'shop:payment_stub' order.id %}">
+    {% csrf_token %}
+    <button type="submit" class="users-btn btn-checkout">Оплатить {{ order.total }} ₽</button><span> - ДЛЯ ТЕСТОВ!!! Товар сразу попадет в статус "оплачен"</span>
+  </form>
+</div>
+
+<style>
+  .payment-stub {
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+  }
+  .payment-stub__label {
+    font-weight: bold;
+    color: #d9534f; /* Красный цвет для предупреждения */
+    margin-bottom: 10px;
+    display: block;
+  }
+    .btn-checkout {
+        background-color: teal; /* Зеленый цвет для кнопки */
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-checkout:hover {
+        background-color: #4cae4c; /* Темно-зеленый при наведении */
+    }
+</style>
+<!-- ===== КОНЕЦ ЗАГЛУШКИ ===== -->
