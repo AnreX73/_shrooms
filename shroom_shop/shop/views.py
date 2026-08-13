@@ -20,10 +20,25 @@ from django.db.models import (
     ExpressionWrapper, F, Min, Max, Q, Prefetch,
 )
 from django.shortcuts import render
+from django.template.defaultfilters import pluralize
+
+from django.db.models.functions import Cast
+from django.db.models import FloatField
 
 from .forms import ProductFilterForm, OrderForm, ReviewForm
 from .models import Product, ProductImage, Category, MushroomType, Info, SiteAssets, Favorite, Cart, CartItem, Order, OrderItem, Review, Contact, ReviewMedia
 
+def ru_plural(n, forms):
+    """forms = ('товар', 'товара', 'товаров')"""
+    n = abs(n) % 100
+    n1 = n % 10
+    if 10 < n < 20:
+        return forms[2]
+    if 1 < n1 < 5:
+        return forms[1]
+    if n1 == 1:
+        return forms[0]
+    return forms[2]
 
 
 def get_hit_ids():
@@ -96,8 +111,11 @@ def catalog(request):
     products = Product.objects.filter(
         Q(stock__gt=0) | Q(out_of_stock_behavior="show")
     ).annotate(
-        computed_final_price=ExpressionWrapper(
-            F("price") * (100 - F("discount_percentage")) / 100.0,
+        computed_final_price=Cast(
+            ExpressionWrapper(
+                F("price") * (100 - F("discount_percentage")) / 100.0,
+                output_field=FloatField(),
+            ),
             output_field=IntegerField(),
         )
     )
@@ -126,8 +144,24 @@ def catalog(request):
 
     # --- Фильтр: не дороже выбранного значения слайдера ---
     if form.is_valid():
-        if (pmax := form.cleaned_data.get("price_max")) is not None:
+        if (pmax := form.cleaned_data.get("price_max")) is not None and pmax < max_price:
             products = products.filter(computed_final_price__lte=pmax)
+
+    # --- Границы веса считаем ДО фильтра по weight_max, но ПОСЛЕ category/mushroom_types ---
+    weight_scope = products  # это тот же queryset, что уже прошёл category+mushroom_types,
+                            # но ДО price_max — если хочешь, чтобы вес не зависел от цены
+
+    weight_agg = weight_scope.aggregate(
+        min_weight=Min("net_weight"),
+        max_weight=Max("net_weight"),
+    )
+    min_weight = weight_agg["min_weight"] or 0
+    max_weight = weight_agg["max_weight"] or 0
+
+    # --- Фильтр: вес не больше выбранного значения ---
+    if form.is_valid():
+        if (wmax := form.cleaned_data.get("weight_max")) is not None and wmax < max_weight:
+            products = products.filter(net_weight__lte=wmax)
 
     # --- Фильтр + приоритет по видам грибов ---
     if selected_types:
@@ -187,9 +221,9 @@ def catalog(request):
         products = products.order_by("-popularity", "article")
 
     products = products.prefetch_related(images_prefetch)
-
+    
     # --- Пагинация ---
-    filter_keys = {"category", "mushroom_types", "price_max"}
+    filter_keys = {"category", "mushroom_types", "price_max", "weight_max"}
     is_filter_change = any(k in request.GET for k in filter_keys) and "page" not in request.GET
 
     if is_filter_change:
@@ -198,6 +232,7 @@ def catalog(request):
         page_number = request.GET.get("page", 1)
         request.session["catalog_last_page"] = page_number
 
+    total_matching = products.count()
     paginator = Paginator(products, 12)
     page_obj = paginator.get_page(page_number)
 
@@ -217,6 +252,18 @@ def catalog(request):
     # Обновляем слайдер через OOB, если запрос пришёл НЕ от самого слайдера
     show_price_oob = hx_trigger_id != "price_max" and is_htmx
 
+    form.fields["weight_max"].widget.attrs["min"] = min_weight
+    form.fields["weight_max"].widget.attrs["max"] = max_weight
+
+    current_weight_max = (
+        form.cleaned_data.get("weight_max")
+        if form.is_valid() and form.cleaned_data.get("weight_max") is not None
+        else max_weight
+    )
+    form.fields["weight_max"].widget.attrs["value"] = current_weight_max
+
+    show_weight_oob = hx_trigger_id != "weight_max" and is_htmx
+
     # --- Активные фильтры (чипы) ---
     active_filters = []
     if form.is_valid():
@@ -235,6 +282,11 @@ def catalog(request):
                 "label": f"до {current_price_max} ₽",
                 "remove_url": _build_remove_url(request.GET, "price_max"),
             })
+        if current_weight_max < max_weight:
+                active_filters.append({
+                    "label": f"вес до {current_weight_max} г",
+                    "remove_url": _build_remove_url(request.GET, "weight_max"),
+                })
 
     context = {
         "form": form,
@@ -245,8 +297,16 @@ def catalog(request):
         "max_price": max_price,
         "current_price_max": current_price_max,
         "show_price_oob": show_price_oob,
+        "current_weight_max": current_weight_max,
+        "show_weight_oob": show_weight_oob,
         "active_filters": active_filters,
+        "min_weight": min_weight,
+        "max_weight": max_weight,
+        "total_matching": total_matching,
+
     }
+    context["total_matching_word"] = ru_plural(total_matching, ("товар", "товара", "товаров"))
+    
 
     if is_htmx:
         return render(request, "shop/includes/catalog_results.html", context)

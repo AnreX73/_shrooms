@@ -13,17 +13,17 @@ class Post(models.Model):
         ('recipe', 'Рецепт'),
         ('media', 'Видео/интервью'),
     ]
-    title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
-    excerpt = models.TextField(blank=True)
-    cover_image = models.ImageField(upload_to='posts/covers/')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, blank=True)
-    is_published = models.BooleanField(default=False)
+    title = models.CharField(max_length=255, verbose_name='Заголовок')
+    slug = models.SlugField(unique=True, verbose_name='URL (slug)')
+    excerpt = models.TextField(blank=True, verbose_name='Краткое описание')
+    cover_image = models.ImageField(upload_to='posts/covers/', verbose_name='Обложка', blank=True, null=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, verbose_name='Категория')
+    is_published = models.BooleanField(default=False, verbose_name='Опубликовано')
     published_on_main_page = models.BooleanField(
         default=False, verbose_name='На главной странице'
     )
-    published_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    published_at = models.DateTimeField(null=True, blank=True, verbose_name='Опубликовано(дата и время)')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
 
     class Meta:
         constraints = [
@@ -77,12 +77,12 @@ class PostBlock(models.Model):
         ('ready', 'Готово'),
         ('failed', 'Ошибка'),
     ]
-    post = models.ForeignKey(Post, related_name='blocks', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='blocks', on_delete=models.CASCADE, verbose_name='Пост')
     order = models.PositiveIntegerField(default=0)
-    block_type = models.CharField(max_length=20, choices=BLOCK_TYPES)
-    text = models.TextField(blank=True)
-    video_url = models.URLField(blank=True)
-    single_image = models.ImageField(upload_to='posts/blocks/', blank=True, null=True)
+    block_type = models.CharField(max_length=20, choices=BLOCK_TYPES, verbose_name='Тип блока')
+    text = models.TextField(blank=True, verbose_name='Текст')
+    video_url = models.URLField(blank=True, verbose_name='URL видео')
+    single_image = models.ImageField(upload_to='posts/blocks/', blank=True, null=True, verbose_name='Одно фото')
 
     # поля для short_video
     video_original = models.FileField(upload_to='posts/video/original/', blank=True, null=True)

@@ -21,9 +21,10 @@
             hx-push-url="true">
 
             {% include "shop/includes/filter_controls.html" %}
-
             {% include "shop/includes/price_slider.html" %}
+            {% include "shop/includes/weight_slider.html" %}
         </form>
+        
 
         <a href="{% url 'shop:catalog' %}" class="filters-reset"
            hx-get="{% url 'shop:catalog' %}"

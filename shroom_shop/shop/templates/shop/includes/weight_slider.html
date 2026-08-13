@@ -1,0 +1,22 @@
+<div id="weight-slider-wrapper">
+    <label>
+        Вес до: <span id="weight-slider-value">{{ current_weight_max }} г</span>
+    </label>
+    <div class="price-slider-scale">
+        <span>{{ min_weight }} г</span>
+        <input type="range"
+               name="weight_max"
+               id="id_weight_max"
+               min="{{ min_weight }}"
+               max="{{ max_weight }}"
+               value="{{ current_weight_max }}"
+               oninput="document.getElementById('weight-slider-value').textContent = this.value + ' г'"
+               hx-get="{% url 'shop:catalog' %}"
+               hx-trigger="change delay:200ms"
+               hx-target="#catalog-results"
+               hx-swap="innerHTML"
+               hx-push-url="true"
+               hx-include="#filter-form">
+        <span>{{ max_weight }} г</span>
+    </div>
+</div>

@@ -8,4 +8,10 @@
 </div>
 {% endif %}
 
+{% if show_weight_oob %}
+<div id="weight-slider-wrapper" hx-swap-oob="true">
+    {% include "shop/includes/weight_slider.html" %}
+</div>
+{% endif %}
+
 {% include "shop/includes/catalog_products.html" %}

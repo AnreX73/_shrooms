@@ -28,6 +28,11 @@ class ProductFilterForm(forms.Form):
         min_value=0,
         widget=forms.NumberInput(attrs={"type": "range"}),
     )
+    weight_max = forms.IntegerField(
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={"type": "range"}),
+    )
 
 
 

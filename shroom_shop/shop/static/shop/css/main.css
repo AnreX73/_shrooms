@@ -2913,6 +2913,12 @@ footer {
     transition: opacity 0.15s ease;
 }
 
+.catalog-results-count {
+    font-size: var(--select-font-size);
+    color: var(--text-color);
+    margin-bottom: 16px;
+}
+
 /* ==========================================================================
    Mobile filters toggle & off-canvas panel
    ========================================================================== */

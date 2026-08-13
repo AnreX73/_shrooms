@@ -8,7 +8,7 @@
     {% endfor %}
 </div>
 {% endif %}
-
+<p class="catalog-results-count">Найдено: {{ total_matching }} {{ total_matching_word }}</p>
 <div class="catalog-grid" id="catalog-section">
     {% if products|length == 0 %}
         <p>Нет товаров в каталоге.</p>
