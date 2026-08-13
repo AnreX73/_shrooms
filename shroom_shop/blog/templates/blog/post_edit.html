@@ -1,0 +1,67 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="post-editor">
+<h1>{% if post.title %}{{ post.title }}{% else %}Новый пост{% endif %}</h1>
+<input type="button" class="users-btn" value="в админпанель" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">
+
+<!-- Форма полей самого поста: title, slug, excerpt, cover_image, category, is_published, published_at -->
+<form method="post" enctype="multipart/form-data" id="post-form">
+    {% csrf_token %}
+    {{ post_form.as_p }}
+
+    <p class="post-status">
+        Статус:
+        {% if post.is_published %}
+            <strong>опубликован</strong> {{ post.published_at|date:"d.m.Y H:i" }}
+        {% else %}
+            <strong>черновик</strong>
+        {% endif %}
+    </p>
+
+    <div class="form-actions">
+        <button type="submit" name="action" value="save_draft">
+            Сохранить {% if not post.is_published %}черновик{% endif %}
+        </button>
+
+        {% if post.is_published %}
+            <button type="submit" name="action" value="unpublish">Снять с публикации</button>
+        {% else %}
+            <button type="submit" name="action" value="publish">Готово — опубликовать</button>
+        {% endif %}
+    </div>
+</form>
+
+<!-- рядом с формой поста, вне <form>, раз это независимый механизм -->
+{% include 'blog/partials/main_page_button.html' %}
+
+<!-- контейнер для модалки, один на всю страницу -->
+<div id="modal-container"></div>
+
+<hr>
+
+<h2>Контент поста</h2>
+
+<!-- Блоки поста: управляются отдельно через htmx, без formset -->
+<div id="blocks-container"
+     hx-get="{% url 'blog:block_add' post.pk %}"
+     hx-trigger="none">
+    {% for block in post.blocks.all %}
+        {% include 'blog/partials/block_row.html' %}
+    {% endfor %}
+</div>
+
+<button type="button"
+        hx-post="{% url 'blog:block_add' post.pk %}"
+        hx-target="#blocks-container"
+        hx-swap="beforeend">
+    + Добавить блок
+</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+{% endblock %}

@@ -1,0 +1,82 @@
+<div class="block-row" id="block-{{ block.pk }}"
+     x-data="{ type: '{{ block.block_type }}' }"
+     data-block-id="{{ block.pk }}">
+
+    <select name="block_type" x-model="type"
+            hx-post="{% url 'blog:block_update' block.pk %}"
+            hx-trigger="change"
+            hx-target="#block-{{ block.pk }}"
+            hx-swap="outerHTML"
+            hx-include="closest .block-row">
+        <option value="text" {% if block.block_type == 'text' %}selected{% endif %}>Текст</option>
+        <option value="image" {% if block.block_type == 'image' %}selected{% endif %}>Фото</option>
+        <option value="gallery" {% if block.block_type == 'gallery' %}selected{% endif %}>Галерея</option>
+        <option value="video_embed" {% if block.block_type == 'video_embed' %}selected{% endif %}>Видео (ссылка)</option>
+        <option value="short_video" {% if block.block_type == 'short_video' %}selected{% endif %}>Короткое видео</option>
+        <option value="quote" {% if block.block_type == 'quote' %}selected{% endif %}>Цитата</option>
+    </select>
+
+    <div x-show="type === 'text' || type === 'quote'">
+        <textarea name="text"
+                  hx-post="{% url 'blog:block_update' block.pk %}"
+                  hx-trigger="blur"
+                  hx-target="#block-{{ block.pk }}"
+                  hx-swap="outerHTML"
+                  hx-include="closest .block-row">{{ block.text }}</textarea>
+    </div>
+
+    <div x-show="type === 'image'">
+    <div class="dropzone-custom dropzone-image"
+         data-upload-url="{% url 'blog:upload_single_image' block.pk %}"
+         data-target="single-image-{{ block.pk }}">
+        <div class="dz-message">
+            <div class="dz-icon">🖼️</div>
+            <div class="dz-text">Перетащите фото сюда</div>
+            <div class="dz-subtext">или <span class="dz-link">нажмите для выбора</span></div>
+            <div class="dz-hint">JPG, PNG, WebP</div>
+        </div>
+    </div>
+    {% include 'blog/partials/single_image_preview.html' %}
+</div>
+
+    <div x-show="type === 'gallery'">
+    <div class="dropzone-custom dropzone-gallery"
+         data-upload-url="{% url 'blog:upload_gallery_image' block.pk %}"
+         data-target="thumbs-{{ block.pk }}">
+        <div class="dz-message">
+            <div class="dz-icon">🖼️</div>
+            <div class="dz-text">Перетащите фото сюда</div>
+            <div class="dz-subtext">или <span class="dz-link">нажмите для выбора</span></div>
+            <div class="dz-hint">JPG, PNG, WebP</div>
+        </div>
+    </div>
+    <div class="gallery-thumbs" id="thumbs-{{ block.pk }}">
+        {% for img in block.images.all %}
+            {% include 'blog/partials/gallery_thumb.html' with image=img %}
+        {% endfor %}
+    </div>
+</div>
+
+    <div x-show="type === 'video_embed'">
+        <input type="url" name="video_url" placeholder="Ссылка на YouTube/VK"
+               value="{{ block.video_url }}"
+               hx-post="{% url 'blog:block_update' block.pk %}"
+               hx-trigger="blur"
+               hx-target="#block-{{ block.pk }}"
+               hx-swap="outerHTML"
+               hx-include="closest .block-row">
+    </div>
+
+    <div x-show="type === 'short_video'">
+        <div id="video-status-{{ block.pk }}">
+            {% include 'blog/partials/video_status.html' %}
+        </div>
+    </div>
+
+    <span class="drag-handle">⠿</span>
+    <button type="button"
+            hx-delete="{% url 'blog:block_delete' block.pk %}"
+            hx-target="#block-{{ block.pk }}"
+            hx-swap="outerHTML"
+            hx-confirm="Удалить блок?">Удалить</button>
+</div>

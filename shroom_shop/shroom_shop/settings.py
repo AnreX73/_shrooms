@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "shop.apps.ShopConfig",
     "payments.apps.PaymentsConfig",
     "dashboard.apps.DashboardConfig",
+    "blog.apps.BlogConfig",
     "django_extensions",
     'django_q',
     "debug_toolbar",

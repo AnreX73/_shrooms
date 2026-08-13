@@ -1,0 +1,11 @@
+<!-- blog/partials/single_image_preview.html -->
+<div class="single-image-preview" id="single-image-{{ block.pk }}">
+    {% if block.single_image %}
+        <img src="{{ block.single_image.url }}" width="150">
+        <button type="button" class="del_img_btn"
+                hx-post="{% url 'blog:block_update' block.pk %}"
+                hx-vals='{"remove_single_image": "1"}'
+                hx-target="#single-image-{{ block.pk }}"
+                hx-swap="outerHTML">Удалить</button>
+    {% endif %}
+</div>

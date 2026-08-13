@@ -1,0 +1,51 @@
+<div x-data="{ open: true }" x-show="open" x-cloak
+     class="modal-overlay" @keydown.escape.window="open = false">
+
+    <div class="modal-box" @click.outside="open = false">
+
+        {% if post.published_on_main_page %}
+            <h3>Снять с главной страницы?</h3>
+            <p>Пост «{{ post.title }}» перестанет отображаться на главной.</p>
+            <div class="modal-actions">
+                <button type="button" @click="open = false">Отмена</button>
+                <button type="button"
+                        hx-post="{% url 'blog:main_page_toggle' post.pk %}"
+                        hx-target="#main-page-toggle-{{ post.pk }}"
+                        hx-swap="outerHTML"
+                        @click="open = false">
+                    Да, снять
+                </button>
+            </div>
+
+        {% elif current %}
+            <h3>Заменить пост на главной?</h3>
+            <p>Сейчас на главной странице показывается «{{ current.title }}».</p>
+            <p>Вы хотите заменить его на «{{ post.title }}»?</p>
+            <div class="modal-actions">
+                <button type="button" @click="open = false">Отмена</button>
+                <button type="button"
+                        hx-post="{% url 'blog:main_page_toggle' post.pk %}"
+                        hx-target="#main-page-toggle-{{ post.pk }}"
+                        hx-swap="outerHTML"
+                        @click="open = false">
+                    Да, заменить
+                </button>
+            </div>
+
+        {% else %}
+            <h3>Показать пост на главной?</h3>
+            <p>Сейчас на главной странице ничего не закреплено.</p>
+            <div class="modal-actions">
+                <button type="button" @click="open = false">Отмена</button>
+                <button type="button"
+                        hx-post="{% url 'blog:main_page_toggle' post.pk %}"
+                        hx-target="#main-page-toggle-{{ post.pk }}"
+                        hx-swap="outerHTML"
+                        @click="open = false">
+                    Да, показать
+                </button>
+            </div>
+        {% endif %}
+
+    </div>
+</div>

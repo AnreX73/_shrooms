@@ -1,0 +1,5 @@
+<div class="thumb" id="thumb-{{ image.pk }}">
+    <img src="{{ image.image.url }}" width="80">
+    <button type="button" hx-delete="{% url 'blog:delete_gallery_image' image.pk %}"
+            hx-target="#thumb-{{ image.pk }}" hx-swap="outerHTML">×</button>
+</div>

@@ -17,8 +17,8 @@
             <div class="footer-col">
                 <h3>Наши грибы</h3>
                 <ul class="footer-links">
-                  {% for shromm_type in shrooms_types %}
-                  <li><a href="{% url 'shop:catalog' %}?mushroom_type={{ shromm_type.id }}">{{ shromm_type.name }}</a></li>
+                  {% for shroom_type in shrooms_types %}
+                  <li><a href="{% url 'shop:catalog' %}?mushroom_types={{ shroom_type.id }}">{{ shroom_type.name }}</a></li>
                   {% endfor %}
                 </ul>
             </div>

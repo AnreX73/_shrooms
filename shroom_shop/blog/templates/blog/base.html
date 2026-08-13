@@ -1,0 +1,36 @@
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    {% comment %} <link rel="shortcut icon" href="{{favicon.image.url}}"/> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'blog/css/blog.css' %}">
+    <link rel="stylesheet" href="{% static 'shop/css/dropzone.min.css' %}">
+    <style>[x-cloak] { display: none !important; }</style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>    
+<div class="all_content_wrapper">
+  
+    
+    
+{% block content %}
+
+
+{% endblock content %}
+
+</div>
+<script  src="{% static 'shop/js/alpine.js' %}"></script>
+<script src="{% static 'shop/js/htmx.min.js' %}"></script>
+<script  src="{% static 'shop/js/dropzone.min.js' %}"></script>
+<script  src="{% static 'shop/js/sortable.min.js' %}"></script>
+<script  src="{% static 'shop/js/main.js' %}"></script>
+<script src="{% static 'blog/js/dropzone-init.js' %}"></script>
+<script src="{% static 'blog/js/block-sortable.js' %}"></script>
+{% block extra_js %}{% endblock %} 
+</body>
+</html>

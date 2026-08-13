@@ -1,0 +1,21 @@
+<!-- blog/partials/video_status.html -->
+<div id="video-status-{{ block.pk }}" data-status="{{ block.video_status }}">
+    {% if block.video_status == 'ready' %}
+        <video src="{{ block.video_processed.url }}" poster="{{ block.video_poster.url }}" controls width="240"></video>
+    {% elif block.video_status == 'failed' %}
+        <p>Ошибка обработки видео</p>
+    {% elif block.video_status == 'pending' or block.video_status == 'processing' %}
+        <p>Обрабатывается... <span class="spinner"></span></p>
+    {% else %}
+        <div class="dropzone-custom dropzone-short-video"
+             data-upload-url="{% url 'blog:upload_short_video' block.pk %}"
+             data-target="video-status-{{ block.pk }}">
+            <div class="dz-message">
+                <div class="dz-icon">🎬</div>
+                <div class="dz-text">Перетащите видео сюда</div>
+                <div class="dz-subtext">или <span class="dz-link">нажмите для выбора</span></div>
+                <div class="dz-hint">MP4, MOV · до 500 МБ</div>
+            </div>
+        </div>
+    {% endif %}
+</div>
