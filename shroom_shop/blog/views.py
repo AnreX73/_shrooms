@@ -8,7 +8,7 @@ from django.contrib import messages
 
 
 from django.http import HttpResponse
-from django.db.models import Max
+from django.db.models import Max, Prefetch
 from django_q.tasks import async_task
 
 from django.db import transaction
@@ -33,7 +33,15 @@ def post_list(request):
 
 
 def post_detail(request, slug):
-    post = get_object_or_404(Post, slug=slug, is_published=True)
+    blocks_prefetch = Prefetch(
+        "blocks",
+        queryset=PostBlock.objects.prefetch_related("images").order_by("order"),
+    )
+    post = get_object_or_404(
+        Post.objects.prefetch_related(blocks_prefetch),
+        slug=slug,
+        is_published=True,
+    )
     return render(request, 'blog/post_detail.html', {'post': post})
 
 

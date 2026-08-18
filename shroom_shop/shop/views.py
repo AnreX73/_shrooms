@@ -25,8 +25,10 @@ from django.template.defaultfilters import pluralize
 from django.db.models.functions import Cast
 from django.db.models import FloatField
 
+
 from .forms import ProductFilterForm, OrderForm, ReviewForm
 from .models import Product, ProductImage, Category, MushroomType, Info, SiteAssets, Favorite, Cart, CartItem, Order, OrderItem, Review, Contact, ReviewMedia
+from blog.models import Post, PostBlock, PostImage
 
 def ru_plural(n, forms):
     """forms = ('товар', 'товара', 'товаров')"""
@@ -54,12 +56,24 @@ def get_hit_ids():
 
 
 def index(request):
+    first_text_subquery = PostBlock.objects.filter(
+        post=OuterRef("pk"),
+        block_type="text",
+    ).order_by("order").values("text")[:1]
+
     start_banner = Info.objects.filter(name="Стартовый баннер", is_active=True).first()
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
     shrooms_types = MushroomType.objects.all()
     categories = Category.objects.filter(is_active=True).order_by("created_at")
     info_objects = Info.objects.all().exclude(name="Стартовый баннер").order_by("created_at")
     contacts = Contact.objects.all()
+    main_blog_post = (
+        Post.objects
+        .filter(published_on_main_page=True)
+        .annotate(first_block_text=Subquery(first_text_subquery))
+        .only("title", "slug", "cover_image")
+        .first()
+    )
 
     context = {
         "start_banner": start_banner,
@@ -67,7 +81,8 @@ def index(request):
         "shrooms_types": shrooms_types,
         "categories": categories,
         "info": info_objects,
-        "contacts": contacts
+        "contacts": contacts,
+        "main_blog_post": main_blog_post,
     }
 
     return render(request, "shop/index.html", context)

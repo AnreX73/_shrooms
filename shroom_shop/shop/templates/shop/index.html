@@ -23,8 +23,15 @@
     </div>
 </div>
 {% endif %}
-
+{% if main_blog_post %}
+<div class="main_blog_post_grid">
+    {% include 'shop/includes/post_preview.html' %}
+    {% include 'shop/includes/categories.html' %}
+</div>
+{% else %}
 {% include 'shop/includes/categories.html' %}
+{% endif %}
+
 
 <section class="shrooms_types_wrapper">
     <h2>Наши грибочки</h2>

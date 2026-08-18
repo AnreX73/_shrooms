@@ -1,0 +1,18 @@
+<section class="main_blog_post_wrapper">
+    <div class="section-title">
+         <h2 style="text-align: center;margin-bottom: 10px; margin-top: 20px;">Новости</h2>          
+    </div>
+    <h3 style="text-align:center;">{{ main_blog_post.title }}</h3>
+    <div class="main_blog_post">  
+          <div class="main_blog_post_image">
+            {% if main_blog_post.cover_image %}
+                <img src="{{ main_blog_post.cover_image.url }}" alt="{{ main_blog_post.cover_image.alt }}">
+            {% else %}
+                <img src="{{ site_logo.image.url }}" alt="логотип">
+            {% endif %}
+        </div>
+        <p style="text-align: justify;line-height: 1; min-width:0;">{{ main_blog_post.first_block_text|truncatechars:200 }}</p>  
+    </div>
+    <a href="{% url 'blog:post_detail' main_blog_post.slug %}" class="read_more_btn">Читать далее</a> 
+</section>
+ 

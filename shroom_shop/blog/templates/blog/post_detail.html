@@ -3,4 +3,61 @@
 {% block title %}{{post.title}}{% endblock %}
 
 {% block content %}
+<h3 style="margin: 1rem auto">{{ post.title }}</h3>
+{% for block in post.blocks.all %}
+
+    {% if block.block_type == 'text' %}
+        <p class="post_detail_text">{{ block.text|linebreaks }}</p>
+
+    {% elif block.block_type == 'image' %}
+        {% if block.single_image %}
+            <figure class="post-image">
+                <img src="{{ block.single_image.url }}" alt="{{ block.image_alt }}">
+                {% if block.text %}
+                    <figcaption>{{ block.text }}</figcaption>
+                {% endif %}
+            </figure>
+        {% endif %}
+
+    {% elif block.block_type == 'gallery' %}
+        {% if block.images.all %}
+            <div class="swiper post-gallery">
+                <div class="swiper-wrapper">
+                    {% for img in block.images.all %}
+                        <div class="swiper-slide">
+                            <img src="{{ img.image.url }}" alt="{{ img.caption }}">
+                            {% if img.caption %}
+                                <p class="caption">{{ img.caption }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        {% endif %}
+
+    {% elif block.block_type == 'video_embed' %}
+        {% if block.video_url %}
+            <div class="video-embed">
+                <iframe src="{{ block.video_url }}" frameborder="0" allowfullscreen></iframe>
+            </div>
+        {% endif %}
+
+    {% elif block.block_type == 'short_video' %}
+        {% if block.video_status == 'ready' and block.video_processed %}
+            <video controls poster="{{ block.video_poster.url }}" class="short-video">
+                <source src="{{ block.video_processed.url }}" type="video/mp4">
+            </video>
+        {% elif block.video_status == 'processing' or block.video_status == 'pending' %}
+            <p class="video-placeholder">Видео обрабатывается…</p>
+        {% endif %}
+
+    {% elif block.block_type == 'quote' %}
+        {% if block.text %}
+            <blockquote>{{ block.text }}</blockquote>
+        {% endif %}
+
+    {% endif %}
+
+{% endfor %}
 {% endblock %}
