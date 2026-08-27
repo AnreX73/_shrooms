@@ -1,3 +1,4 @@
+<div class="all_content_wrapper"> 
 <div class="block-row" id="block-{{ block.pk }}"
      x-data="{ type: '{{ block.block_type }}' }"
      data-block-id="{{ block.pk }}">
@@ -16,13 +17,27 @@
         <option value="quote" {% if block.block_type == 'quote' %}selected{% endif %}>Цитата</option>
     </select>
 
-    <div x-show="type === 'text' || type === 'quote'">
-        <textarea name="text"
-                  hx-post="{% url 'blog:block_update' block.pk %}"
-                  hx-trigger="blur"
-                  hx-target="#block-{{ block.pk }}"
-                  hx-swap="outerHTML"
-                  hx-include="closest .block-row">{{ block.text }}</textarea>
+    <div class="rt-wrapper" style="position: relative;"
+     x-data="richTextField('{{ block.pk }}')"
+     x-init="init()"
+     x-on:focusout="handleFocusOut($event)">
+
+    <div class="rt-toolbar" x-show="toolbarVisible"
+         x-bind:style="`top:${toolbarTop}px; left:${toolbarLeft}px;`">
+        <button type="button" x-on:mousedown.prevent="bold()"><b>Ж</b></button>
+        <input type="color" x-on:mousedown.stop x-on:input="color($event.target.value)">
+    </div>
+
+    <div class="rt-editable"
+         contenteditable="true"
+         x-ref="editable">{{ block.text|safe }}</div>
+
+    <textarea name="text" x-ref="hidden" style="display:none"
+              hx-post="{% url 'blog:block_update' block.pk %}"
+              hx-trigger="rt:blur"
+              hx-target="#block-{{ block.pk }}"
+              hx-swap="outerHTML"
+              hx-include="closest .block-row">{{ block.text }}</textarea>
     </div>
 
     <div x-show="type === 'image'">
@@ -79,4 +94,5 @@
             hx-target="#block-{{ block.pk }}"
             hx-swap="outerHTML"
             hx-confirm="Удалить блок?">Удалить</button>
+</div>
 </div>

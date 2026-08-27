@@ -1083,27 +1083,7 @@ margin: 0 auto;
     color: var(--accent-color);
     
 }
-/* Страница поста */
-.post_detail_text{
-    line-height: 1.5;
-}
-.post-image{
-    width: 500px;
-    height: auto;
-}
-.post-image img{
-    width: 100%;
-    height: auto;
-    float: left;
-    margin-right: 2rem;
-}
 
-@media (max-width: 533px) {
-     .post-image img{
-        width: clamp(21.875rem, 86.705vw + 2.366rem, 31.25rem);
-     }
-
-}
 
 /* Категории товаров */
 .category-card {

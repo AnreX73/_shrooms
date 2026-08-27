@@ -1,0 +1,22 @@
+
+    <div class="post_list_containerr">
+    <h3 style="margin-top: 2rem; text-align:center;">Все посты</h3>
+    <div class="post_list_wrapper">
+        {% for post in posts %}
+            <div class="post_link_block">
+                <h3>{{ post.title }}</h3>
+                {% for block in post.blocks.all %}
+                {% if block.block_type == 'text' %}
+                    <p class="post_detail_text">{{ block.text|safe|linebreaks|truncatechars:200}}</p>
+                    {% elif block.single_image %}
+                    <figure class="post_list_image">
+                        <img src="{{ block.single_image.url }}" alt="{{ block.image_alt }}">
+                    </figure>
+                {% endif %}
+                {% endfor %}
+                <a href="{% url 'blog:blog_page' post.slug %}" class="read_more_btn">Читать далее</a>
+                
+            </div>
+        {% endfor %}
+    </div>
+

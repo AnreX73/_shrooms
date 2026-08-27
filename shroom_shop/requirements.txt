@@ -3,6 +3,7 @@ aiohttp==3.13.5
 aiosignal==1.4.0
 asgiref==3.11.1
 attrs==26.1.0
+bleach==6.4.0
 certifi==2026.2.25
 cffi==2.0.0
 charset-normalizer==3.4.7
@@ -38,9 +39,11 @@ requests==2.33.1
 ruff==0.15.12
 six==1.17.0
 sqlparse==0.5.5
+tinycss2==1.5.1
 typing_extensions==4.15.0
 tzdata==2025.3
 urllib3==2.6.3
+webencodings==0.6.1
 wrapt==2.1.2
 yarl==1.23.0
 yookassa==3.10.0

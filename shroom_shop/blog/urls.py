@@ -5,8 +5,7 @@ from blog import views
 app_name = "blog"
 
 urlpatterns = [
-    path("", views.post_list, name="post_list"),
-    path("<slug:slug>/", views.post_detail, name="post_detail"),
+    path("<slug:slug>/", views.blog_page, name="blog_page"),
     path('posts/new/', views.post_create, name='post_create'),
     path("edit/<int:pk>/", views.post_edit, name="post_edit"),
     path('posts/<int:post_id>/blocks/add/', views.block_add, name='block_add'),
@@ -20,4 +19,5 @@ urlpatterns = [
     path('images/<int:pk>/delete/', views.delete_gallery_image, name='delete_gallery_image'),
     path('blocks/<int:pk>/video-status/', views.block_video_status, name='block_video_status'),
     path('blocks/<int:pk>/upload-single-image/', views.upload_single_image, name='upload_single_image'),
+    path('check-slider/', views.check_slider, name='check_slider'),
 ]

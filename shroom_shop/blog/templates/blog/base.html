@@ -8,13 +8,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token }}">
     {% comment %} <link rel="shortcut icon" href="{{favicon.image.url}}"/> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'shop/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'blog/css/blog.css' %}">
+    <link rel="stylesheet" href="{% static 'blog/css/splide.min.css' %}">
     <link rel="stylesheet" href="{% static 'shop/css/dropzone.min.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'shop/css/swiper-bundle.min.css' %}" />
     <style>[x-cloak] { display: none !important; }</style>
     {% block extra_css %}{% endblock %}
 </head>
 <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>    
-<div class="all_content_wrapper">
+
   
     
     
@@ -23,9 +26,11 @@
 
 {% endblock content %}
 
-</div>
+
+<script  src="{% static 'blog/js/script.js' %}"></script>
 <script  src="{% static 'shop/js/alpine.js' %}"></script>
 <script src="{% static 'shop/js/htmx.min.js' %}"></script>
+<script  src="{% static 'blog/js/splide.min.js' %}"></script>
 <script  src="{% static 'shop/js/dropzone.min.js' %}"></script>
 <script  src="{% static 'shop/js/sortable.min.js' %}"></script>
 <script  src="{% static 'shop/js/main.js' %}"></script>

@@ -1,0 +1,17 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{post.title}}{% endblock %}
+
+{% block content %}
+{% include 'shop/includes/header.html' %}   
+<div class="all_content_wrapper">
+ 
+<div class="blog_page_wrapper">
+{% include 'blog/partials/post_detail.html' %}  
+{% include 'blog/partials/post_list.html' %} 
+    
+</div>
+
+</div>
+
+{% endblock %}

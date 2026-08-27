@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 import uuid
 from django.contrib import messages
+import bleach
+from bleach.css_sanitizer import CSSSanitizer
 
 
 from django.http import HttpResponse
@@ -25,14 +27,7 @@ def superuser_required(view_func):
     decorated = login_required(user_passes_test(lambda u: u.is_superuser)(view_func))
     return decorated
 
-
-def post_list(request):
-    posts = Post.objects.filter(is_published=True).order_by('-published_at')
-    return render(request, 'blog/post_list.html', {'posts': posts})
-
-
-
-def post_detail(request, slug):
+def blog_page(request,slug):
     blocks_prefetch = Prefetch(
         "blocks",
         queryset=PostBlock.objects.prefetch_related("images").order_by("order"),
@@ -42,7 +37,16 @@ def post_detail(request, slug):
         slug=slug,
         is_published=True,
     )
-    return render(request, 'blog/post_detail.html', {'post': post})
+    posts = Post.objects.filter(is_published=True).prefetch_related(blocks_prefetch).order_by('-published_at').exclude(id=post.id)
+    context= {
+        'posts':posts,
+        "post":post
+    }
+    return render(request, 'blog/blog.html', context=context)
+
+    
+
+
 
 
 @superuser_required
@@ -99,14 +103,37 @@ def block_add(request, post_id):
     return render(request, 'blog/partials/block_row.html', {'block': block})
 
 
+ALLOWED_TAGS = ['strong', 'b', 'br', 'span', 'p', 'font']
+ALLOWED_ATTRS = {'span': ['style'], 'font': ['color']}
+ALLOWED_STYLES = ['color']
+
+css_sanitizer = CSSSanitizer(allowed_css_properties=ALLOWED_STYLES)
+
+
+
+
+def clean_rich_text(html):
+    return bleach.clean(
+        html,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRS,
+        css_sanitizer=css_sanitizer,
+        strip=True,
+)
+
+
 def block_update(request, pk):
     block = get_object_or_404(PostBlock, pk=pk)
     if request.method == 'POST':
         block.block_type = request.POST.get('block_type', block.block_type)
-        block.text = request.POST.get('text', '')
+
+        raw_text = request.POST.get('text', '')
+        block.text = clean_rich_text(raw_text) if raw_text else ''
+
         block.video_url = request.POST.get('video_url', '')
         block.save()
     return render(request, 'blog/partials/block_row.html', {'block': block})
+    
 
 
 def block_delete(request, pk):
@@ -179,3 +206,10 @@ def upload_single_image(request, pk):
     block.single_image = request.FILES['file']
     block.save()
     return render(request, 'blog/partials/single_image_preview.html', {'block': block})
+
+def check_slider(request):
+    block = PostBlock.objects.filter(block_type='gallery').exclude(images=None).first()
+    context= {
+            'block': block
+        }
+    return render(request, 'blog/check_slider.html', context=context)
