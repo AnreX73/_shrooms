@@ -1,0 +1,16 @@
+{% extends 'blog/base.html' %}
+
+{% block title %} Редактирование постов {% endblock %}
+
+{% block content %}
+<div class="all_content_wrapper">
+    <div class="blog_page_wrapper">
+        <h1>Выберете пост для редактирования</h1>
+        <ul>
+            {% for post in posts %}
+                <li class="post_edit_link"><a href="{% url 'blog:post_edit' post.pk %}">{{ post.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

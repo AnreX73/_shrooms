@@ -2,8 +2,32 @@ from django.contrib import admin
 
 from .models import Post, PostBlock, PostImage
 
+from unfold.admin import ModelAdmin
+
+# admin.site.register(PostBlock)
+# admin.site.register(PostImage)
+
+@admin.register(Post)
+class PostAdmin(ModelAdmin):
+    list_display = ('title', 'created_at')
+    list_filter = ('created_at', )
+    search_fields = ('title', 'excerpt')
+    ordering = ('-created_at',)
+    prepopulated_fields = {'slug': ('title',)}
+
+class PostImageInline(admin.TabularInline):
+    model = PostImage
+    extra = 1
 
 
-admin.site.register(Post)
-admin.site.register(PostBlock)
-admin.site.register(PostImage)
+@admin.register(PostBlock)
+class PostBlockAdmin(admin.ModelAdmin):
+    list_display = ('post', 'block_type',)
+    list_filter = ('block_type', 'post')
+    search_fields = ('block_type', )
+    ordering = ('post', 'order')
+    inlines = [PostImageInline]
+
+
+
+    

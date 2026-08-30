@@ -83,7 +83,7 @@ def post_edit(request, pk):
 
             if post.is_published:
                 messages.success(request, 'Пост опубликован')
-                return redirect('blog:post_detail', slug=post.slug)
+                return redirect('blog:blog_page', slug=post.slug)
             else:
                 messages.info(request, 'Черновик сохранён')
                 return redirect('dashboard:post_list')
@@ -207,9 +207,8 @@ def upload_single_image(request, pk):
     block.save()
     return render(request, 'blog/partials/single_image_preview.html', {'block': block})
 
-def check_slider(request):
-    block = PostBlock.objects.filter(block_type='gallery').exclude(images=None).first()
-    context= {
-            'block': block
-        }
-    return render(request, 'blog/check_slider.html', context=context)
+
+@superuser_required
+def post_choice(request):
+    posts = Post.objects.all()
+    return render(request, 'blog/post_choice.html', {'posts': posts})
