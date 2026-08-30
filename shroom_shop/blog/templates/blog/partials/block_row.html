@@ -1,4 +1,4 @@
-<div class="all_content_wrapper"> 
+
 <div class="block-row" id="block-{{ block.pk }}"
      x-data="{ type: '{{ block.block_type }}' }"
      data-block-id="{{ block.pk }}">
@@ -94,5 +94,4 @@
             hx-target="#block-{{ block.pk }}"
             hx-swap="outerHTML"
             hx-confirm="Удалить блок?">Удалить</button>
-</div>
 </div>

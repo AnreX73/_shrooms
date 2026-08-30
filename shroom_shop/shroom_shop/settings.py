@@ -32,8 +32,7 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
-    "unfold",
-    "unfold.contrib.forms",
+   
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -175,26 +174,6 @@ CSRF_TRUSTED_ORIGINS = config(
 )
 
 
-UNFOLD = {
-    "SITE_TITLE": "Управление студия НР",
-    "SITE_HEADER": "Панель управления",
-    "COLORS": {
-        "primary": {
-            "50": "#f8f3ef",  # самый светлый
-            "100": "#d4b8a5",
-            "200": "#e1c4b2",
-            "300": "#cd9f87",
-            "400": "#b4785f",
-            "500": "#8a5944",  # ← ваш #8a5944
-            "600": "#6b4535",
-            "700": "#52352a",
-            "800": "#3d2a1f",
-            "900": "#2a1f15",
-            "950": "#C43F44",  # самый тёмный
-        },
-    },
-}
-
 
 PASSWORD_HASHERS = [
     "users.hashers.FastPBKDF2PasswordHasher",
@@ -211,7 +190,7 @@ Q_CLUSTER = {
     "queue_limit": 50,
     "bulk": 10,
     "orm": "default",  # используем БД как брокер — Redis не нужен!
-    "save_limit": 10000,  # <-- Спасательный круг от переполнения
+    "save_limit": 1000,  # <-- Спасательный круг от переполнения
 }
 
 RU_EMAIL_PATTERN = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.ru$"

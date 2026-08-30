@@ -3,7 +3,24 @@ import tempfile
 import os
 import json
 from django.core.files import File
-from .models import PostBlock
+from .models import PostBlock, Post
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def delete_draft_posts():
+    """
+    Удаляет все посты, у которых title равен 'черновик'.
+    """
+    # Фильтруем и удаляем. Метод delete() возвращает кортеж (количество удаленных, словарь по моделям)
+    deleted_count, _ = Post.objects.filter(title__iexact="Черновик").delete()
+    
+    # Логируем результат, чтобы было видно в консоли воркера
+    if deleted_count > 0:
+        logger.info(f"Удалено постов-черновиков: {deleted_count}")
+        
+    return f"Deleted {deleted_count} posts"
 
 
 
@@ -56,3 +73,5 @@ def process_short_video(block_id):
         except subprocess.CalledProcessError:
             block.video_status = 'failed'
             block.save(update_fields=['video_status'])
+
+

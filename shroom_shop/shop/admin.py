@@ -23,7 +23,7 @@ from .models import (
 
 
 @admin.register(SiteAssets)
-class SiteAssetsAdmin(ModelAdmin):
+class SiteAssetsAdmin(admin.ModelAdmin):
     list_display = ("name", "is_active", "note", "getHtmlPhoto")
     search_fields = ("name",)
     list_filter = ("is_active",)
@@ -37,12 +37,8 @@ class SiteAssetsAdmin(ModelAdmin):
 
 
 @admin.register(Category)
-class CategoryAdmin(ModelAdmin):
-    formfield_overrides = {
-        models.TextField: {
-            "widget": WysiwygWidget,
-        }
-    }
+class CategoryAdmin(admin.ModelAdmin):
+    
     list_display = ("name", "slug", "getHtmlPhoto", "is_active")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -57,7 +53,7 @@ class CategoryAdmin(ModelAdmin):
 
 
 @admin.register(MushroomType)
-class MushroomTypeAdmin(ModelAdmin):
+class MushroomTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -78,12 +74,8 @@ class ProductImageInline(admin.TabularInline):
 
 
 @admin.register(Product)
-class ProductAdmin(ModelAdmin):
-    formfield_overrides = {
-        models.TextField: {
-            "widget": WysiwygWidget,
-        }
-    }
+class ProductAdmin(admin.ModelAdmin):
+    
     exclude = ("group_slug",)
     inlines = [ProductImageInline]
     list_display = (
@@ -116,7 +108,7 @@ class ProductAdmin(ModelAdmin):
 
 
 @admin.register(Contact)
-class ContactAdmin(ModelAdmin):
+class ContactAdmin(admin.ModelAdmin):
     list_display = ("label", "value", "contact_type", "is_active")
     list_filter = ("contact_type", "is_active")
     search_fields = ("label", "value")
@@ -125,12 +117,8 @@ class ContactAdmin(ModelAdmin):
 
 
 @admin.register(Info)
-class InfoAdmin(ModelAdmin):
-    formfield_overrides = {
-        models.TextField: {
-            "widget": WysiwygWidget,
-        }
-    }
+class InfoAdmin(admin.ModelAdmin):
+    
     list_display = ("name", "title", "slug", "is_active")
     list_filter = ("is_active",)
     search_fields = ("name", "title", "slug")
@@ -140,27 +128,27 @@ class InfoAdmin(ModelAdmin):
 
 
 @admin.register(Cart)
-class CartAdmin(ModelAdmin):
+class CartAdmin(admin.ModelAdmin):
     list_display = ("user", "total_price", "total_items")
     search_fields = ("user",)
     save_on_top = True
 
 @admin.register(CartItem)
-class CartItemAdmin(ModelAdmin):
+class CartItemAdmin(admin.ModelAdmin):
     list_display = ("cart", "product", "quantity")
     search_fields = ("cart", "product")
     save_on_top = True
 
 
 @admin.register(Favorite)
-class FavoriteAdmin(ModelAdmin):
+class FavoriteAdmin(admin.ModelAdmin):
     list_display = ("user", "product")
     search_fields = ("user", "product")
     save_on_top = True
 
 
 @admin.register(Order)
-class OrderAdmin(ModelAdmin):
+class OrderAdmin(admin.ModelAdmin):
     list_display = ("user", "order_number", "status", "payment_status")
     list_editable = ("status", "payment_status")
     search_fields = ("user",)
@@ -168,7 +156,7 @@ class OrderAdmin(ModelAdmin):
 
 
 @admin.register(OrderItem)
-class OrderItemAdmin(ModelAdmin):
+class OrderItemAdmin(admin.ModelAdmin):
     list_display = ("order", "product_name", "quantity", "product_price")
     search_fields = ("order", "product_name")
     save_on_top = True
@@ -189,7 +177,7 @@ class ReviewMediaInline(admin.TabularInline):
 
 
 @admin.register(Review)
-class ReviewAdmin(ModelAdmin):
+class ReviewAdmin(admin.ModelAdmin):
     inlines = [ReviewMediaInline]
     list_display = (
         "product",

@@ -2,13 +2,12 @@ from django.contrib import admin
 
 from .models import Post, PostBlock, PostImage
 
-from unfold.admin import ModelAdmin
 
-# admin.site.register(PostBlock)
-# admin.site.register(PostImage)
+
+
 
 @admin.register(Post)
-class PostAdmin(ModelAdmin):
+class PostAdmin(admin.ModelAdmin):
     list_display = ('title', 'created_at')
     list_filter = ('created_at', )
     search_fields = ('title', 'excerpt')
