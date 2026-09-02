@@ -1,6 +1,13 @@
 
 <div class="blog_detail_wrapper">
-<h3 style="margin: 1rem auto; text-align:center;">{{ post.title }}</h3>
+<h3 style="margin: 1rem auto; text-align:center;">{{ post.title }}
+     {% if user.is_superuser %}
+       
+          <span style="margin-left: 1rem; font-size: 0.9rem; color: #666;"><a href="{% url 'blog:post_edit' post.id %}"> / Редактировать пост</a></span>
+        
+{% endif %}
+</h3>
+
 {% for block in post.blocks.all %}
 
     {% if block.block_type == 'text' %}

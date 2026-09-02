@@ -1,16 +1,26 @@
 {% extends 'blog/base.html' %}
+{% load static %}
 
 {% block title %} Редактирование постов {% endblock %}
 
 {% block content %}
 <div class="all_content_wrapper">
-    <div class="blog_page_wrapper">
+    <input type="button" class="users-btn" value="в админпанель" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">
+    <div class="post_choice_container">
         <h1>Выберете пост для редактирования</h1>
-        <ul>
+        <div class="post_choice_wrapper"> 
+            
             {% for post in posts %}
-                <li class="post_edit_link"><a href="{% url 'blog:post_edit' post.pk %}">{{ post.title }}</a></li>
+                <a href="{% url 'blog:post_edit' post.pk %}" class="post_choice_block">
+                    <h4>{{ post.title }}</h4>
+                    {% if post.cover_image %}
+                        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+                    {% else %}
+                        <img src="{{ site_logo.image.url }}" alt="Default cover">
+                    {% endif %}
+                </a>
             {% endfor %}
-        </ul>
+        </div>
     </div>
 </div>
 {% endblock %}

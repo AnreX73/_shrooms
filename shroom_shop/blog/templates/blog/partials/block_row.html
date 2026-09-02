@@ -28,7 +28,7 @@
         <input type="color" x-on:mousedown.stop x-on:input="color($event.target.value)">
     </div>
 
-    <div class="rt-editable"
+    <div class="rt-editable" style='border: 1px solid grey'
          contenteditable="true"
          x-ref="editable">{{ block.text|safe }}</div>
 

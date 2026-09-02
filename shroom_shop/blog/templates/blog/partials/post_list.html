@@ -7,7 +7,7 @@
                 <h4 style="margin-bottom: 0.5rem;">{{ post.title }}</h4>
                 {% for block in post.blocks.all %}
                 {% if block.block_type == 'text' %}
-                    <p class="post_detail_text">{{ block.text|safe|linebreaks|truncatechars:170}}</p>
+                    <p class="post_detail_text">{{ block.text|safe|linebreaks|truncatechars:250}}</p>
                     {% elif block.single_image %}
                     <figure class="post_list_image">
                         <img src="{{ block.single_image.url }}" alt="{{ block.image_alt }}">
