@@ -137,18 +137,14 @@ class PostBlock(models.Model):
             )
 
     def get_embed_html(self):
-        """
-        HTML для вставки видео в video_embed блоке.
-        Приоритет: embed_code -> автопарсинг YouTube -> автопарсинг VK -> просто ссылка.
-        """
-        if self.block_type != "video_embed":
-            return ""
+        if self.block_type != 'video_embed':
+            return ''
 
         if self.embed_code:
-            return mark_safe(self.embed_code)
+            return mark_safe(f'<div class="video-embed">{self.embed_code}</div>')
 
         if not self.video_url:
-            return ""
+            return ''
 
         match = self.YOUTUBE_RE.search(self.video_url)
         if match:
@@ -156,9 +152,10 @@ class PostBlock(models.Model):
             return mark_safe(
                 f'<div class="video-embed video-embed--youtube">'
                 f'<iframe src="https://www.youtube.com/embed/{video_id}" '
-                f'title="YouTube video" frameborder="0" allowfullscreen '
+                f'title="YouTube video" allowfullscreen '
+                f'referrerpolicy="strict-origin-when-cross-origin" '
                 f'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>'
-                f"</div>"
+                f'</div>'
             )
 
         match = self.VK_RE.search(self.video_url)
@@ -167,8 +164,9 @@ class PostBlock(models.Model):
             return mark_safe(
                 f'<div class="video-embed video-embed--vk">'
                 f'<iframe src="https://vk.com/video_ext.php?oid={oid}&id={vid}" '
-                f'frameborder="0" allowfullscreen></iframe>'
-                f"</div>"
+                f'allowfullscreen '
+                f'referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+                f'</div>'
             )
 
         safe_url = escape(self.video_url)
