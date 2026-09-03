@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('blog', '0003_post_unique_post_on_main_page'),
+        ("blog", "0003_post_unique_post_on_main_page"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='postblock',
-            name='video_status',
-            field=models.CharField(blank=True, choices=[('empty', 'Видео не загружено'), ('pending', 'В очереди'), ('processing', 'Обрабатывается'), ('ready', 'Готово'), ('failed', 'Ошибка')], default='empty', max_length=20),
+            model_name="postblock",
+            name="video_status",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("empty", "Видео не загружено"),
+                    ("pending", "В очереди"),
+                    ("processing", "Обрабатывается"),
+                    ("ready", "Готово"),
+                    ("failed", "Ошибка"),
+                ],
+                default="empty",
+                max_length=20,
+            ),
         ),
     ]

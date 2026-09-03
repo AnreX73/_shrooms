@@ -8,14 +8,16 @@ class ProductFilterForm(forms.Form):
         label="Категория",
         required=False,
         empty_label="Все категории",
-        widget=forms.Select(attrs={
-            "hx-get": "",  # заполним в шаблоне через url-тег, см. ниже
-            "hx-trigger": "change",
-            "hx-target": "#catalog-results",
-            "hx-swap": "innerHTML",
-            "hx-push-url": "true",
-            "hx-include": "#filter-form",
-        }),
+        widget=forms.Select(
+            attrs={
+                "hx-get": "",  # заполним в шаблоне через url-тег, см. ниже
+                "hx-trigger": "change",
+                "hx-target": "#catalog-results",
+                "hx-swap": "innerHTML",
+                "hx-push-url": "true",
+                "hx-include": "#filter-form",
+            }
+        ),
     )
     mushroom_types = forms.ModelMultipleChoiceField(
         label="Виды грибов",
@@ -33,7 +35,6 @@ class ProductFilterForm(forms.Form):
         min_value=0,
         widget=forms.NumberInput(attrs={"type": "range"}),
     )
-
 
 
 class OrderForm(forms.Form):
@@ -96,10 +97,18 @@ class OrderForm(forms.Form):
             if value:
                 self.fields[field_name].initial = value
 
-        required_fields = {"first_name", "last_name", "customer_email", "customer_phone", "delivery_city", "delivery_address", "delivery_postal_code"}
+        required_fields = {
+            "first_name",
+            "last_name",
+            "customer_email",
+            "customer_phone",
+            "delivery_city",
+            "delivery_address",
+            "delivery_postal_code",
+        }
         for name, field in self.fields.items():
-                    if name not in required_fields:
-                        field.required = False
+            if name not in required_fields:
+                field.required = False
 
 
 class ReviewForm(forms.Form):
@@ -143,4 +152,3 @@ class ReviewForm(forms.Form):
             attrs={"rows": 4, "placeholder": "Поделитесь впечатлениями..."}
         ),
     )
-    

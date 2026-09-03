@@ -5,26 +5,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shop', '0008_product_is_set'),
+        ("shop", "0008_product_is_set"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='info',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='Дата создания'),
+            model_name="info",
+            name="created_at",
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now,
+                verbose_name="Дата создания",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='info',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, verbose_name='Дата обновления'),
+            model_name="info",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='release_form',
-            field=models.CharField(blank=True, choices=[('glass_jar', 'Стеклянная банка'), ('tin_can', 'Жестяная банка'), ('bag', 'Дой-пак'), ('box', 'Коробка'), ('vacuum', 'Вакуумная упаковка'), ('other', 'Другое')], default='', max_length=20, verbose_name='Форма выпуска'),
+            model_name="product",
+            name="release_form",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("glass_jar", "Стеклянная банка"),
+                    ("tin_can", "Жестяная банка"),
+                    ("bag", "Дой-пак"),
+                    ("box", "Коробка"),
+                    ("vacuum", "Вакуумная упаковка"),
+                    ("other", "Другое"),
+                ],
+                default="",
+                max_length=20,
+                verbose_name="Форма выпуска",
+            ),
         ),
     ]

@@ -13,11 +13,6 @@ import re
 User = get_user_model()
 
 
-import re
-from django.core.exceptions import ValidationError
-
-
-
 def validate_russian_email(value):
     if not value or "@" not in value:
         raise ValidationError("Некорректный адрес электронной почты.")

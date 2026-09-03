@@ -21,7 +21,7 @@ ALWAYS_EXCLUDE = {
     "price",
     "discount_percentage",
     "rating",
-    "reviews_count"
+    "reviews_count",
 }
 
 
@@ -43,7 +43,7 @@ def get_visible_fields(obj, exclude_fields=None):
             and not field.is_relation
         ):
             raw_value = getattr(obj, field.name)
-            
+
             # 🔑 НОВОЕ: получаем человекочитаемое значение для полей с choices
             display_value = raw_value
             if field.choices:

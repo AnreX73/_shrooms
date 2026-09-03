@@ -699,7 +699,6 @@ def close_session(request, session_id):
     return JsonResponse({"status": "ok"})
 
 
-
 @staff_member_required
 def stock_sync(request):
     return render(request, "dashboard/stock_sync.html")
@@ -1015,5 +1014,3 @@ def price_export(request):
     )
     response["Content-Disposition"] = 'attachment; filename="price_export.xlsx"'
     return response
-
-

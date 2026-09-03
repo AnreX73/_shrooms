@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('blog', '0001_initial'),
+        ("blog", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='post',
-            name='published_on_main_page',
-            field=models.BooleanField(default=False, verbose_name='На главной странице'),
+            model_name="post",
+            name="published_on_main_page",
+            field=models.BooleanField(
+                default=False, verbose_name="На главной странице"
+            ),
         ),
     ]

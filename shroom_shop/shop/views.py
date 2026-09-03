@@ -1,4 +1,4 @@
-from django.http import HttpResponse, request
+from django.http import HttpResponse
 from django.shortcuts import render
 import os
 
@@ -8,27 +8,43 @@ from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.db.models import ExpressionWrapper, F, IntegerField, Max, Min, Prefetch, Q
-from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.template import context
+from django.http import HttpResponseForbidden, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django_q.tasks import async_task
-from django.core.paginator import Paginator
 from django.db.models import (
-    Case, When, Value, IntegerField, Count, Subquery, OuterRef,
-    ExpressionWrapper, F, Min, Max, Q, Prefetch,
+    Case,
+    When,
+    Value,
+    Count,
+    Subquery,
+    OuterRef,
 )
-from django.shortcuts import render
-from django.template.defaultfilters import pluralize
 
 from django.db.models.functions import Cast
 from django.db.models import FloatField
 
 
 from .forms import ProductFilterForm, OrderForm, ReviewForm
-from .models import Product, ProductImage, Category, MushroomType, Info, SiteAssets, Favorite, Cart, CartItem, Order, OrderItem, Review, Contact, ReviewMedia
-from blog.models import Post, PostBlock, PostImage
+from .models import (
+    Product,
+    ProductImage,
+    Category,
+    MushroomType,
+    Info,
+    SiteAssets,
+    Favorite,
+    Cart,
+    CartItem,
+    Order,
+    OrderItem,
+    Review,
+    Contact,
+    ReviewMedia,
+)
+from blog.models import Post, PostBlock
+
 
 def ru_plural(n, forms):
     """forms = ('товар', 'товара', 'товаров')"""
@@ -44,7 +60,6 @@ def ru_plural(n, forms):
 
 
 def get_hit_ids():
-    from django.core.cache import cache
 
     hit_ids = cache.get("hit_product_ids")
     if hit_ids is None:
@@ -56,20 +71,25 @@ def get_hit_ids():
 
 
 def index(request):
-    first_text_subquery = PostBlock.objects.filter(
-        post=OuterRef("pk"),
-        block_type="text",
-    ).order_by("order").values("text")[:1]
+    first_text_subquery = (
+        PostBlock.objects.filter(
+            post=OuterRef("pk"),
+            block_type="text",
+        )
+        .order_by("order")
+        .values("text")[:1]
+    )
 
     start_banner = Info.objects.filter(name="Стартовый баннер", is_active=True).first()
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
     shrooms_types = MushroomType.objects.all()
     categories = Category.objects.filter(is_active=True).order_by("created_at")
-    info_objects = Info.objects.all().exclude(name="Стартовый баннер").order_by("created_at")
+    info_objects = (
+        Info.objects.all().exclude(name="Стартовый баннер").order_by("created_at")
+    )
     contacts = Contact.objects.all()
     main_blog_post = (
-        Post.objects
-        .filter(published_on_main_page=True)
+        Post.objects.filter(published_on_main_page=True)
         .annotate(first_block_text=Subquery(first_text_subquery))
         .only("title", "slug", "cover_image")
         .first()
@@ -86,7 +106,6 @@ def index(request):
     }
 
     return render(request, "shop/index.html", context)
-
 
 
 def _build_remove_url(get_params, key, value=None):
@@ -148,7 +167,9 @@ def catalog(request):
     # --- Границы цены считаем ДО фильтра по price_max, но ПОСЛЕ category/mushroom_types ---
     price_scope = products
     if selected_types:
-        price_scope = price_scope.filter(mushroom_types__in=[t.pk for t in selected_types]).distinct()
+        price_scope = price_scope.filter(
+            mushroom_types__in=[t.pk for t in selected_types]
+        ).distinct()
 
     price_agg = price_scope.aggregate(
         min_price=Min("computed_final_price"),
@@ -159,12 +180,16 @@ def catalog(request):
 
     # --- Фильтр: не дороже выбранного значения слайдера ---
     if form.is_valid():
-        if (pmax := form.cleaned_data.get("price_max")) is not None and pmax < max_price:
+        if (
+            pmax := form.cleaned_data.get("price_max")
+        ) is not None and pmax < max_price:
             products = products.filter(computed_final_price__lte=pmax)
 
     # --- Границы веса считаем ДО фильтра по weight_max, но ПОСЛЕ category/mushroom_types ---
-    weight_scope = products  # это тот же queryset, что уже прошёл category+mushroom_types,
-                            # но ДО price_max — если хочешь, чтобы вес не зависел от цены
+    weight_scope = (
+        products  # это тот же queryset, что уже прошёл category+mushroom_types,
+    )
+    # но ДО price_max — если хочешь, чтобы вес не зависел от цены
 
     weight_agg = weight_scope.aggregate(
         min_weight=Min("net_weight"),
@@ -175,7 +200,9 @@ def catalog(request):
 
     # --- Фильтр: вес не больше выбранного значения ---
     if form.is_valid():
-        if (wmax := form.cleaned_data.get("weight_max")) is not None and wmax < max_weight:
+        if (
+            wmax := form.cleaned_data.get("weight_max")
+        ) is not None and wmax < max_weight:
             products = products.filter(net_weight__lte=wmax)
 
     # --- Фильтр + приоритет по видам грибов ---
@@ -193,7 +220,13 @@ def catalog(request):
         # Сколько из ВЫБРАННЫХ типов есть у продукта
         matched_sq = (
             Product.objects.filter(pk=OuterRef("pk"))
-            .annotate(c=Count("mushroom_types", filter=Q(mushroom_types__in=type_ids), distinct=True))
+            .annotate(
+                c=Count(
+                    "mushroom_types",
+                    filter=Q(mushroom_types__in=type_ids),
+                    distinct=True,
+                )
+            )
             .values("c")[:1]
         )
 
@@ -236,10 +269,12 @@ def catalog(request):
         products = products.order_by("-popularity", "article")
 
     products = products.prefetch_related(images_prefetch)
-    
+
     # --- Пагинация ---
     filter_keys = {"category", "mushroom_types", "price_max", "weight_max"}
-    is_filter_change = any(k in request.GET for k in filter_keys) and "page" not in request.GET
+    is_filter_change = (
+        any(k in request.GET for k in filter_keys) and "page" not in request.GET
+    )
 
     if is_filter_change:
         page_number = 1
@@ -283,25 +318,35 @@ def catalog(request):
     active_filters = []
     if form.is_valid():
         if selected_category:
-            active_filters.append({
-                "label": selected_category.name,
-                "remove_url": _build_remove_url(request.GET, "category"),
-            })
+            active_filters.append(
+                {
+                    "label": selected_category.name,
+                    "remove_url": _build_remove_url(request.GET, "category"),
+                }
+            )
         for mt in selected_types:
-            active_filters.append({
-                "label": mt.name,
-                "remove_url": _build_remove_url(request.GET, "mushroom_types", str(mt.pk)),
-            })
+            active_filters.append(
+                {
+                    "label": mt.name,
+                    "remove_url": _build_remove_url(
+                        request.GET, "mushroom_types", str(mt.pk)
+                    ),
+                }
+            )
         if current_price_max < max_price:
-            active_filters.append({
-                "label": f"до {current_price_max} ₽",
-                "remove_url": _build_remove_url(request.GET, "price_max"),
-            })
+            active_filters.append(
+                {
+                    "label": f"до {current_price_max} ₽",
+                    "remove_url": _build_remove_url(request.GET, "price_max"),
+                }
+            )
         if current_weight_max < max_weight:
-                active_filters.append({
+            active_filters.append(
+                {
                     "label": f"вес до {current_weight_max} г",
                     "remove_url": _build_remove_url(request.GET, "weight_max"),
-                })
+                }
+            )
 
     context = {
         "form": form,
@@ -318,10 +363,10 @@ def catalog(request):
         "min_weight": min_weight,
         "max_weight": max_weight,
         "total_matching": total_matching,
-
     }
-    context["total_matching_word"] = ru_plural(total_matching, ("товар", "товара", "товаров"))
-    
+    context["total_matching_word"] = ru_plural(
+        total_matching, ("товар", "товара", "товаров")
+    )
 
     if is_htmx:
         return render(request, "shop/includes/catalog_results.html", context)
@@ -443,14 +488,12 @@ def remove_from_cart(request, item_id):
     return HttpResponse(oob_counter + partial)
 
 
-
 def product_page(request, slug):
     product = get_object_or_404(
         Product.objects.select_related("category").prefetch_related("mushroom_types"),
         slug=slug,
     )
     product_id = product.id
-    
 
     product_gallery = ProductImage.objects.filter(product=product).order_by(
         "-created_at"
@@ -471,13 +514,11 @@ def product_page(request, slug):
             stock_filter,
             category=product.category,
             mushroom_types__in=product.mushroom_types.all(),
-            
         )
         .exclude(id=product_id)
         .select_related("category")
         .prefetch_related(images_prefetch)
     )
-    
 
     return render(
         request,
@@ -551,7 +592,7 @@ def order_create(request):
             _update_profile_from_order(user, data)
 
             # return redirect("payments:create_payment", order_id=order.id)
-            return redirect('shop:order_success', order_id=order.id)
+            return redirect("shop:order_success", order_id=order.id)
 
     else:
         form = OrderForm(user)
@@ -605,7 +646,11 @@ def order_success(request, order_id):
 
 def info_page(request):
     # Получаем все активные записи
-    info_items = Info.objects.filter(is_active=True).exclude(name="Стартовый баннер").order_by("created_at")
+    info_items = (
+        Info.objects.filter(is_active=True)
+        .exclude(name="Стартовый баннер")
+        .order_by("created_at")
+    )
 
     # Получаем активную вкладку из GET-параметра
     active_tab = request.GET.get("tab", None)
@@ -807,7 +852,6 @@ def add_admin_reply(request, review_id):
         )
 
     return JsonResponse({"error": "Метод не разрешён"}, status=405)
-
 
 
 # ===== ЗАГЛУШКА ОПЛАТЫ — УДАЛИТЬ ПОСЛЕ ПОДКЛЮЧЕНИЯ ЭКВАЙРИНГА =====

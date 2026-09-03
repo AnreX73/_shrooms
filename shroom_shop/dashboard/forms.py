@@ -1,6 +1,6 @@
 from django import forms
 
-from shop.models import  Product
+from shop.models import Product
 
 
 # class OrderStatusForm(forms.ModelForm):
@@ -92,4 +92,3 @@ class ProductForm(forms.ModelForm):
                 "Товар с несколькими видами грибов должен быть отмечен как «Ассорти/набор»",
             )
         return cleaned_data
-

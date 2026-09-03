@@ -1,8 +1,5 @@
 from django.contrib import admin
-from django.db import models
 from django.utils.safestring import mark_safe
-from unfold.admin import ModelAdmin
-from unfold.contrib.forms.widgets import WysiwygWidget
 
 from .models import (
     Cart,
@@ -38,7 +35,6 @@ class SiteAssetsAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    
     list_display = ("name", "slug", "getHtmlPhoto", "is_active")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -75,7 +71,6 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    
     exclude = ("group_slug",)
     inlines = [ProductImageInline]
     list_display = (
@@ -118,7 +113,6 @@ class ContactAdmin(admin.ModelAdmin):
 
 @admin.register(Info)
 class InfoAdmin(admin.ModelAdmin):
-    
     list_display = ("name", "title", "slug", "is_active")
     list_filter = ("is_active",)
     search_fields = ("name", "title", "slug")
@@ -132,6 +126,7 @@ class CartAdmin(admin.ModelAdmin):
     list_display = ("user", "total_price", "total_items")
     search_fields = ("user",)
     save_on_top = True
+
 
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):

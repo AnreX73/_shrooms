@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shop', '0006_mushroomtype_description_mushroomtype_image'),
+        ("shop", "0006_mushroomtype_description_mushroomtype_image"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='total_weight',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True, verbose_name='Общий вес (кг)'),
+            model_name="product",
+            name="total_weight",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                max_digits=5,
+                null=True,
+                verbose_name="Общий вес (кг)",
+            ),
         ),
     ]

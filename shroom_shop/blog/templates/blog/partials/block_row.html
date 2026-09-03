@@ -18,6 +18,8 @@
     </select>
 
     <div class="rt-wrapper" style="position: relative;"
+     x-show="type === 'text' || type === 'quote'"
+     x-cloak
      x-data="richTextField('{{ block.pk }}')"
      x-init="init()"
      x-on:focusout="handleFocusOut($event)">
@@ -72,15 +74,36 @@
     </div>
 </div>
 
-    <div x-show="type === 'video_embed'">
-        <input type="url" name="video_url" placeholder="Ссылка на YouTube/VK"
-               value="{{ block.video_url }}"
-               hx-post="{% url 'blog:block_update' block.pk %}"
-               hx-trigger="blur"
-               hx-target="#block-{{ block.pk }}"
-               hx-swap="outerHTML"
-               hx-include="closest .block-row">
-    </div>
+<div x-show="type === 'video_embed'" class="space-y-2">
+    <input type="url" name="video_url" placeholder="Ссылка на YouTube/VK"
+           value="{{ block.video_url }}"
+           hx-post="{% url 'blog:block_update' block.pk %}"
+           hx-trigger="blur"
+           hx-target="#block-{{ block.pk }}"
+           hx-swap="outerHTML"
+           hx-include="closest .block-row">
+
+    <textarea name="embed_code"
+              placeholder="Или вставьте embed-код (iframe) для площадок, которых нет в списке"
+              rows="3"
+              hx-post="{% url 'blog:block_update' block.pk %}"
+              hx-trigger="blur"
+              hx-target="#block-{{ block.pk }}"
+              hx-swap="outerHTML"
+              hx-include="closest .block-row">{{ block.embed_code }}</textarea>
+
+    {% if block.embed_code %}
+        <p class="text-xs text-amber-600">
+            ⚠️ Используется ручной embed-код, поле «Ссылка» игнорируется
+        </p>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="text-xs text-red-600">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+</div>
 
     <div x-show="type === 'short_video'">
         <div id="video-status-{{ block.pk }}">

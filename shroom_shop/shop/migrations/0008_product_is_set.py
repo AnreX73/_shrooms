@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shop', '0007_product_total_weight'),
+        ("shop", "0007_product_total_weight"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='is_set',
-            field=models.BooleanField(default=False, help_text='Отметьте, если товар — набор из нескольких видов грибов', verbose_name='Ассорти/набор'),
+            model_name="product",
+            name="is_set",
+            field=models.BooleanField(
+                default=False,
+                help_text="Отметьте, если товар — набор из нескольких видов грибов",
+                verbose_name="Ассорти/набор",
+            ),
         ),
     ]

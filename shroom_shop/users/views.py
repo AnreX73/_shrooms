@@ -89,8 +89,6 @@ class LoginUser(LoginView):
             return reverse("dashboard:admin_area")
         return reverse("shop:index")
 
-        
-
 
 @login_required(login_url="/register/")
 def profile(request):

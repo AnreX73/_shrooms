@@ -32,7 +32,6 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
-   
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,7 +44,7 @@ INSTALLED_APPS = [
     "dashboard.apps.DashboardConfig",
     "blog.apps.BlogConfig",
     "django_extensions",
-    'django_q',
+    "django_q",
     "debug_toolbar",
     "notifications.apps.NotificationsConfig",
     "django_cleanup.apps.CleanupConfig",
@@ -174,7 +173,6 @@ CSRF_TRUSTED_ORIGINS = config(
 )
 
 
-
 PASSWORD_HASHERS = [
     "users.hashers.FastPBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",  # для старых паролей
@@ -200,7 +198,7 @@ EXTRA_ALLOWED_DOMAINS = ["yandex.by", "yandex.kz", "yandex.com"]
 
 
 # Настройки cookie для CSRF и сессий
-CSRF_COOKIE_NAME = "csrftoken_shroomsshop" # убрать на деплое, хотя это не критично, т.к. CSRF токен генерируется заново при каждой сессии
+CSRF_COOKIE_NAME = "csrftoken_shroomsshop"  # убрать на деплое, хотя это не критично, т.к. CSRF токен генерируется заново при каждой сессии
 
 SESSION_COOKIE_NAME = "sessionid_shroomsshop"  # убрать на деплое, хотя это не критично, т.к. сессия генерируется заново при каждой авторизации
 

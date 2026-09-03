@@ -153,6 +153,7 @@ DEFAULT_IMAGE_CACHE_DIR = Path.home() / ".cache" / "wb_import_images"
 # Вспомогательные парсеры
 # ---------------------------------------------------------------------------
 
+
 def clean_str(value):
     """NaN/None -> '' ; иначе строка без лишних пробелов."""
     if value is None or (isinstance(value, float) and pd.isna(value)):
@@ -200,7 +201,9 @@ def map_choice(value, mapping, field_label, article):
         return ""
     if s in mapping:
         return mapping[s]
-    print(f"  [!] {article}: неизвестное значение '{value}' для {field_label}, ставлю 'other'")
+    print(
+        f"  [!] {article}: неизвестное значение '{value}' для {field_label}, ставлю 'other'"
+    )
     return "other"
 
 
@@ -208,14 +211,25 @@ def map_choice(value, mapping, field_label, article):
 # Команда
 # ---------------------------------------------------------------------------
 
+
 class Command(BaseCommand):
     help = "Импорт товаров (грибы) из Excel-выгрузок Wildberries (сушёные / консервированные)."
 
     def add_arguments(self, parser):
         parser.add_argument("--dried", type=str, help="Путь к xlsx с сушёными грибами")
-        parser.add_argument("--canned", type=str, help="Путь к xlsx с консервированными грибами")
-        parser.add_argument("--dry-run", action="store_true", help="Ничего не сохранять, только показать план")
-        parser.add_argument("--skip-images", action="store_true", help="Не скачивать картинки (быстрее для теста)")
+        parser.add_argument(
+            "--canned", type=str, help="Путь к xlsx с консервированными грибами"
+        )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Ничего не сохранять, только показать план",
+        )
+        parser.add_argument(
+            "--skip-images",
+            action="store_true",
+            help="Не скачивать картинки (быстрее для теста)",
+        )
         parser.add_argument(
             "--image-cache-dir",
             type=str,
@@ -263,9 +277,15 @@ class Command(BaseCommand):
                     f"Создайте её (Category.objects.create(name='{category_name}')) и запустите снова."
                 )
 
-            self.stdout.write(self.style.NOTICE(f"\n=== Импорт из {path} (категория: {category_name}) ==="))
+            self.stdout.write(
+                self.style.NOTICE(
+                    f"\n=== Импорт из {path} (категория: {category_name}) ==="
+                )
+            )
             df = pd.read_excel(path, sheet_name="Items")
-            df.columns = [str(c).strip() for c in df.columns]  # в файлах встречаются "packaging_length " с пробелом
+            df.columns = [
+                str(c).strip() for c in df.columns
+            ]  # в файлах встречаются "packaging_length " с пробелом
 
             for _, row in df.iterrows():
                 article = clean_str(row.get("article"))
@@ -273,7 +293,9 @@ class Command(BaseCommand):
                     continue  # пустая/служебная строка
 
                 try:
-                    created, error = self._import_row(row, category, kind, dry_run, skip_images)
+                    created, error = self._import_row(
+                        row, category, kind, dry_run, skip_images
+                    )
                     if error:
                         total_errors += 1
                     elif created:
@@ -282,17 +304,23 @@ class Command(BaseCommand):
                         total_updated += 1
                 except Exception as exc:  # noqa: BLE001 - хотим продолжить импорт остальных строк
                     total_errors += 1
-                    self.stderr.write(self.style.ERROR(f"  [X] {article}: ошибка импорта — {exc}"))
+                    self.stderr.write(
+                        self.style.ERROR(f"  [X] {article}: ошибка импорта — {exc}")
+                    )
 
-        self.stdout.write(self.style.SUCCESS(
-            f"\nГотово. Создано: {total_created}, обновлено: {total_updated}, ошибок: {total_errors}."
-            + (" (dry-run, ничего не сохранено)" if dry_run else "")
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\nГотово. Создано: {total_created}, обновлено: {total_updated}, ошибок: {total_errors}."
+                + (" (dry-run, ничего не сохранено)" if dry_run else "")
+            )
+        )
         if not dry_run:
-            self.stdout.write(self.style.WARNING(
-                "\nНапоминание: у импортированных товаров price=0 (в Excel цен не было) — "
-                "проставьте реальные цены перед публикацией."
-            ))
+            self.stdout.write(
+                self.style.WARNING(
+                    "\nНапоминание: у импортированных товаров price=0 (в Excel цен не было) — "
+                    "проставьте реальные цены перед публикацией."
+                )
+            )
 
     # -- построчный импорт ---------------------------------------------------
 
@@ -302,7 +330,9 @@ class Command(BaseCommand):
         description = clean_str(row.get("description") or row.get("Description"))
 
         # Разбираем виды грибов ДО построения defaults — is_set зависит от их количества
-        mushroom_names = self._resolve_mushroom_types(row.get("mushroom_types"), article, dry_run)
+        mushroom_names = self._resolve_mushroom_types(
+            row.get("mushroom_types"), article, dry_run
+        )
 
         defaults = {
             "name": name,
@@ -310,9 +340,14 @@ class Command(BaseCommand):
             "description": description,
             "country_of_origin": clean_str(row.get("country_of_origin")),
             "preservation_method": map_choice(
-                row.get("preservation_method"), PRESERVATION_METHOD_MAP, "preservation_method", article
+                row.get("preservation_method"),
+                PRESERVATION_METHOD_MAP,
+                "preservation_method",
+                article,
             ),
-            "release_form": map_choice(row.get("release_form"), RELEASE_FORM_MAP, "release_form", article),
+            "release_form": map_choice(
+                row.get("release_form"), RELEASE_FORM_MAP, "release_form", article
+            ),
             "package": clean_str(row.get("package")),
             "kit": clean_str(row.get("kit")),
             "ingredients": clean_str(row.get("ingredients")),
@@ -324,7 +359,9 @@ class Command(BaseCommand):
             "packaging_length": parse_decimal(row.get("packaging_length")),
             "packaging_width": parse_decimal(row.get("packaging_width")),
             "packaging_height": parse_decimal(row.get("packaging_height")),
-            "total_weight": parse_decimal(row.get("total_weight(kg)") or row.get("total_weight")),
+            "total_weight": parse_decimal(
+                row.get("total_weight(kg)") or row.get("total_weight")
+            ),
             "nutrition_calories": parse_int(row.get("nutrition_calories")),
             "nutrition_carbs": parse_decimal(row.get("nutrition_carbs")),
             "nutrition_fat": parse_decimal(row.get("nutrition_fat")),
@@ -334,7 +371,11 @@ class Command(BaseCommand):
             "is_set": len(set(mushroom_names)) > 1,
         }
         if "is_vegetarian" in row.index:
-            defaults["is_vegetarian"] = bool(row.get("is_vegetarian")) if not pd.isna(row.get("is_vegetarian")) else False
+            defaults["is_vegetarian"] = (
+                bool(row.get("is_vegetarian"))
+                if not pd.isna(row.get("is_vegetarian"))
+                else False
+            )
 
         image_urls = split_multi(row.get("image"))
         video_urls = split_multi(row.get("Video")) if "Video" in row.index else []
@@ -347,7 +388,9 @@ class Command(BaseCommand):
             return True, False
 
         with transaction.atomic():
-            product, created = Product.objects.update_or_create(article=article, defaults=defaults)
+            product, created = Product.objects.update_or_create(
+                article=article, defaults=defaults
+            )
 
             if mushroom_names:
                 types = list(MushroomType.objects.filter(name__in=mushroom_names))
@@ -386,19 +429,29 @@ class Command(BaseCommand):
                 continue
 
             # Совсем неизвестный вид гриба
-            self.stdout.write(self.style.WARNING(
-                f"  [!] {article}: вид гриба '{token}' не найден в справочнике и не в словаре синонимов."
-                + ("" if dry_run else f" Создаю новый MushroomType('{token}') — проверьте вручную.")
-            ))
+            self.stdout.write(
+                self.style.WARNING(
+                    f"  [!] {article}: вид гриба '{token}' не найден в справочнике и не в словаре синонимов."
+                    + (
+                        ""
+                        if dry_run
+                        else f" Создаю новый MushroomType('{token}') — проверьте вручную."
+                    )
+                )
+            )
             if not dry_run:
-                new_type, _ = MushroomType.objects.get_or_create(name=token.capitalize())
+                new_type, _ = MushroomType.objects.get_or_create(
+                    name=token.capitalize()
+                )
                 names.append(new_type.name)
         return names
 
     # -- медиа: скачивание с диcковым кешем ----------------------------------
 
     def _attach_media(self, product, url, media_type, order, retries=3, timeout=60):
-        content_bytes, filename = self._get_media_content(url, retries=retries, timeout=timeout)
+        content_bytes, filename = self._get_media_content(
+            url, retries=retries, timeout=timeout
+        )
         if content_bytes is None:
             return False
 
@@ -445,7 +498,9 @@ class Command(BaseCommand):
                 resp = None
 
         if resp is None:
-            self.stderr.write(self.style.ERROR(f"    не удалось скачать {url}: {last_exc}"))
+            self.stderr.write(
+                self.style.ERROR(f"    не удалось скачать {url}: {last_exc}")
+            )
             return None, None
 
         if cache_path is not None:

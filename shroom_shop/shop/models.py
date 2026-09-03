@@ -114,7 +114,7 @@ class Product(models.Model):
     is_set = models.BooleanField(
         default=False,
         verbose_name="Ассорти/набор",
-        help_text="Отметьте, если товар — набор из нескольких видов грибов"
+        help_text="Отметьте, если товар — набор из нескольких видов грибов",
     )
     mushroom_types = models.ManyToManyField(
         MushroomType,
@@ -296,7 +296,7 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return f"/product_page/{self.slug}/"
-    
+
     def clean(self):
         # мягкая защита от рассинхрона
         if not self.is_set and self.pk and self.mushroom_types.count() > 1:
@@ -335,7 +335,6 @@ class Product(models.Model):
         if self.stock > 0:
             return True
         return self.out_of_stock_behavior == "show"
-   
 
     @property
     def main_image(self):
@@ -347,8 +346,6 @@ class Product(models.Model):
             first = self.images.filter(media_type="image").first()
 
         return first.image if first else None
-    
-    
 
 
 class ProductImage(models.Model):
@@ -771,6 +768,7 @@ class ReviewMedia(models.Model):
             raise ValidationError(
                 f'Максимум {limit} файлов типа "{self.media_type}" на отзыв.'
             )
+
 
 class Contact(models.Model):
     # Предустановленные типы для удобства и иконок

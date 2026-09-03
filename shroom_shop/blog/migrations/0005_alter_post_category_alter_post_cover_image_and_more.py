@@ -5,75 +5,107 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('blog', '0004_alter_postblock_video_status'),
+        ("blog", "0004_alter_postblock_video_status"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='post',
-            name='category',
-            field=models.CharField(choices=[('story', 'История'), ('recipe', 'Рецепт'), ('media', 'Видео/интервью')], max_length=50, verbose_name='Категория'),
+            model_name="post",
+            name="category",
+            field=models.CharField(
+                choices=[
+                    ("story", "История"),
+                    ("recipe", "Рецепт"),
+                    ("media", "Видео/интервью"),
+                ],
+                max_length=50,
+                verbose_name="Категория",
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='cover_image',
-            field=models.ImageField(blank=True, null=True, upload_to='posts/covers/', verbose_name='Обложка'),
+            model_name="post",
+            name="cover_image",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="posts/covers/", verbose_name="Обложка"
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Создано'),
+            model_name="post",
+            name="created_at",
+            field=models.DateTimeField(auto_now_add=True, verbose_name="Создано"),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='excerpt',
-            field=models.TextField(blank=True, verbose_name='Краткое описание'),
+            model_name="post",
+            name="excerpt",
+            field=models.TextField(blank=True, verbose_name="Краткое описание"),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='is_published',
-            field=models.BooleanField(default=False, verbose_name='Опубликовано'),
+            model_name="post",
+            name="is_published",
+            field=models.BooleanField(default=False, verbose_name="Опубликовано"),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='published_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Опубликовано(дата и время)'),
+            model_name="post",
+            name="published_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Опубликовано(дата и время)"
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='slug',
-            field=models.SlugField(unique=True, verbose_name='URL (slug)'),
+            model_name="post",
+            name="slug",
+            field=models.SlugField(unique=True, verbose_name="URL (slug)"),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='title',
-            field=models.CharField(max_length=255, verbose_name='Заголовок'),
+            model_name="post",
+            name="title",
+            field=models.CharField(max_length=255, verbose_name="Заголовок"),
         ),
         migrations.AlterField(
-            model_name='postblock',
-            name='block_type',
-            field=models.CharField(choices=[('text', 'Текст'), ('image', 'Одно фото'), ('gallery', 'Галерея (swiper)'), ('video_embed', 'Видео (ссылка YouTube/VK)'), ('short_video', 'Короткое видео (вертикальное)'), ('quote', 'Цитата')], max_length=20, verbose_name='Тип блока'),
+            model_name="postblock",
+            name="block_type",
+            field=models.CharField(
+                choices=[
+                    ("text", "Текст"),
+                    ("image", "Одно фото"),
+                    ("gallery", "Галерея (swiper)"),
+                    ("video_embed", "Видео (ссылка YouTube/VK)"),
+                    ("short_video", "Короткое видео (вертикальное)"),
+                    ("quote", "Цитата"),
+                ],
+                max_length=20,
+                verbose_name="Тип блока",
+            ),
         ),
         migrations.AlterField(
-            model_name='postblock',
-            name='post',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='blocks', to='blog.post', verbose_name='Пост'),
+            model_name="postblock",
+            name="post",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="blocks",
+                to="blog.post",
+                verbose_name="Пост",
+            ),
         ),
         migrations.AlterField(
-            model_name='postblock',
-            name='single_image',
-            field=models.ImageField(blank=True, null=True, upload_to='posts/blocks/', verbose_name='Одно фото'),
+            model_name="postblock",
+            name="single_image",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to="posts/blocks/",
+                verbose_name="Одно фото",
+            ),
         ),
         migrations.AlterField(
-            model_name='postblock',
-            name='text',
-            field=models.TextField(blank=True, verbose_name='Текст'),
+            model_name="postblock",
+            name="text",
+            field=models.TextField(blank=True, verbose_name="Текст"),
         ),
         migrations.AlterField(
-            model_name='postblock',
-            name='video_url',
-            field=models.URLField(blank=True, verbose_name='URL видео'),
+            model_name="postblock",
+            name="video_url",
+            field=models.URLField(blank=True, verbose_name="URL видео"),
         ),
     ]
