@@ -27,9 +27,14 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from notifications.models import ChatMessage, ChatSession
-from shop.models import Order, OrderItem, Product, ProductImage
+from shop.models import Order, OrderItem, Product, ProductImage, Info
 
-from .forms import ProductForm
+from .forms import ProductForm, StartBannerForm
+
+from django.contrib import messages
+from django.urls import reverse
+
+
 
 User = get_user_model()
 is_manager = lambda u: u.is_staff
@@ -1014,3 +1019,30 @@ def price_export(request):
     )
     response["Content-Disposition"] = 'attachment; filename="price_export.xlsx"'
     return response
+
+
+@require_http_methods(["GET", "POST"])
+def edit_start_banner(request):
+    """
+    Редактирование стартового баннера.
+    Если его ещё нет — создаём при первом сохранении.
+    """
+    banner = Info.objects.filter(name="Стартовый баннер").first()
+
+    if request.method == "POST":
+        form = StartBannerForm(request.POST, request.FILES, instance=banner)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Стартовый баннер успешно сохранён.")
+            # Переходим на главную с параметром для принудительного показа баннера
+            return redirect(reverse("shop:index") + "?show_banner=1")
+        else:
+            messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = StartBannerForm(instance=banner)
+
+    return render(request, "dashboard/start_banner_form.html", {
+        "form": form,
+        "banner": banner,
+        "page_title": "Стартовый баннер",
+    })

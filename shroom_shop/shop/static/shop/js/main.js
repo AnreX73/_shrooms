@@ -1,33 +1,65 @@
-const banner = document.getElementById('startBanner');
-    const overlay = document.getElementById('bannerOverlay');
-    const closeBtn = document.getElementById('bannerClose');
+document.addEventListener('DOMContentLoaded', function() {
+    // ── 1. СТАРТОВЫЙ БАННЕР ─────────────────────────────────────────────────────
+    const banner = document.getElementById('startBanner');
+    
+    if (!banner) {
+        console.warn('⚠️ Элемент #startBanner не найден в DOM.');
+    } else {
+        const overlay = document.getElementById('bannerOverlay');
+        const closeBtn = document.getElementById('bannerClose');
 
-    // Показываем только если в этой сессии ещё не закрывали
-    if (banner && !sessionStorage.getItem('startBannerShown')) {
-        banner.style.display = 'block';
+        const urlParams = new URLSearchParams(window.location.search);
+        const forceShow = urlParams.get('show_banner') === '1';
+        const isShown = sessionStorage.getItem('startBannerShown');
+
+        console.log('🔍 Отладка баннера:', { 
+            forceShow: forceShow, 
+            isShownInStorage: isShown, 
+            shouldShow: forceShow || !isShown 
+        });
+
+        if (forceShow || !isShown) {
+            banner.style.display = 'block';
+            
+            if (forceShow) {
+                urlParams.delete('show_banner');
+                const newUrl = urlParams.toString() 
+                    ? `${window.location.pathname}?${urlParams.toString()}`
+                    : window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                console.log('✅ Баннер показан принудительно, параметр удалён из URL');
+            }
+        }
+
+        const hideBanner = () => {
+            banner.style.display = 'none';
+            sessionStorage.setItem('startBannerShown', 'true');
+            console.log('🚪 Баннер закрыт пользователем');
+        };
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', hideBanner);
+            console.log('✅ Кнопка закрытия (#bannerClose) найдена и активна');
+        } else {
+            console.error('❌ ОШИБКА: Кнопка с id="bannerClose" НЕ НАЙДЕНА в HTML!');
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', hideBanner);
+        }
     }
 
-    const hideBanner = () => {
-        banner.style.display = 'none';
-        sessionStorage.setItem('startBannerShown', 'true');
-    };
-
-    if (closeBtn) closeBtn.addEventListener('click', hideBanner);
-    if (overlay) overlay.addEventListener('click', hideBanner);
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    // SWIPER
+    // ── 2. SWIPER ГАЛЕРЕЯ ───────────────────────────────────────────────────────
     const galleryThumbs = new Swiper('.gallery-thumbs', {
         spaceBetween: 10,
         slidesPerView: 4,
         freeMode: true,
         watchSlidesProgress: true,
         slideToClickedSlide: true,
-        direction: 'horizontal', // база — мобильный вариант
+        direction: 'horizontal',
         breakpoints: {
             481: {
-                direction: 'vertical', // с 769px переключаем в колонку
+                direction: 'vertical',
                 slidesPerView: 4,
             }
         }
@@ -43,10 +75,9 @@ document.addEventListener('DOMContentLoaded', function () {
             swiper: galleryThumbs,
         },
         loop: true,
-        loopedSlides: galleryThumbs.slides.length, // чтобы зациклить все
+        loopedSlides: galleryThumbs.slides.length,
     });
 
-    // Пересчитать размеры после полной загрузки картинок (у тебя loading="lazy")
     window.addEventListener('load', () => {
         galleryThumbs.update();
         galleryMain.update();
@@ -59,161 +90,147 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Модальное окно на cтранице товара
+    // Модальное окно на странице товара
     const modal = document.getElementById('detailsModal');
     const openBtn = document.getElementById('openDetailsModal');
-    const closeBtn = document.getElementById('closeDetailsModal');
+    const closeBtnModal = document.getElementById('closeDetailsModal'); // переименовал, чтобы не путать с closeBtn баннера
     const modalOverlay = document.getElementById('detailsModalOverlay');
 
     openBtn?.addEventListener('click', () => modal.classList.add('active'));
-    closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
+    closeBtnModal?.addEventListener('click', () => modal.classList.remove('active'));
     modalOverlay?.addEventListener('click', () => modal.classList.remove('active'));
     modal?.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.remove('active');
     });
 });
 
+// ── 3. МЕДИА-МЕНЕДЖЕР ТОВАРА ──────────────────────────────────────────────────
 (function() {
-    console.log('IIFE запустился');
     const mediaDropzone = document.getElementById('media-dropzone');
-    console.log('mediaDropzone:', mediaDropzone);
     if (!mediaDropzone) return;
-    // ...
+
+    Dropzone.autoDiscover = false;
+
+    const _urls = document.getElementById('js-urls').dataset;
+    const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')
+                       ? document.querySelector('[name=csrfmiddlewaretoken]').value
+                       : getCookie('csrftoken');
+
+    function buildUrl(template, id) {
+        return template.replace('/0/', `/${id}/`);
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    const dz = new Dropzone('#media-dropzone', {
+        url: _urls.upload,
+        headers: { 'X-CSRFToken': CSRF_TOKEN },
+        paramName: 'file',
+        maxFilesize: 100,
+        acceptedFiles: 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/x-msvideo,video/webm',
+        addRemoveLinks: false,
+        previewsContainer: false,
+        parallelUploads: 2,
+        clickable: true,
+
+        init() {
+            const progressWrap = document.getElementById('upload-progress');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+
+            this.on('uploadprogress', (file, progress) => {
+                progressWrap.classList.remove('hidden');
+                progressFill.style.width = progress + '%';
+                progressText.textContent = `Загрузка: ${Math.round(progress)}%`;
+            });
+
+            this.on('success', (file, response) => {
+                const empty = document.getElementById('empty-placeholder');
+                if (empty) empty.remove();
+
+                htmx.ajax(
+                    'GET',
+                    buildUrl(_urls.partialBase, response.id),
+                    { target: '#media-grid', swap: 'beforeend' }
+                );
+
+                updateMediaCount(1);
+                this.removeFile(file);
+                progressWrap.classList.add('hidden');
+                progressFill.style.width = '0%';
+            });
+
+            this.on('error', (file, msg) => {
+                progressWrap.classList.add('hidden');
+                alert('Ошибка загрузки: ' + (typeof msg === 'string' ? msg : msg.error || 'неизвестная ошибка'));
+                this.removeFile(file);
+            });
+        }
+    });
+
+    const grid = document.getElementById('media-grid');
+    Sortable.create(grid, {
+        animation: 200,
+        handle: '.drag-handle',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd() {
+            const ids = [...grid.querySelectorAll('[data-media-id]')]
+                .map(el => parseInt(el.dataset.mediaId));
+            fetch(_urls.reorder, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN,
+                },
+                body: JSON.stringify({ order: ids }),
+            });
+        }
+    });
+
+    window.deleteMedia = function(mediaId, btn) {
+        if (!confirm('Удалить этот файл?')) return;
+        fetch(buildUrl(_urls.deleteBase, mediaId), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+        }).then(r => {
+            if (r.ok) {
+                btn.closest('.media-item').remove();
+                updateMediaCount(-1);
+                if (grid.querySelectorAll('.media-item').length === 0) {
+                    grid.innerHTML = '<div class="media-empty" id="empty-placeholder">Пока нет файлов.</div>';
+                }
+            }
+        });
+    };
+
+    function updateMediaCount(delta) {
+        const el = document.getElementById('media-count');
+        const next = (parseInt(el.textContent) || 0) + delta;
+        const forms = ['файл', 'файла', 'файлов'];
+        const n = Math.abs(next) % 100, n1 = n % 10;
+        const form = (n > 10 && n < 20) ? forms[2]
+                   : n1 === 1            ? forms[0]
+                   : (n1 >= 2 && n1 <= 4) ? forms[1]
+                   : forms[2];
+        el.textContent = `${next} ${form}`;
+    }
 })();
 
-   // ── Медиа-менеджер товара (страница /products/<id>/media/) ──────────────
-    const mediaDropzone = document.getElementById('media-dropzone');
-    if (mediaDropzone) {  // инициализируем только если элемент есть на странице
-
-        Dropzone.autoDiscover = false;
-
-        const _urls      = document.getElementById('js-urls').dataset;
-        const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')
-                           ? document.querySelector('[name=csrfmiddlewaretoken]').value
-                           : getCookie('csrftoken');
-
-        function buildUrl(template, id) {
-            return template.replace('/0/', `/${id}/`);
-        }
-
-        // Вспомогательная функция чтения CSRF из куки (если нет input на странице)
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
-        // ── Dropzone ──────────────────────────────────────────────────────────
-        const dz = new Dropzone('#media-dropzone', {
-            url: _urls.upload,
-            headers: { 'X-CSRFToken': CSRF_TOKEN },
-            paramName: 'file',
-            maxFilesize: 100,
-            acceptedFiles: 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/x-msvideo,video/webm',
-            addRemoveLinks: false,
-            previewsContainer: false,
-            parallelUploads: 2,
-            clickable: true,
-
-            init() {
-                const progressWrap = document.getElementById('upload-progress');
-                const progressFill = document.getElementById('progress-fill');
-                const progressText = document.getElementById('progress-text');
-
-                this.on('uploadprogress', (file, progress) => {
-                    progressWrap.classList.remove('hidden');
-                    progressFill.style.width = progress + '%';
-                    progressText.textContent = `Загрузка: ${Math.round(progress)}%`;
-                });
-
-                this.on('success', (file, response) => {
-                    const empty = document.getElementById('empty-placeholder');
-                    if (empty) empty.remove();
-
-                    htmx.ajax(
-                        'GET',
-                        buildUrl(_urls.partialBase, response.id),
-                        { target: '#media-grid', swap: 'beforeend' }
-                    );
-
-                    updateMediaCount(1);
-                    this.removeFile(file);
-                    progressWrap.classList.add('hidden');
-                    progressFill.style.width = '0%';
-                });
-
-                this.on('error', (file, msg) => {
-                    progressWrap.classList.add('hidden');
-                    alert('Ошибка загрузки: ' + (typeof msg === 'string' ? msg : msg.error || 'неизвестная ошибка'));
-                    this.removeFile(file);
-                });
-            }
-        });
-
-        // ── SortableJS ────────────────────────────────────────────────────────
-        const grid = document.getElementById('media-grid');
-        Sortable.create(grid, {
-            animation: 200,
-            handle: '.drag-handle',
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            onEnd() {
-                const ids = [...grid.querySelectorAll('[data-media-id]')]
-                    .map(el => parseInt(el.dataset.mediaId));
-                fetch(_urls.reorder, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': CSRF_TOKEN,
-                    },
-                    body: JSON.stringify({ order: ids }),
-                });
-            }
-        });
-
-        // ── Удаление (глобальная функция, вызывается из onclick в шаблоне) ──
-        window.deleteMedia = function(mediaId, btn) {
-            if (!confirm('Удалить этот файл?')) return;
-            fetch(buildUrl(_urls.deleteBase, mediaId), {
-                method: 'POST',
-                headers: { 'X-CSRFToken': CSRF_TOKEN },
-            }).then(r => {
-                if (r.ok) {
-                    btn.closest('.media-item').remove();
-                    updateMediaCount(-1);
-                    if (grid.querySelectorAll('.media-item').length === 0) {
-                        grid.innerHTML = '<div class="media-empty" id="empty-placeholder">Пока нет файлов.</div>';
-                    }
-                }
-            });
-        };
-
-        // ── Счётчик файлов ────────────────────────────────────────────────────
-        function updateMediaCount(delta) {
-            const el = document.getElementById('media-count');
-            const next = (parseInt(el.textContent) || 0) + delta;
-            const forms = ['файл', 'файла', 'файлов'];
-            const n = Math.abs(next) % 100, n1 = n % 10;
-            const form = (n > 10 && n < 20) ? forms[2]
-                       : n1 === 1            ? forms[0]
-                       : (n1 >= 2 && n1 <= 4) ? forms[1]
-                       : forms[2];
-            el.textContent = `${next} ${form}`;
-        }
-
-    } // конец if (mediaDropzone)
-
-    // ── Медиа к отзыву ───────────────────────────────────────────────────────────
+// ── 4. МЕДИА К ОТЗЫВУ ─────────────────────────────────────────────────────────
 (function() {
     const reviewDropzone = document.getElementById('review-dropzone');
     if (!reviewDropzone) return;
 
     Dropzone.autoDiscover = false;
 
-    const _urls      = document.getElementById('js-review-urls').dataset;
+    const _urls = document.getElementById('js-review-urls').dataset;
     const CSRF_TOKEN = getCookie('csrftoken');
 
-    // getCookie уже определена выше в файле — если нет, добавь:
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -224,7 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return template.replace('/0/', `/${id}/`);
     }
 
-    // Счётчики фото/видео из уже загруженных
     const grid = document.getElementById('review-media-grid');
     let photoCount = [...grid.querySelectorAll('[data-media-type="photo"]')].length;
     let videoCount = [...grid.querySelectorAll('[data-media-type="video"]')].length;
@@ -237,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updateLimitCounters();
 
-        const dz = new Dropzone('#review-dropzone', {
+    const dz = new Dropzone('#review-dropzone', {
         url: _urls.upload,
         headers: { 'X-CSRFToken': CSRF_TOKEN },
         paramName: 'file',
@@ -252,8 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
         dictFallbackMessage: '',
         dictFileTooBig: 'Файл слишком большой ({{filesize}}MB). Максимум {{maxFilesize}}MB.',
         dictInvalidFileType: 'Недопустимый тип файла.',
-        dictResponseError: '',  // ← это отключает встроенный alert при ошибке сервера
-        // ...
+        dictResponseError: '',
 
         init() {
             const progressWrap = document.getElementById('upload-progress');
@@ -285,25 +300,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 progressFill.style.width = '0%';
             });
 
+            // ИСПРАВЛЕНО: убран задвоенный/сломанный блок this.on('error', ...)
             this.on('error', (file, msg) => {
-    console.log('Dropzone error msg:', msg);  // ← временно
-    progressWrap.classList.add('hidden');
-    const errMsg = typeof msg === 'string' ? msg : msg.error || 'Ошибка загрузки';
-    this.on('error', (file, msg) => {
-    progressWrap.classList.add('hidden');
-    const errMsg = typeof msg === 'string' ? msg : msg.error || 'Ошибка загрузки';
-    
-    const errorBlock = document.getElementById('upload-error');
-    const errorText = document.getElementById('upload-error-text');
-    if (errorBlock && errorText) {
-        errorText.textContent = errMsg;
-        errorBlock.classList.remove('hidden');
-        setTimeout(() => errorBlock.classList.add('hidden'), 4000);
-    }
-    this.removeFile(file);
-});
-    this.removeFile(file);
-});
+                progressWrap.classList.add('hidden');
+                const errMsg = typeof msg === 'string' ? msg : (msg.error || 'Ошибка загрузки');
+                
+                const errorBlock = document.getElementById('upload-error');
+                const errorText = document.getElementById('upload-error-text');
+                if (errorBlock && errorText) {
+                    errorText.textContent = errMsg;
+                    errorBlock.classList.remove('hidden');
+                    setTimeout(() => errorBlock.classList.add('hidden'), 4000);
+                }
+                this.removeFile(file);
+            });
         }
     });
 
@@ -322,8 +332,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     };
-
 })();
+
+// ── 5. HTMX КАТАЛОГ (ИСПРАВЛЕНО: убраны дубликаты) ────────────────────────────
 document.body.addEventListener('htmx:beforeRequest', function(e) {
     if (e.detail.target.id === 'catalog-section') {
         document.querySelector('.products-grid')?.classList.add('loading');
@@ -341,23 +352,7 @@ document.body.addEventListener('htmx:afterSwap', function(e) {
     }
 });
 
-document.body.addEventListener('htmx:beforeRequest', function(e) {
-    if (e.detail.target.id === 'catalog-section') {
-        document.querySelector('.products-grid')?.classList.add('loading');
-    }
-});
-
-document.body.addEventListener('htmx:afterSwap', function(e) {
-    if (e.detail.target.id === 'catalog-section') {
-        setTimeout(() => {
-            document.querySelectorAll('.product-card').forEach((card, i) => {
-                card.style.animationDelay = `${i * 30}ms`;
-                card.classList.add('card-enter');
-            });
-        }, 10);
-    }
-});
-
+// ── 6. ФИЛЬТРЫ КАТАЛОГА (МОБИЛЬНЫЕ) ───────────────────────────────────────────
 (function () {
     var panel = document.getElementById("catalog-filters");
     var toggle = document.getElementById("filters-toggle");
@@ -390,9 +385,6 @@ document.body.addEventListener('htmx:afterSwap', function(e) {
         if (e.key === "Escape") closePanel();
     });
 
-    // Закрываем панель после успешной htmx-подмены результатов —
-    // на случай если пользователь не нажал "Показать результаты",
-    // а фильтр применился сам через change (селект/чекбокс)
     document.body.addEventListener("htmx:afterSwap", function (e) {
         if (e.detail.target && e.detail.target.id === "catalog-results") {
             if (window.matchMedia("(max-width: 900px)").matches) {
@@ -401,5 +393,3 @@ document.body.addEventListener('htmx:afterSwap', function(e) {
         }
     });
 })();
-
-

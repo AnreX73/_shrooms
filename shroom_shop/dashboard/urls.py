@@ -17,6 +17,7 @@ from dashboard.views import (
     reorder_product_media,
     request_photo,
     upload_product_media,
+  
 )
 
 app_name = "dashboard"
@@ -99,4 +100,5 @@ urlpatterns = [
         views.order_note_form,
         name="order_note_form",
     ),
+    path("start-banner/", views.edit_start_banner, name="edit_start_banner"),
 ]

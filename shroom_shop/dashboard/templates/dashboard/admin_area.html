@@ -59,15 +59,17 @@
             <hr>
             <input type="button" onclick="window.location.href='{% url 'dashboard:manage_orders' %}'" class="users-btn profile_logaut_btn" value="Управление заказами">
     </div>
-    <div class="admin_btns_block">
-            <h3 class="btns_block_title">Работа с пользователями</h3>
-            <hr>       
-    </div>
+    
     <div class="admin_btns_block">
             <h3  class="btns_block_title">Работа с блогом</h3>
             <hr> 
             <input type="button" onclick="window.location.href='{% url 'blog:post_create' %}'" class="users-btn profile_logaut_btn" value="Добавить историю">      
             <input type="button" onclick="window.location.href='{% url 'blog:post_choice' %}'" class="users-btn profile_logaut_btn" value="Список постов">      
+    </div>
+    <div class="admin_btns_block">
+            <h3 class="btns_block_title">Дополнительно</h3>
+            <hr>  
+            <input type="button" onclick="window.location.href='{% url 'dashboard:edit_start_banner' %}'" class="users-btn profile_logaut_btn" value="Настроить баннер на главной">     
     </div>
     
 </div>

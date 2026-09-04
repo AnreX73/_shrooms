@@ -476,7 +476,7 @@ input[type="radio"] {
     border-radius: 10px;
     box-shadow: var(--shadow);
     text-align: center;
-    z-index: 51;
+    z-index: 101;
 
 }
 
@@ -2289,6 +2289,7 @@ footer {
     height: 75px;
     top: 4rem;
     z-index: 25;
+    box-shadow: var(--shadow);
    
 }
 
