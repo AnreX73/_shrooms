@@ -202,6 +202,6 @@ CSRF_COOKIE_NAME = "csrftoken_shroomsshop"  # убрать на деплое, х
 
 SESSION_COOKIE_NAME = "sessionid_shroomsshop"  # убрать на деплое, хотя это не критично, т.к. сессия генерируется заново при каждой авторизации
 
-# SESSION_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
-# CSRF_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
+SESSION_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
+CSRF_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
 SESSION_COOKIE_HTTPONLY = True  # Куки сессии недоступны через JavaScript
