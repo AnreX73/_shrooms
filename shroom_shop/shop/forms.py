@@ -21,7 +21,7 @@ class ProductFilterForm(forms.Form):
     )
     mushroom_types = forms.ModelMultipleChoiceField(
         label="Виды грибов",
-        queryset=MushroomType.objects.all(),
+        queryset=MushroomType.objects.filter(is_active=True),
         required=False,
         widget=forms.CheckboxSelectMultiple,
     )

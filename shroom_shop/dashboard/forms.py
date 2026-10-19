@@ -1,6 +1,8 @@
 from django import forms
+from django.utils.text import slugify
 
-from shop.models import Product, Info
+from shop.models import Category, Info, MushroomType, Product
+from shop.utils import make_slug
 
 
 # class OrderStatusForm(forms.ModelForm):
@@ -92,6 +94,172 @@ class ProductForm(forms.ModelForm):
                 "Товар с несколькими видами грибов должен быть отмечен как «Ассорти/набор»",
             )
         return cleaned_data
+
+
+class SlugUniqueModelForm(forms.ModelForm):
+    """ModelForm с автогенерацией уникального slug из названия.
+
+    Модели Category и MushroomType имеют unique slug, но в админке поле
+    можно оставить пустым — тогда slug генерируется транслитерацией
+    (shop.utils.make_slug) и при совпадении получает суффикс -2, -3…
+    """
+
+    slug_source_field = "name"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # slug необязателен в форме: пустой генерируется в save()
+        if "slug" in self.fields:
+            self.fields["slug"].required = False
+
+    def _unique_slug(self, value: str, max_length: int = 200) -> str:
+        base = make_slug(value)[:max_length].strip("-") or "item"
+        candidate = base
+        counter = 2
+        model = self.instance.__class__
+        qs = model.objects.all()
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        while qs.filter(slug=candidate).exists():
+            suffix = f"-{counter}"
+            candidate = f"{base[: max_length - len(suffix)]}{suffix}"
+            counter += 1
+        return candidate
+
+    def clean_slug(self):
+        # Поле необязательное: пустое — сгенерируем из названия
+        return self.cleaned_data.get("slug") or ""
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if not instance.slug:
+            instance.slug = self._unique_slug(
+                getattr(instance, self.slug_source_field)
+            )
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
+
+class CategoryForm(SlugUniqueModelForm):
+    class Meta:
+        model = Category
+        fields = ["name", "slug", "description", "image", "is_active"]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Например: Сушёные грибы"}
+            ),
+            "slug": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "оставьте пустым — сгенерируется из названия",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Короткое описание для витрины",
+                }
+            ),
+            "image": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+        labels = {
+            "name": "Название категории",
+            "slug": "URL (slug)",
+            "description": "Описание",
+            "image": "Изображение",
+            "is_active": "Показывать на сайте",
+        }
+        help_texts = {
+            "slug": "Можно не заполнять — сгенерируется автоматически из названия.",
+            "is_active": "Снятая галочка скрывает категорию и её товары из фильтров витрины.",
+        }
+
+    def clean_name(self):
+        name = (self.cleaned_data.get("name") or "").strip()
+        if not name:
+            raise forms.ValidationError("Название обязательно.")
+        qs = Category.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Категория с таким названием уже существует.")
+        return name
+
+    def clean_slug(self):
+        slug = (self.cleaned_data.get("slug") or "").strip()
+        if not slug:
+            return ""
+        slug = slugify(slug, allow_unicode=False) or ""
+        qs = Category.objects.filter(slug=slug)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Категория с таким URL уже существует.")
+        return slug
+
+
+class MushroomTypeForm(SlugUniqueModelForm):
+    class Meta:
+        model = MushroomType
+        fields = ["name", "slug", "description", "image", "is_active"]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Например: Белый гриб"}
+            ),
+            "slug": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "оставьте пустым — сгенерируется из названия",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Чем этот вид отличается",
+                }
+            ),
+            "image": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+        labels = {
+            "name": "Название вида",
+            "slug": "URL (slug)",
+            "description": "Описание",
+            "image": "Изображение",
+            "is_active": "Показывать на сайте",
+        }
+        help_texts = {
+            "slug": "Можно не заполнять — сгенерируется автоматически из названия.",
+            "is_active": "Снятая галочка убирает вид из фильтров и с главной, но у товаров он остаётся.",
+        }
+
+    def clean_name(self):
+        name = (self.cleaned_data.get("name") or "").strip()
+        if not name:
+            raise forms.ValidationError("Название обязательно.")
+        qs = MushroomType.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Вид гриба с таким названием уже существует.")
+        return name
+
+    def clean_slug(self):
+        slug = (self.cleaned_data.get("slug") or "").strip()
+        if not slug:
+            return ""
+        slug = slugify(slug, allow_unicode=False) or ""
+        qs = MushroomType.objects.filter(slug=slug)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Вид гриба с таким URL уже существует.")
+        return slug
 
 
 class StartBannerForm(forms.ModelForm):

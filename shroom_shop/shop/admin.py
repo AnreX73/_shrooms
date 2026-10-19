@@ -50,9 +50,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(MushroomType)
 class MushroomTypeAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
+    list_display = ("name", "slug", "is_active")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    list_editable = ("is_active",)
     save_on_top = True
 
 

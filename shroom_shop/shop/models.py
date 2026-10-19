@@ -60,6 +60,11 @@ class MushroomType(models.Model):
     image = models.ImageField(
         upload_to="mushroom_types/", blank=True, null=True, verbose_name="Изображение"
     )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Активен",
+        help_text="Неактивные виды скрыты на витрине, но остаются у товаров",
+    )
 
     class Meta:
         verbose_name = "Вид гриба"

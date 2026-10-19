@@ -49,6 +49,13 @@
 
 
     <div class="admin_btns_block">
+            <h3 class="btns_block_title">Справочники</h3>
+            <hr>
+            <input type="button" class="users-btn profile_logaut_btn" value="Категории" onclick="window.location.href='{% url 'dashboard:category_list' %}'">
+            <input type="button" class="users-btn profile_logaut_btn" value="Виды грибов" onclick="window.location.href='{% url 'dashboard:mushroom_type_list' %}'">
+    </div>
+
+    <div class="admin_btns_block">
             <h3 class="btns_block_title">Загрузки</h3>
             <hr>
             <input type="button" class="users-btn profile_logaut_btn" value="Цены и скидки" onclick="window.location.href='{% url 'dashboard:price_sync' %}'"> 

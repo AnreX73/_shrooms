@@ -1,0 +1,114 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Виды грибов{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <button class="users-btn profile_logaut_btn" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">В панель администратора</button>
+  <h1>Виды грибов</h1>
+  <button class="users-btn profile_logaut_btn" onclick="window.location.href='{% url 'dashboard:mushroom_type_create' %}'">+ Добавить вид</button>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="dash-alert {% if message.tags == 'error' %}dash-alert--error{% else %}dash-alert--ok{% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="dash-nav-tabs">
+  <a href="{% url 'dashboard:category_list' %}" class="dash-nav-tabs__item">Категории</a>
+  <span class="dash-nav-tabs__item dash-nav-tabs__item--active">Виды грибов</span>
+</div>
+
+<form method="get" class="dash-search">
+  <input type="text" name="q" value="{{ query }}" placeholder="Поиск по названию вида">
+  <button type="submit" class="users-btn profile_logaut_btn">Найти</button>
+  {% if query %}
+    <a href="{% url 'dashboard:mushroom_type_list' %}" class="dash-search__reset">сбросить</a>
+  {% endif %}
+</form>
+
+<div class="dash-table-wrap">
+  <div class="dash-table">
+    <div class="dash-table__head">
+      <div class="dash-table__cell dash-table__cell--photo">Фото</div>
+      <div class="dash-table__cell dash-table__cell--name">Название</div>
+      <div class="dash-table__cell dash-table__cell--slug">URL</div>
+      <div class="dash-table__cell dash-table__cell--num">Товаров</div>
+      <div class="dash-table__cell dash-table__cell--state">На сайте</div>
+      <div class="dash-table__cell dash-table__cell--actions">Действия</div>
+    </div>
+
+    {% for item in mushroom_types %}
+      <div class="dash-table__row {% cycle 'dash-table__row--odd' 'dash-table__row--even' %}">
+        <div class="dash-table__cell dash-table__cell--photo" data-label="Фото">
+          {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.name }}" class="dash-thumb">
+          {% else %}
+            <span class="dash-thumb dash-thumb--empty">—</span>
+          {% endif %}
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--name" data-label="Название">
+          <a href="{% url 'dashboard:mushroom_type_edit' item.pk %}" class="dash-link">{{ item.name }}</a>
+          {% if item.description %}
+            <span class="dash-sub">{{ item.description|truncatechars:70 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--slug" data-label="URL">
+          <code>{{ item.slug }}</code>
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--num" data-label="Товаров">
+          {% if item.products_count %}
+            <a href="{% url 'shop:catalog' %}?mushroom_types={{ item.pk }}" class="dash-link">{{ item.products_count }}</a>
+          {% else %}
+            0
+          {% endif %}
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--state" data-label="На сайте">
+          <form method="post" action="{% url 'dashboard:mushroom_type_toggle' item.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="dash-pill {% if item.is_active %}dash-pill--on{% else %}dash-pill--off{% endif %}"
+                    title="Нажмите, чтобы {% if item.is_active %}скрыть{% else %}показать{% endif %}">
+              {% if item.is_active %}показан{% else %}скрыт{% endif %}
+            </button>
+          </form>
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--actions" data-label="Действия">
+          <a href="{% url 'dashboard:mushroom_type_edit' item.pk %}" class="users-btn profile_logaut_btn dash-btn-sm">Изменить</a>
+          {% if item.products_count %}
+            <form method="post" action="{% url 'dashboard:mushroom_type_toggle' item.pk %}"
+                  onsubmit="return confirm('Вид используется в {{ item.products_count }} товар(ах) — удалить его нельзя. {% if item.is_active %}Скрыть его с сайта?{% else %}Показать его на сайте?{% endif %}');">
+              {% csrf_token %}
+              <button type="submit" class="users-btn profile_logaut_btn dash-btn-sm dash-btn--warn">
+                {% if item.is_active %}Скрыть{% else %}Показать{% endif %}
+              </button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'dashboard:mushroom_type_delete' item.pk %}"
+                  onsubmit="return confirm('Удалить вид «{{ item.name|escapejs }}»?');">
+              {% csrf_token %}
+              <button type="submit" class="users-btn profile_logaut_btn dash-btn-sm dash-btn--danger">Удалить</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="dash-empty">
+        {% if query %}Ничего не найдено по запросу «{{ query }}».{% else %}Видов грибов ещё нет — добавьте первый.{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<p class="dash-note">
+  Всего видов: {{ total }}. Вид, привязанный к товарам, удалить нельзя — скройте его с сайта.
+</p>
+{% endblock %}

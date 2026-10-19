@@ -27,9 +27,9 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from notifications.models import ChatMessage, ChatSession
-from shop.models import Order, OrderItem, Product, ProductImage, Info
+from shop.models import Category, Info, MushroomType, Order, OrderItem, Product, ProductImage
 
-from .forms import ProductForm, StartBannerForm
+from .forms import CategoryForm, MushroomTypeForm, ProductForm, StartBannerForm
 
 from django.contrib import messages
 from django.urls import reverse
@@ -1046,3 +1046,222 @@ def edit_start_banner(request):
         "banner": banner,
         "page_title": "Стартовый баннер",
     })
+
+# ── Категории и виды грибов ───────────────────────────────────────────────────
+# Раздел доступен менеджерам (is_staff), т.к. справочники нужны при работе
+# с товарами. Удаление блокируется, если запись используется в товарах —
+# вместо удаления предлагается деактивация (is_active).
+
+
+def _catalog_guard(request, obj, is_category):
+    """Защита от удаления используемого справочника.
+
+    Если к записи привязаны товары — удаление отменяется, администратору
+    предлагается деактивировать запись. Возвращает True, если удалено.
+    """
+    related = obj.products.count()
+    if related:
+        kind = "категорию" if is_category else "вид гриба"
+        messages.error(
+            request,
+            f"Нельзя удалить {kind} «{obj.name}»: привязано товаров — {related}. "
+            f"Снимите галочку «Показывать на сайте», чтобы скрыть его из витрины.",
+        )
+        return False
+    obj.delete()
+    messages.success(request, f"«{obj.name}» удалён.")
+    return True
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_list(request):
+    query = request.GET.get("q", "").strip()
+    categories = Category.objects.all().order_by("name")
+    if query:
+        categories = categories.filter(name__icontains=query)
+    categories = categories.annotate(products_count=db_models.Count("products"))
+
+    return render(
+        request,
+        "dashboard/category_list.html",
+        {
+            "title": "Категории",
+            "categories": categories,
+            "query": query,
+            "total": Category.objects.count(),
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_create(request):
+    if request.method == "POST":
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save()
+            messages.success(request, f"Категория «{category.name}» создана.")
+            return redirect("dashboard:category_list")
+        messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = CategoryForm()
+
+    return render(
+        request,
+        "dashboard/category_form.html",
+        {
+            "form": form,
+            "title": "Новая категория",
+            "is_edit": False,
+            "back_url": reverse("dashboard:category_list"),
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_edit(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+
+    if request.method == "POST":
+        form = CategoryForm(request.POST, request.FILES, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Категория «{category.name}» сохранена.")
+            return redirect("dashboard:category_list")
+        messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = CategoryForm(instance=category)
+
+    return render(
+        request,
+        "dashboard/category_form.html",
+        {
+            "form": form,
+            "title": f"Категория: {category.name}",
+            "is_edit": True,
+            "category": category,
+            "products_count": category.products.count(),
+            "back_url": reverse("dashboard:category_list"),
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_manager)
+@require_POST
+def category_delete(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    _catalog_guard(request, category, is_category=True)
+    return redirect("dashboard:category_list")
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_toggle(request, pk):
+    """Быстрое включение/выключение категории прямо из списка."""
+    category = get_object_or_404(Category, pk=pk)
+    category.is_active = not category.is_active
+    category.save(update_fields=["is_active", "updated_at"])
+    state = "показана на сайте" if category.is_active else "скрыта с сайта"
+    messages.success(request, f"Категория «{category.name}» {state}.")
+    return redirect("dashboard:category_list")
+
+
+@login_required
+@user_passes_test(is_manager)
+def mushroom_type_list(request):
+    query = request.GET.get("q", "").strip()
+    mushroom_types = MushroomType.objects.all().order_by("name")
+    if query:
+        mushroom_types = mushroom_types.filter(name__icontains=query)
+    mushroom_types = mushroom_types.annotate(
+        products_count=db_models.Count("products")
+    )
+
+    return render(
+        request,
+        "dashboard/mushroom_type_list.html",
+        {
+            "title": "Виды грибов",
+            "mushroom_types": mushroom_types,
+            "query": query,
+            "total": MushroomType.objects.count(),
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_manager)
+def mushroom_type_create(request):
+    if request.method == "POST":
+        form = MushroomTypeForm(request.POST, request.FILES)
+        if form.is_valid():
+            mushroom_type = form.save()
+            messages.success(request, f"Вид гриба «{mushroom_type.name}» создан.")
+            return redirect("dashboard:mushroom_type_list")
+        messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = MushroomTypeForm()
+
+    return render(
+        request,
+        "dashboard/mushroom_type_form.html",
+        {
+            "form": form,
+            "title": "Новый вид гриба",
+            "is_edit": False,
+            "back_url": reverse("dashboard:mushroom_type_list"),
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_manager)
+def mushroom_type_edit(request, pk):
+    mushroom_type = get_object_or_404(MushroomType, pk=pk)
+
+    if request.method == "POST":
+        form = MushroomTypeForm(request.POST, request.FILES, instance=mushroom_type)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Вид гриба «{mushroom_type.name}» сохранён.")
+            return redirect("dashboard:mushroom_type_list")
+        messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = MushroomTypeForm(instance=mushroom_type)
+
+    return render(
+        request,
+        "dashboard/mushroom_type_form.html",
+        {
+            "form": form,
+            "title": f"Вид гриба: {mushroom_type.name}",
+            "is_edit": True,
+            "mushroom_type": mushroom_type,
+            "products_count": mushroom_type.products.count(),
+            "back_url": reverse("dashboard:mushroom_type_list"),
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_manager)
+@require_POST
+def mushroom_type_delete(request, pk):
+    mushroom_type = get_object_or_404(MushroomType, pk=pk)
+    _catalog_guard(request, mushroom_type, is_category=False)
+    return redirect("dashboard:mushroom_type_list")
+
+
+@login_required
+@user_passes_test(is_manager)
+def mushroom_type_toggle(request, pk):
+    """Быстрое включение/выключение вида гриба прямо из списка."""
+    mushroom_type = get_object_or_404(MushroomType, pk=pk)
+    mushroom_type.is_active = not mushroom_type.is_active
+    mushroom_type.save(update_fields=["is_active"])
+    state = "показан на сайте" if mushroom_type.is_active else "скрыт с сайта"
+    messages.success(request, f"Вид гриба «{mushroom_type.name}» {state}.")
+    return redirect("dashboard:mushroom_type_list")

@@ -1,0 +1,128 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <button class="users-btn profile_logaut_btn" onclick="window.location.href='{{ back_url }}'">← К списку</button>
+  <h1>{{ title }}</h1>
+  <span></span>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="dash-alert {% if message.tags == 'error' %}dash-alert--error{% else %}dash-alert--ok{% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="dash-form-card">
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="dash-alert dash-alert--error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="dash-form-grid">
+      <div class="dash-form-field">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="dash-error">{{ form.name.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="dash-form-field">
+        <label for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label>
+        {{ form.slug }}
+        {% if form.slug.help_text %}<div class="dash-help">{{ form.slug.help_text }}</div>{% endif %}
+        {% if form.slug.errors %}<div class="dash-error">{{ form.slug.errors.0 }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="dash-form-field">
+      <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+      {{ form.description }}
+      {% if form.description.errors %}<div class="dash-error">{{ form.description.errors.0 }}</div>{% endif %}
+    </div>
+
+    <div class="dash-form-field">
+      <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+      {{ form.image }}
+      {% if form.image.errors %}<div class="dash-error">{{ form.image.errors.0 }}</div>{% endif %}
+
+      <div class="dash-image-preview">
+        {% if category and category.image %}
+          <img src="{{ category.image.url }}" alt="preview" id="imagePreview">
+        {% else %}
+          <span class="dash-thumb--empty">Изображение не выбрано</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="dash-form-field">
+      <div class="dash-check">
+        {{ form.is_active }}
+        <label for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+      </div>
+      {% if form.is_active.help_text %}<div class="dash-help">{{ form.is_active.help_text }}</div>{% endif %}
+    </div>
+
+    {% if is_edit %}
+      <div class="dash-meta">
+        Товаров в категории: <strong>{{ products_count }}</strong>
+        {% if products_count %}— удаление недоступно, только деактивация.{% endif %}
+      </div>
+    {% endif %}
+
+    <div class="dash-form-actions">
+      <a href="{{ back_url }}" class="users-btn profile_logaut_btn">Отмена</a>
+      <button type="submit" class="users-btn profile_logaut_btn">
+        {% if is_edit %}Сохранить{% else %}Создать{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+
+{% if is_edit %}
+<form method="post" action="{% url 'dashboard:category_delete' category.pk %}"
+      class="dash-danger-zone"
+      onsubmit="return confirm('{% if products_count %}Категорию нельзя удалить: есть товары.{% else %}Удалить категорию «{{ category.name|escapejs }}»?{% endif %}');">
+  {% csrf_token %}
+  <div class="dash-danger-zone__text">
+    {% if products_count %}
+      Категория используется в {{ products_count }} товар(ах) — удаление заблокировано.
+      Снимите «Показывать на сайте», чтобы убрать её из витрины.
+    {% else %}
+      Категория не используется. Удаление необратимо.
+    {% endif %}
+  </div>
+  <button type="submit" class="users-btn profile_logaut_btn dash-btn--danger">
+    {% if products_count %}Скрыть с сайта{% else %}Удалить категорию{% endif %}
+  </button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var input = document.getElementById('{{ form.image.id_for_label }}');
+    if (!input) return;
+    input.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      var box = input.parentElement.querySelector('.dash-image-preview');
+      if (!file || !box) return;
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var img = document.createElement('img');
+        img.id = 'imagePreview';
+        img.alt = 'preview';
+        img.src = ev.target.result;
+        box.replaceChildren(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  })();
+</script>
+{% endblock %}

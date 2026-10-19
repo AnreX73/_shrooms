@@ -1,0 +1,109 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Категории{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <button class="users-btn profile_logaut_btn" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">В панель администратора</button>
+  <h1>Категории</h1>
+  <button class="users-btn profile_logaut_btn" onclick="window.location.href='{% url 'dashboard:category_create' %}'">+ Добавить категорию</button>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="dash-alert {% if message.tags == 'error' %}dash-alert--error{% else %}dash-alert--ok{% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<form method="get" class="dash-search">
+  <input type="text" name="q" value="{{ query }}" placeholder="Поиск по названию категории">
+  <button type="submit" class="users-btn profile_logaut_btn">Найти</button>
+  {% if query %}
+    <a href="{% url 'dashboard:category_list' %}" class="dash-search__reset">сбросить</a>
+  {% endif %}
+</form>
+
+<div class="dash-table-wrap">
+  <div class="dash-table">
+    <div class="dash-table__head">
+      <div class="dash-table__cell dash-table__cell--photo">Фото</div>
+      <div class="dash-table__cell dash-table__cell--name">Название</div>
+      <div class="dash-table__cell dash-table__cell--slug">URL</div>
+      <div class="dash-table__cell dash-table__cell--num">Товаров</div>
+      <div class="dash-table__cell dash-table__cell--state">На сайте</div>
+      <div class="dash-table__cell dash-table__cell--actions">Действия</div>
+    </div>
+
+    {% for category in categories %}
+      <div class="dash-table__row {% cycle 'dash-table__row--odd' 'dash-table__row--even' %}">
+        <div class="dash-table__cell dash-table__cell--photo" data-label="Фото">
+          {% if category.image %}
+            <img src="{{ category.image.url }}" alt="{{ category.name }}" class="dash-thumb">
+          {% else %}
+            <span class="dash-thumb dash-thumb--empty">—</span>
+          {% endif %}
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--name" data-label="Название">
+          <a href="{% url 'dashboard:category_edit' category.pk %}" class="dash-link">{{ category.name }}</a>
+          {% if category.description %}
+            <span class="dash-sub">{{ category.description|truncatechars:70 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--slug" data-label="URL">
+          <code>{{ category.slug }}</code>
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--num" data-label="Товаров">
+          {% if category.products_count %}
+            <a href="{% url 'shop:catalog' %}?category={{ category.pk }}" class="dash-link">{{ category.products_count }}</a>
+          {% else %}
+            0
+          {% endif %}
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--state" data-label="На сайте">
+          <form method="post" action="{% url 'dashboard:category_toggle' category.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="dash-pill {% if category.is_active %}dash-pill--on{% else %}dash-pill--off{% endif %}"
+                    title="Нажмите, чтобы {% if category.is_active %}скрыть{% else %}показать{% endif %}">
+              {% if category.is_active %}показана{% else %}скрыта{% endif %}
+            </button>
+          </form>
+        </div>
+
+        <div class="dash-table__cell dash-table__cell--actions" data-label="Действия">
+          <a href="{% url 'dashboard:category_edit' category.pk %}" class="users-btn profile_logaut_btn dash-btn-sm">Изменить</a>
+          {% if category.products_count %}
+            <form method="post" action="{% url 'dashboard:category_toggle' category.pk %}"
+                  onsubmit="return confirm('Категория используется в {{ category.products_count }} товар(ах) — удалить её нельзя. {% if category.is_active %}Скрыть её с сайта?{% else %}Показать её на сайте?{% endif %}');">
+              {% csrf_token %}
+              <button type="submit" class="users-btn profile_logaut_btn dash-btn-sm dash-btn--warn">
+                {% if category.is_active %}Скрыть{% else %}Показать{% endif %}
+              </button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'dashboard:category_delete' category.pk %}"
+                  onsubmit="return confirm('Удалить категорию «{{ category.name|escapejs }}»?');">
+              {% csrf_token %}
+              <button type="submit" class="users-btn profile_logaut_btn dash-btn-sm dash-btn--danger">Удалить</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="dash-empty">
+        {% if query %}Ничего не найдено по запросу «{{ query }}».{% else %}Категорий ещё нет — добавьте первую.{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<p class="dash-note">
+  Всего категорий: {{ total }}. Категорию с товарами удалить нельзя — снимите галочку «показана», чтобы скрыть её из витрины.
+</p>
+{% endblock %}

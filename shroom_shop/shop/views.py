@@ -82,7 +82,7 @@ def index(request):
 
     start_banner = Info.objects.filter(name="Стартовый баннер", is_active=True).first()
     advantages = SiteAssets.objects.filter(note="advantages", is_active=True)
-    shrooms_types = MushroomType.objects.all()
+    shrooms_types = MushroomType.objects.filter(is_active=True)
     categories = Category.objects.filter(is_active=True).order_by("created_at")
     info_objects = (
         Info.objects.all().exclude(name="Стартовый баннер").order_by("created_at")

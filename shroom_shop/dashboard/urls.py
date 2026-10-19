@@ -57,6 +57,38 @@ urlpatterns = [
     path("products/<int:pk>/edit/", ProductEditView.as_view(), name="product_edit"),
     path("products/<int:pk>/clone/", ProductCloneView.as_view(), name="product_clone"),
     path("products/search/", ProductSearchView.as_view(), name="product_search"),
+    # ── Категории ──
+    path("categories/", views.category_list, name="category_list"),
+    path("categories/add/", views.category_create, name="category_create"),
+    path("categories/<int:pk>/edit/", views.category_edit, name="category_edit"),
+    path(
+        "categories/<int:pk>/delete/", views.category_delete, name="category_delete"
+    ),
+    path(
+        "categories/<int:pk>/toggle/", views.category_toggle, name="category_toggle"
+    ),
+    # ── Виды грибов ──
+    path("mushroom-types/", views.mushroom_type_list, name="mushroom_type_list"),
+    path(
+        "mushroom-types/add/",
+        views.mushroom_type_create,
+        name="mushroom_type_create",
+    ),
+    path(
+        "mushroom-types/<int:pk>/edit/",
+        views.mushroom_type_edit,
+        name="mushroom_type_edit",
+    ),
+    path(
+        "mushroom-types/<int:pk>/delete/",
+        views.mushroom_type_delete,
+        name="mushroom_type_delete",
+    ),
+    path(
+        "mushroom-types/<int:pk>/toggle/",
+        views.mushroom_type_toggle,
+        name="mushroom_type_toggle",
+    ),
     # ── AJAX endpoints ──
     path(
         "products/<int:pk>/media/upload/",
