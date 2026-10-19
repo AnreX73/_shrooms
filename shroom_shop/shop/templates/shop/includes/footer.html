@@ -9,7 +9,7 @@
                 
                 <ul class="footer-links" style="margin-top: 16px;">
                   {% for category in categories %}
-                  <li><a href="{% url 'shop:catalog' %}?category={{ category.id }}">{{ category.name }}</a></li>
+                  <li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
                   {% endfor %}
                 </ul>
             </div>

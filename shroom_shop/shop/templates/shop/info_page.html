@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block content %}
-<h2 style="margin: 1rem auto;">Информация</h2>
+<h1 style="margin: 1rem auto;">Информация</h1>
 <div class="info__container">
     <div class="tabs">
         <!-- Заголовки табов -->
@@ -29,7 +29,7 @@
                 <div class="tabs__body">
                     {% if info.image %}
                     <div class="tabs__image">
-                        <img src="{{ info.image.url }}" alt="{{ info.title }}">
+                        {% if info.image %}<img src="{{ info.image.url }}" alt="{{ info.title }}">{% endif %}
                     </div>
                     {% endif %}
                     <div class="tabs__text">

@@ -300,7 +300,7 @@ class Product(models.Model):
             return f"{self.name} — {self.article}"
 
     def get_absolute_url(self):
-        return f"/product_page/{self.slug}/"
+        return f"/product/{self.slug}/"
 
     def clean(self):
         # мягкая защита от рассинхрона

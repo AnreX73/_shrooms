@@ -1,0 +1,26 @@
+{% comment %}
+Общие SEO-теги. Значения приходят из view/context processor:
+seo_title, seo_description, seo_canonical, seo_image, seo_og_type,
+seo_robots, seo_json_ld.
+{% endcomment %}
+<title>{{ seo_title|default:SITE_NAME }}</title>
+<meta name="description" content="{{ seo_description|default:SITE_DESCRIPTION }}">
+<meta name="robots" content="{{ seo_robots|default:seo_robots_default }}">
+<link rel="canonical" href="{% if seo_canonical %}{{ seo_canonical }}{% else %}{{ SITE_URL }}{{ request.path }}{% endif %}">
+
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="{{ SITE_NAME }}">
+<meta property="og:type" content="{{ seo_og_type|default:'website' }}">
+<meta property="og:title" content="{{ seo_title|default:SITE_NAME }}">
+<meta property="og:description" content="{{ seo_description|default:SITE_DESCRIPTION }}">
+<meta property="og:url" content="{% if seo_canonical %}{{ seo_canonical }}{% else %}{{ SITE_URL }}{{ request.path }}{% endif %}">
+{% if seo_image %}<meta property="og:image" content="{{ seo_image }}">{% endif %}
+
+<meta name="twitter:card" content="{% if seo_image %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ seo_title|default:SITE_NAME }}">
+<meta name="twitter:description" content="{{ seo_description|default:SITE_DESCRIPTION }}">
+{% if seo_image %}<meta name="twitter:image" content="{{ seo_image }}">{% endif %}
+
+{% if seo_json_ld %}
+<script type="application/ld+json">{{ seo_json_ld|safe }}</script>
+{% endif %}

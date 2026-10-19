@@ -7,10 +7,10 @@
             </div>
             <div class="categories-grid">
                 {% for category in categories %}
-                <a href="{% url 'shop:catalog' %}?category={{ category.id }}" class="category-card">
-                    <img src="{{ category.image.url }}" class="category-img">
+                <a href="{{ category.get_absolute_url }}" class="category-card">
+                    {% if category.image %}<img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-img">{% endif %}
                     <div class="category-overlay">
-                        <h3 class="category_name";>{{ category.name }}</h3>
+                        <h3 class="category_name">{{ category.name }}</h3>
                         {{ category.description|safe }}
                     </div>
                 </a>

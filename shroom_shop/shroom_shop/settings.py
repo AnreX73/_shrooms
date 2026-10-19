@@ -17,8 +17,7 @@ SECRET_KEY = config("SECRET_KEY")
 
 
 # ALLOWED_HOSTS = ['thirstily-attractive-bird.cloudpub.ru', 'localhost', '127.0.0.1']
-# DEBUG = config("DEBUG", default=False, cast=bool)
-DEBUG = True
+DEBUG = config("DEBUG", default=True, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
 
@@ -38,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
     "users.apps.UsersConfig",
     "shop.apps.ShopConfig",
     "payments.apps.PaymentsConfig",
@@ -74,6 +74,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "shroom_shop.context_processors.get_logo",
+                "shroom_shop.context_processors.site_settings",
                 "shop.context_processors.cart_context",
             ],
         },
@@ -156,6 +157,18 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- SEO ---
+# Боевой адрес сайта. Используется в canonical, Open Graph, sitemap и robots.txt.
+SITE_URL = config("SITE_URL", default="http://localhost:8002").rstrip("/")
+SITE_NAME = config("SITE_NAME", default="Лесная фея")
+SITE_DESCRIPTION = config(
+    "SITE_DESCRIPTION",
+    default=(
+        "Лесные грибы от «Лесной феи»: сушёные, маринованные и солёные — "
+        "натуральный вкус леса с доставкой."
+    ),
+)
 
 AUTHENTICATION_BACKENDS = [
     "users.authentication.EmailAuthBackend",

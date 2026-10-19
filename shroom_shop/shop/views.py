@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
 import os
 
 from django.contrib import messages
@@ -44,6 +46,7 @@ from .models import (
     ReviewMedia,
 )
 from blog.models import Post, PostBlock
+from shroom_shop.seo import absolute_url, image_url, json_ld, make_description
 
 
 def ru_plural(n, forms):
@@ -95,6 +98,32 @@ def index(request):
         .first()
     )
 
+    site_logo = SiteAssets.objects.filter(name="logo", is_active=True).first()
+    seo_image = None
+    if start_banner and start_banner.image:
+        seo_image = image_url(start_banner.image)
+    elif main_blog_post and main_blog_post.cover_image:
+        seo_image = image_url(main_blog_post.cover_image)
+    elif site_logo:
+        seo_image = image_url(site_logo.image)
+
+    organization = {
+        "@type": "Organization",
+        "name": settings.SITE_NAME,
+        "url": absolute_url("/"),
+    }
+    if site_logo:
+        logo_url = image_url(site_logo.image)
+        if logo_url:
+            organization["logo"] = logo_url
+
+    website = {
+        "@type": "WebSite",
+        "name": settings.SITE_NAME,
+        "url": absolute_url("/"),
+        "inLanguage": "ru-RU",
+    }
+
     context = {
         "start_banner": start_banner,
         "advantages": advantages,
@@ -103,6 +132,14 @@ def index(request):
         "info": info_objects,
         "contacts": contacts,
         "main_blog_post": main_blog_post,
+        "seo_title": f"{settings.SITE_NAME} — лесные грибы с доставкой",
+        "seo_description": settings.SITE_DESCRIPTION,
+        "seo_canonical": absolute_url("/"),
+        "seo_image": seo_image,
+        "seo_og_type": "website",
+        "seo_json_ld": json_ld(
+            {"@context": "https://schema.org", "@graph": [organization, website]}
+        ),
     }
 
     return render(request, "shop/index.html", context)
@@ -124,8 +161,16 @@ def _build_remove_url(get_params, key, value=None):
     return params.urlencode()
 
 
-def catalog(request):
+def catalog(request, slug=None):
+    category_obj = None
+    if slug:
+        category_obj = get_object_or_404(Category, slug=slug, is_active=True)
+
     data = request.GET.copy()
+    # ЧПУ категории имеет приоритет над query-параметром category.
+    if category_obj:
+        data["category"] = category_obj.pk
+
     hx_trigger_id = request.headers.get("HX-Trigger", "")
     is_htmx = bool(request.headers.get("HX-Request"))
 
@@ -348,6 +393,60 @@ def catalog(request):
                 }
             )
 
+    default_description = (
+        "Каталог лесных грибов: сушёные, маринованные, солёные и замороженные "
+        "грибы с доставкой."
+    )
+
+    if selected_category:
+        seo_canonical = absolute_url(
+            reverse("shop:category", args=[selected_category.slug])
+        )
+        seo_title = (
+            f"{selected_category.name} — купить с доставкой | {settings.SITE_NAME}"
+        )
+        seo_description = make_description(
+            selected_category.description,
+            fallback=(
+                f"{selected_category.name}: натуральные грибы от "
+                f"«{settings.SITE_NAME}» с доставкой."
+            ),
+        )
+    else:
+        seo_canonical = absolute_url(reverse("shop:catalog"))
+        seo_title = f"Каталог лесных грибов — {settings.SITE_NAME}"
+        seo_description = make_description(
+            "", fallback=default_description
+        )
+
+    breadcrumbs = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Главная",
+                "item": absolute_url("/"),
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Каталог",
+                "item": absolute_url(reverse("shop:catalog")),
+            },
+        ],
+    }
+    if selected_category:
+        breadcrumbs["itemListElement"].append(
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": selected_category.name,
+                "item": seo_canonical,
+            }
+        )
+
     context = {
         "form": form,
         "page_obj": page_obj,
@@ -363,6 +462,12 @@ def catalog(request):
         "min_weight": min_weight,
         "max_weight": max_weight,
         "total_matching": total_matching,
+        "selected_category": selected_category,
+        "seo_title": seo_title,
+        "seo_description": seo_description,
+        "seo_canonical": seo_canonical,
+        "seo_og_type": "website",
+        "seo_json_ld": json_ld(breadcrumbs),
     }
     context["total_matching_word"] = ru_plural(
         total_matching, ("товар", "товара", "товаров")
@@ -520,6 +625,88 @@ def product_page(request, slug):
         .prefetch_related(images_prefetch)
     )
 
+    image_urls = [
+        image_url(img.image)
+        for img in product_gallery
+        if img.media_type == "image" and img.image
+    ]
+    image_urls = [url for url in image_urls if url][:5]
+
+    product_url = absolute_url(product.get_absolute_url())
+    seo_title = (
+        f"{product.name} — купить за {product.final_price} ₽ | {settings.SITE_NAME}"
+    )
+    seo_description = make_description(
+        product.description,
+        fallback=(
+            f"{product.name} от «{settings.SITE_NAME}»: натуральные лесные грибы "
+            "с доставкой."
+        ),
+    )
+
+    product_schema = {
+        "@type": "Product",
+        "name": product.name,
+        "description": make_description(
+            product.description, fallback=product.name, limit=500
+        ),
+        "sku": product.article,
+        "category": product.category.name,
+        "brand": {"@type": "Brand", "name": settings.SITE_NAME},
+        "url": product_url,
+        "offers": {
+            "@type": "Offer",
+            "url": product_url,
+            "price": str(product.final_price),
+            "priceCurrency": "RUB",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": (
+                "https://schema.org/InStock"
+                if product.is_available
+                else "https://schema.org/OutOfStock"
+            ),
+        },
+    }
+    if image_urls:
+        product_schema["image"] = image_urls
+    if product.reviews_count and product.rating:
+        product_schema["aggregateRating"] = {
+            "@type": "AggregateRating",
+            "ratingValue": str(product.rating),
+            "reviewCount": product.reviews_count,
+        }
+
+    breadcrumbs = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Главная",
+                "item": absolute_url("/"),
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Каталог",
+                "item": absolute_url(reverse("shop:catalog")),
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": product.category.name,
+                "item": absolute_url(product.category.get_absolute_url()),
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
+                "name": product.name,
+                "item": product_url,
+            },
+        ],
+    }
+
     return render(
         request,
         "shop/product_page.html",
@@ -530,6 +717,17 @@ def product_page(request, slug):
             "related_products": related_products,
             "reviews": reviews,
             "hit_ids": get_hit_ids(),
+            "seo_title": seo_title,
+            "seo_description": seo_description,
+            "seo_canonical": product_url,
+            "seo_image": image_urls[0] if image_urls else None,
+            "seo_og_type": "product",
+            "seo_json_ld": json_ld(
+                {
+                    "@context": "https://schema.org",
+                    "@graph": [product_schema, breadcrumbs],
+                }
+            ),
         },
     )
 
@@ -654,6 +852,18 @@ def info_page(request):
 
     # Получаем активную вкладку из GET-параметра
     active_tab = request.GET.get("tab", None)
+    active_info = next(
+        (item for item in info_items if item.slug == active_tab), None
+    )
+
+    if active_info:
+        seo_title = f"{active_info.title} — {settings.SITE_NAME}"
+        seo_description = make_description(
+            active_info.content, fallback=settings.SITE_DESCRIPTION
+        )
+    else:
+        seo_title = f"Информация — {settings.SITE_NAME}"
+        seo_description = settings.SITE_DESCRIPTION
 
     return render(
         request,
@@ -661,6 +871,10 @@ def info_page(request):
         {
             "info_items": info_items,
             "active_tab": active_tab,
+            "seo_title": seo_title,
+            "seo_description": seo_description,
+            "seo_canonical": absolute_url(reverse("shop:info_page")),
+            "seo_og_type": "website",
         },
     )
 

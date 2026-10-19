@@ -6,9 +6,9 @@
     <div class="main_blog_post">  
           <div class="main_blog_post_image">
             {% if main_blog_post.cover_image %}
-                <img src="{{ main_blog_post.cover_image.url }}" alt="{{ main_blog_post.cover_image.alt }}">
-            {% else %}
-                <img src="{{ site_logo.image.url }}" alt="логотип">
+                <img src="{{ main_blog_post.cover_image.url }}" alt="{{ main_blog_post.title }}">
+            {% elif site_logo and site_logo.image %}
+                <img src="{{ site_logo.image.url }}" alt="{{ SITE_NAME }}">
             {% endif %}
         </div>
         <p style="text-align: justify;line-height: 1; min-width:0;">{{ main_blog_post.first_block_text|truncatechars:200 }}</p>  

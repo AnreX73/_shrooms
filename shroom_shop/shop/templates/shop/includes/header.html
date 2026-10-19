@@ -2,7 +2,7 @@
 {% block extra_css %}
 <style>
 header{
-    background-image: url("{{ header_image.image.url }}");
+    background-image: {% if header_image and header_image.image %}url("{{ header_image.image.url }}"){% else %}none{% endif %};
     width: 100%;
     height:auto;
     background-size: cover;
@@ -26,10 +26,16 @@ header{
             {% endif %}
 
    <div class="logo_wrapper">
-      <img onclick="window.location.href='{% url 'shop:index' %}'"  src="{{ site_logo.image.url }}" alt="logo">
+      {% if site_logo and site_logo.image %}
+      <img onclick="window.location.href='{% url 'shop:index' %}'"  src="{{ site_logo.image.url }}" alt="{{ SITE_NAME }} — магазин лесных грибов" role="button" tabindex="0">
+      {% else %}
+      <a href="{% url 'shop:index' %}" class="logo_text">{{ SITE_NAME }}</a>
+      {% endif %}
+      {% if basket and basket.image %}
       <div class="nice_basket">
-         <img src="{{ basket.image.url }}" alt="basket">
+         <img src="{{ basket.image.url }}" alt="Корзина">
       </div>
+      {% endif %}
    </div>
        {% include "shop/includes/user_icons.html" %}
        {% if request.path != '/catalog/' %}

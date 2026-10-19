@@ -1,5 +1,41 @@
+from django.conf import settings
 from django.core.cache import cache
 from shop.models import SiteAssets
+
+
+# Разделы, которые не должны попадать в поисковую выдачу.
+PRIVATE_URL_PREFIXES = (
+    "/admin/",
+    "/dashboard/",
+    "/users/",
+    "/order-create/",
+    "/order-success/",
+    "/payment-stub/",
+    "/review/",
+    "/reviews/",
+    "/toggle_cart/",
+    "/toggle_favorite/",
+    "/remove-from-cart/",
+    "/update-cart/",
+    "/password_reset/",
+    "/reset/",
+    "/blog/posts/",
+    "/blog/post-choice/",
+    "/blog/edit/",
+    "/blog/blocks/",
+    "/blog/images/",
+)
+
+
+def site_settings(request):
+    """Общие данные сайта для шаблонов + noindex для служебных страниц."""
+    is_private = request.path.startswith(PRIVATE_URL_PREFIXES)
+    return {
+        "SITE_URL": settings.SITE_URL,
+        "SITE_NAME": settings.SITE_NAME,
+        "SITE_DESCRIPTION": settings.SITE_DESCRIPTION,
+        "seo_robots_default": "noindex, nofollow" if is_private else "index, follow",
+    }
 
 
 def get_logo(request):

@@ -3,12 +3,23 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetDoneView
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.views.generic import TemplateView
 
+from shroom_shop.sitemaps import sitemaps
 from users.views import UserPasswordResetConfirmView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "robots.txt",
+        TemplateView.as_view(
+            template_name="robots.txt", content_type="text/plain"
+        ),
+        name="robots",
+    ),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
     path("", include("shop.urls")),
     path("users/", include("users.urls")),
     path("dashboard/", include("dashboard.urls")),

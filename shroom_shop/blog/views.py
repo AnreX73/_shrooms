@@ -1,4 +1,7 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .models import Post, PostBlock, PostImage
 from .forms import PostForm
 from django.contrib.auth import get_user_model
@@ -7,6 +10,8 @@ import uuid
 from django.contrib import messages
 import bleach
 from bleach.css_sanitizer import CSSSanitizer
+
+from shroom_shop.seo import absolute_url, image_url, json_ld, make_description
 
 
 from django.http import HttpResponse
@@ -57,7 +62,48 @@ def blog_page(request, slug):
         .order_by("-published_at")
         .exclude(id=post.id)
     )
-    context = {"posts": posts, "post": post}
+    post_text = next(
+        (
+            block.text
+            for block in post.blocks.all()
+            if block.block_type == "text" and block.text
+        ),
+        "",
+    )
+    post_url = absolute_url(reverse("blog:blog_page", args=[post.slug]))
+    published_at = post.published_at or post.created_at
+    seo_image = image_url(post.cover_image)
+
+    article = {
+        "@type": "Article",
+        "headline": post.title,
+        "description": make_description(
+            post.excerpt or post_text, fallback=settings.SITE_DESCRIPTION
+        ),
+        "datePublished": published_at.isoformat(),
+        "dateModified": published_at.isoformat(),
+        "mainEntityOfPage": post_url,
+        "author": {"@type": "Organization", "name": settings.SITE_NAME},
+        "publisher": {"@type": "Organization", "name": settings.SITE_NAME},
+        "inLanguage": "ru-RU",
+    }
+    if seo_image:
+        article["image"] = [seo_image]
+
+    context = {
+        "posts": posts,
+        "post": post,
+        "seo_title": f"{post.title} — {settings.SITE_NAME}",
+        "seo_description": make_description(
+            post.excerpt or post_text, fallback=settings.SITE_DESCRIPTION
+        ),
+        "seo_canonical": post_url,
+        "seo_image": seo_image,
+        "seo_og_type": "article",
+        "seo_json_ld": json_ld(
+            {"@context": "https://schema.org", "@graph": [article]}
+        ),
+    }
     return render(request, "blog/blog.html", context=context)
 
 

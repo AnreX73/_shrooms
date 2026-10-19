@@ -14,7 +14,7 @@
                 <div class="gallery-thumbs swiper">
                     <div class="swiper-wrapper">
                         {% for img in product_gallery %}
-                        {% if img.media_type == "image" %}
+                        {% if img.media_type == "image" and img.image %}
                         <div class="swiper-slide gallery-thumb">
                             <img src="{{ img.image.url }}" alt="{{ product.name }}" loading="lazy">
                         </div>
@@ -27,7 +27,7 @@
                 <div class="gallery-main swiper">
                     <div class="swiper-wrapper">
                         {% for img in product_gallery %}
-                        {% if img.media_type == "image" %}
+                        {% if img.media_type == "image" and img.image %}
                         <div class="swiper-slide gallery-main-slide">
                             <img src="{{ img.image.url }}" alt="{{ product.name }}">
                             <button class="favorite-btn" aria-label="Добавить в избранное" data-product-id="{{ product.id }}">
@@ -54,7 +54,7 @@
 
         <!-- Колонка 2: Описание товара -->
         <div class="product-info">
-            <h3 class="product-title">{{ product.name }}</h3>
+            <h1 class="product-title">{{ product.name }}</h1>
         <div class="rating-wrapper">
             <span class="rating-value">{{ product.rating }} </span>
             <span class="rating-badge">
@@ -164,10 +164,10 @@
                 {% for related in related_products %}
                 <a href="{{ related.get_absolute_url }}" class="related-item" title="{{ related.name }}">
                     {% with related.prefetched_images|first as main_img %}
-                    {% if main_img %}
+                    {% if main_img and main_img.image %}
                     <img src="{{ main_img.image.url }}" alt="{{ related.name }}" loading="lazy">
-                    {% else %}
-                    <img src="{% static 'img/no-image.png' %}" alt="{{ related.name }}" loading="lazy">
+                    {% elif site_logo and site_logo.image %}
+                    <img src="{{ site_logo.image.url }}" alt="{{ related.name }}" loading="lazy">
                     {% endif %}
                     {% endwith %}
                 </a>
@@ -217,22 +217,6 @@
     <p style="line-height: 1.65; color: var(--text-color, #3F4A3E); font-size: 15px; text-align: justify;">{{ product.description|safe }}</p>
     </div>
 </div>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org/",
-  "@type": "Product",
-  "name": "{{ product.name }}",
-  "description": "{{ product.description }}",
-  "image": "{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}",
-  "offers": {
-    "@type": "Offer",
-    "price": "{{ product.price }}",
-    "priceCurrency": "RUB",
-    "availability": "{% if product.in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
-  }
-}
-</script>
-
 {% endblock %}
 
 

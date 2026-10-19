@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /users/
+Disallow: /order-create/
+Disallow: /order-success/
+Disallow: /payment-stub/
+Disallow: /review/
+Disallow: /reviews/
+Disallow: /toggle_cart/
+Disallow: /toggle_favorite/
+Disallow: /remove-from-cart/
+Disallow: /update-cart/
+Disallow: /password_reset/
+Disallow: /reset/
+Disallow: /blog/posts/
+Disallow: /blog/post-choice/
+Disallow: /blog/edit/
+Disallow: /blog/blocks/
+Disallow: /blog/images/
+
+Sitemap: {{ SITE_URL }}/sitemap.xml

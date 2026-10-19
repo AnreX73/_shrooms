@@ -1,7 +1,9 @@
 
 <a href="{{ product.get_absolute_url }}"><div class="product-card" x-data="{ show: false, isFavorite: {% if product.id in user_favorite_ids %}true{% else %}false{% endif %}}">
     <div class="product-image-container" >
-        <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="product-image">
+        {% if product.main_image %}
+        <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="product-image" loading="lazy">
+        {% endif %}
 
         <button class="favorite-btn" type="button"
         @click.prevent.stop="isFavorite = !isFavorite; $nextTick(() => $dispatch('toggle-fav', isFavorite))"

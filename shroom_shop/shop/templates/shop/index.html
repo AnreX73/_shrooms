@@ -1,7 +1,5 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}Лесная фея - Главная{% endblock %}
-
 {% block content %}
 {% if start_banner.is_active %}
 <div id="startBanner" class="start_banner_wrapper" style="display: none;">
@@ -13,8 +11,8 @@
         <div class="start_banner_img">
             {% if start_banner.image %}
             <img src="{{ start_banner.image.url }}" alt="{{ start_banner.title }}">
-            {% else %}
-            <img src="{{ site_logo.image.url }}" alt=" логотип ">
+            {% elif site_logo and site_logo.image %}
+            <img src="{{ site_logo.image.url }}" alt="{{ SITE_NAME }}">
             {% endif %}
         </div>
         <div class="banner-content">{{ start_banner.content|safe }}</div>
@@ -22,6 +20,8 @@
         <button type="button" id="bannerClose" class="banner-close-btn">Закрыть</button>
     </div>
 </div>
+{% else %}
+<h1 class="visually-hidden">{{ SITE_NAME }} — лесные грибы с доставкой</h1>
 {% endif %}
 {% if main_blog_post %}
 <div class="main_blog_post_grid">
@@ -43,8 +43,8 @@
                 <div class="shroom_type_img">
                     {% if shroom_type.image %}
                     <img src="{{ shroom_type.image.url }}" alt="{{ shroom_type.name }}">
-                    {% else %}
-                    <img src="{{ site_logo.image.url }}" alt=" логотип ">
+                    {% elif site_logo and site_logo.image %}
+                    <img src="{{ site_logo.image.url }}" alt="{{ SITE_NAME }}">
                     {% endif %}
                 </div>
             </div>

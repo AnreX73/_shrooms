@@ -1,6 +1,9 @@
 {% extends "shop/base.html" %}
 {% block content %}
 <div class="catalog">
+    <h1 class="catalog__title">
+        {% if selected_category %}{{ selected_category.name }}{% else %}Каталог лесных грибов{% endif %}
+    </h1>
 
     <button type="button" class="filters-toggle" id="filters-toggle" aria-controls="catalog-filters" aria-expanded="false">
         <span class="filters-toggle__icon">⚙</span> Фильтры
