@@ -3,53 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Технические работы</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#2c412a">
+  <title>Технические работы — Лесная фея</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #7BA88E;
+      --secondary-color: #E6DFD3;
+      --accent-color: #bd5d25;
+      --text-color: #3F4A3E;
+      --dark-color: #2c412a;
+      --light-color: #C8DCC8;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0f172a;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: #e2e8f0;
+      padding: 1.5rem;
+      background-color: var(--dark-color);
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(123, 168, 142, 0.22), transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(189, 93, 37, 0.18), transparent 40%),
+        radial-gradient(circle at 50% 0%, rgba(200, 220, 200, 0.12), transparent 60%);
+      color: var(--secondary-color);
+      font-family: 'Oswald', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 400;
     }
+
     .card {
-      text-align: center;
-      padding: 3rem 2rem;
+      width: 100%;
       max-width: 480px;
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+      background: rgba(230, 223, 211, 0.06);
+      border: 1px solid rgba(230, 223, 211, 0.14);
+      border-radius: 20px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(6px);
     }
-    .icon { font-size: 4rem; margin-bottom: 1.5rem; }
-    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: .75rem; }
-    p { color: #94a3b8; line-height: 1.6; margin-bottom: .5rem; }
+
+    .mushroom {
+      font-size: 4rem;
+      line-height: 1;
+      margin-bottom: 1.25rem;
+      animation: sway 4s ease-in-out infinite;
+    }
+
+    .brand {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin-bottom: 0.85rem;
+      color: #f4efe6;
+      font-size: 1.75rem;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    p {
+      margin-bottom: 0.5rem;
+      color: #c9d2c4;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    p:last-of-type { margin-bottom: 0; }
+
+    .dots {
+      margin-top: 1.75rem;
+      line-height: 1;
+    }
+
     .dot {
       display: inline-block;
-      width: 8px; height: 8px;
-      background: #3b82f6;
+      width: 8px;
+      height: 8px;
+      margin: 0 0.25rem;
+      background: var(--primary-color);
       border-radius: 50%;
-      margin: 1.5rem .25rem 0;
       animation: pulse 1.2s ease-in-out infinite;
     }
-    .dot:nth-child(2) { animation-delay: .2s; }
-    .dot:nth-child(3) { animation-delay: .4s; }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
     @keyframes pulse {
-      0%, 100% { opacity: .3; transform: scale(.8); }
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
       50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(4deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mushroom, .dot { animation: none; }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 2.5rem 1.25rem 2rem; }
+      h1 { font-size: 1.5rem; }
+      .mushroom { font-size: 3.25rem; }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="icon">🔧</div>
+  <main class="card" role="main">
+    <div class="mushroom" aria-hidden="true">🍄</div>
+    <div class="brand">Лесная фея</div>
     <h1>Технические работы</h1>
     <p>Сайт временно недоступен.</p>
     <p>Мы уже всё чиним — скоро вернёмся!</p>
-    <div>
+    <div class="dots" aria-hidden="true">
       <span class="dot"></span>
       <span class="dot"></span>
       <span class="dot"></span>
     </div>
-  </div>
+  </main>
 </body>
 </html>
