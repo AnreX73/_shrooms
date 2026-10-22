@@ -218,3 +218,19 @@ SESSION_COOKIE_NAME = "sessionid_shroomsshop"  # убрать на деплое,
 SESSION_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
 CSRF_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
 SESSION_COOKIE_HTTPONLY = True  # Куки сессии недоступны через JavaScript
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.mail.ru"
+
+# Используем SSL и порт 465 (рекомендация Mail.ru)
+EMAIL_PORT = 465  
+EMAIL_USE_SSL = True  
+EMAIL_USE_TLS = False  # Обязательно выключаем TLS, они конфликтуют
+
+EMAIL_HOST_USER = "han2201@bk.ru"  
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")  
+
+# Адрес отправителя по умолчанию
+DEFAULT_FROM_EMAIL = "Служба поддержки <han2201@bk.ru>"
+SERVER_EMAIL = "han2201@bk.ru"
+EMAIL_SUBJECT_PREFIX = "[les-feya.ru] "
