@@ -196,12 +196,17 @@ Q_CLUSTER = {
     "name": "myshop",
     "workers": 2,
     "recycle": 500,
-    "timeout": 60,
-    "retry": 120,
+    # Сжатие видео через ffmpeg может идти дольше минуты, поэтому timeout/retry
+    # увеличены: retry должен быть больше timeout, иначе задача перезапустится.
+    "timeout": 600,
+    "retry": 900,
+    "max_attempts": 3,  # 0 = бесконечно; ограничиваем перезапуски упавших задач
     "queue_limit": 50,
     "bulk": 10,
-    "orm": "default",  # используем БД как брокер — Redis не нужен!
-    "save_limit": 1000,  # <-- Спасательный круг от переполнения
+    # Брокер Redis. Локально — WSL, в Docker переопределяется на redis://redis:6379/0.
+    # Важно: не указывать одновременно "orm", иначе ORM-брокер имеет приоритет.
+    "redis": config("REDIS_URL", default="redis://127.0.0.1:6379/0"),
+    "save_limit": 1000,
 }
 
 RU_EMAIL_PATTERN = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.ru$"

@@ -32,11 +32,37 @@ services:
     # Для сервера лучше убрать DEBUG=True отсюда и держать его только в .env
     environment:
       - DEBUG=False
+      - REDIS_URL=redis://redis:6379/0
     networks:
       - web
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .  # Тот же образ, что и web, но команда — воркер django-q
+    container_name: shroom_shop_worker
+    restart: unless-stopped
+    command: python manage.py qcluster
+    env_file:
+      - .env
+    environment:
+      - DEBUG=False
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      # Воркер обрабатывает медиа (сжатие картинок/видео) — том общий с web и nginx
+      - media_volume:/app/media
+    networks:
+      - web
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_started  # web выполняет migrate, воркеру нужны таблицы django_q
 
   adminer:
     image: adminer
@@ -72,6 +98,22 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    # Брокер задач django-q2. Наружу порт не открываем — доступ только внутри сети web.
+    image: redis:7-alpine
+    container_name: shroom_shop_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - web
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
 networks:
   web:
     driver: bridge
@@ -80,6 +122,7 @@ networks:
 
 volumes:
   postgres_data:
+  redis_data:
   static_volume:
   media_volume:
 
