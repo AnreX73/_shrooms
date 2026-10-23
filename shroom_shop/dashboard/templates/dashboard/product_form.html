@@ -4,13 +4,7 @@
 
 {% block content %}
 <div class="page-header">
-  <button class="users-btn" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">В панель администратора</button>
   <h1>{{ title }}</h1>
-  {% if is_edit %}
-    <a href="{% url 'dashboard:product_media' product.pk %}" class="btn btn-secondary">
-      🖼 Медиафайлы
-    </a>
-  {% endif %}
 </div>
 
 <div class="steps-indicator">
@@ -172,10 +166,18 @@
   </div>
 
   <div class="form-actions">
-    <a href="{% url 'dashboard:admin_area' %}" class="btn btn-ghost">← Назад</a>
+    <button type="button" class="btn btn-admin admi_link"
+            onclick="window.location.href='{% url 'dashboard:admin_area' %}'">
+      В панель администратора
+    </button>
     <button type="submit" class="btn btn-primary">
       {% if is_edit %}Сохранить и перейти к медиа →{% else %}Создать и добавить фото →{% endif %}
     </button>
+    {% if is_edit %}
+      <a href="{% url 'dashboard:product_media' product.pk %}" class="btn btn-secondary">
+        🖼 Медиафайлы
+      </a>
+    {% endif %}
   </div>
 </form>
 
@@ -239,7 +241,8 @@
   }
   .form-image-container img { width: 100%; height: auto; object-fit: cover; }
 
-  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .page-header h1 { flex: 1; text-align: center; }
 
   .steps-indicator {
     display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;
@@ -300,14 +303,74 @@
   .form-field--checkbox label { font-weight: 400; margin: 0; cursor: pointer; }
   .form-field--checkbox input { width: 16px; height: 16px; cursor: pointer; }
 
-  .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-bottom: 2rem; }
-  .btn { padding: .6rem 1.25rem; border-radius: 7px; font-size: .9rem; font-weight: 500; cursor: pointer; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: .4rem; }
-  .btn-primary { background: var(--primary-color); color: #fff; }
-  .btn-primary:hover { background: var(--accent-color); }
-  .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
-  .btn-secondary:hover { background: #e5e7eb; }
-  .btn-ghost { background: transparent; color: #6b7280; }
-  .btn-ghost:hover { color: #374151; }
+  /* ── Блок действий: закреплён в левом верхнем углу ── */
+  .form-actions {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .5rem;
+    width: 230px;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Сброс глобального «деревянного» .btn из main.css */
+  .form-actions .btn {
+    position: static;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: .65rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+    font-size: .9rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .form-actions .btn:hover,
+  .form-actions .btn:active { transform: none; filter: none; }
+
+  .form-actions .btn-primary { background: var(--primary-color); color: #fff; }
+  .form-actions .btn-primary:hover { background: var(--accent-color); color: #fff; }
+  .form-actions .btn-secondary { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
+  .form-actions .btn-secondary:hover { background: #e5e7eb; color: #374151; }
+
+  /* Кнопка возврата в панель — цвета прежнего .users-btn */
+  .form-actions .btn-admin { background: var(--light-color); color: var(--text-color); border-color: transparent; }
+  .form-actions .btn-admin:hover { background: var(--accent-color); color: #fff; }
+
+  /* Освобождаем место под закреплённый блок на десктопе */
+  @media (min-width: 992px) {
+    .all_content_wrapper {
+      padding-left: clamp(0px, calc(937px - 50vw), 254px);
+    }
+  }
+
+  /* На узких экранах кнопки возвращаются в поток — под форму */
+  @media (max-width: 991px) {
+    .form-actions {
+      position: static;
+      width: 100%;
+      margin-top: 1.5rem;
+      padding-bottom: 2rem;
+    }
+  }
 </style>
 
 <script>

@@ -8,21 +8,10 @@
     <h1>{{ title }}</h1>
     <p class="subtitle">{{ product.article }} · {{ product.category }}</p>
   </div>
-  <div class="header-actions">
-    <a href="{% url 'dashboard:product_edit' product.pk %}" class="btn btn-secondary">✏️ Редактировать товар</a>
-    <a href="{{ product.get_absolute_url }}" target="_blank" class="btn btn-ghost">👁 Смотреть на сайте</a>
-  </div>
 </div>
 
 {# Шаги #}
 <div class="steps-indicator">
-  <div class="step available">
-    <a href="{% url 'dashboard:product_edit' product.pk %}" style="display:contents">
-      <span class="step-num">1</span>
-      <span class="step-label">Основная информация</span>
-    </a>
-  </div>
-  <div class="step-arrow">→</div>
   <div class="step active">
     <span class="step-num">2</span>
     <span class="step-label">Фото и видео</span>
@@ -87,8 +76,13 @@
 </div>
 
 <div class="form-actions">
-  <a href="{% url 'dashboard:admin_area' %}" class=" btn-ghost">← В панель</a>
-  <a href="{{ product.get_absolute_url }}" target="_blank" class="users-btn">
+   <a href="{% url 'dashboard:admin_area' %}" class="btn btn-admin">
+    В панель администратора
+  </a>
+  <a href="{% url 'dashboard:product_edit' product.pk %}" class="btn btn-secondary">
+    ✏️ Основная информация
+  </a>
+  <a href="{{ product.get_absolute_url }}" target="_blank" class="btn btn-primary">
     Готово · смотреть товар →
   </a>
 </div>
@@ -97,7 +91,7 @@
 
 <div id="duplicate-section" class="mt-4">
     {% if all_done %}
-    <button id="copy-to-duplicates" class="">
+    <button id="copy-to-duplicates" class="btn btn-primary">
         Применить медиа к дубликатам
     </button>
     {% else %}
@@ -108,7 +102,80 @@
 </div>
 {% endif %}
 
+<style>
+  /* ── Кнопки: сброс глобального «деревянного» .btn из main.css ── */
+  .btn {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: .65rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+    font-size: .9rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    text-decoration: none;
+    cursor: pointer;
+    background: #f3f4f6;
+    color: #374151;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover,
+  .btn:active { transform: none; filter: none; }
 
+  .btn-primary { background: var(--primary-color); color: #fff; }
+  .btn-primary:hover { background: var(--accent-color); color: #fff; }
+  .btn-secondary { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
+  .btn-secondary:hover { background: #e5e7eb; color: #374151; }
+  .btn-admin { background: var(--light-color); color: var(--text-color); border-color: transparent; }
+  .btn-admin:hover { background: var(--accent-color); color: #fff; }
+
+  /* ── Блок действий: закреплён в левом верхнем углу ── */
+  .form-actions {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .5rem;
+    width: 230px;
+    margin: 0;
+    padding: 0;
+  }
+  .form-actions .btn { width: 100%; }
+
+  /* Освобождаем место под закреплённый блок на десктопе */
+  @media (min-width: 992px) {
+    .all_content_wrapper {
+      padding-left: clamp(0px, calc(937px - 50vw), 254px);
+    }
+  }
+
+  /* На узких экранах кнопки возвращаются в поток — под галерею */
+  @media (max-width: 991px) {
+    .form-actions {
+      position: static;
+      width: 100%;
+      margin-top: 1.5rem;
+    }
+  }
+
+  /* Кнопка применения медиа к дубликатам */
+  #duplicate-section { margin-top: 1.5rem; }
+  .text-muted { color: #6b7280; font-size: .9rem; }
+</style>
 
 {% endblock %}
 
