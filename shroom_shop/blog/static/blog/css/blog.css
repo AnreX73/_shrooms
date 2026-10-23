@@ -208,6 +208,18 @@
     transform: translateY(1px);
 }
 
+/* Ряд кнопок под формой поста */
+#post-form .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+#post-form .form-actions button[type="submit"] {
+    margin-top: 0;
+}
+
 /* «Удалить» внутри блока */
 .block-row > button[type="button"], .del_img_btn {
     padding: 8px 14px;
@@ -719,6 +731,23 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+}
+
+.post_choice_link{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.post_choice_block form{
+    margin: 0;
+}
+
+.post_choice_empty{
+    color: var(--text-color);
 }
 
 .post_choice_block:nth-child(odd){

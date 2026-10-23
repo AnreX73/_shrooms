@@ -1,20 +1,26 @@
  <!-- Categories Section -->
-    <section class="categories" id="categories">
-        
+    <section class="categories{% if not main_blog_post %} categories--wide{% endif %}" id="categories">
+
             <div class="section-title">
                 <h2 style="text-align: center;margin-bottom: 20px; margin-top: 20px;">Категории товаров</h2>
-                
+
             </div>
-            <div class="categories-grid">
+            <div class="categories-grid" data-count="{{ categories|length }}">
                 {% for category in categories %}
                 <a href="{{ category.get_absolute_url }}" class="category-card">
-                    {% if category.image %}<img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-img">{% endif %}
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-img">
+                    {% elif site_logo and site_logo.image %}
+                    <img src="{{ site_logo.image.url }}" alt="{{ category.name }}" class="category-img">
+                    {% else %}
+                    <div class="category-img category-img--empty"></div>
+                    {% endif %}
                     <div class="category-overlay">
                         <h3 class="category_name">{{ category.name }}</h3>
                         {{ category.description|safe }}
                     </div>
                 </a>
-                {% endfor %}              
+                {% endfor %}
             </div>
-       
+
     </section>

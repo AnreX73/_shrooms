@@ -6,20 +6,40 @@
 {% block content %}
 <div class="all_content_wrapper">
     <input type="button" class="users-btn" value="в админпанель" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="dash-alert {% if message.tags == 'error' %}dash-alert--error{% else %}dash-alert--ok{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="post_choice_container">
         <h1>Выберете пост для редактирования</h1>
-        <div class="post_choice_wrapper"> 
-            
+        <div class="post_choice_wrapper">
+
             {% for post in posts %}
-                <a href="{% url 'blog:post_edit' post.pk %}" class="post_choice_block">
-                    <h4>{{ post.title }}</h4>
-                    {% if post.cover_image %}
-                        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
-                    {% else %}
-                        <img src="{{ site_logo.image.url }}" alt="Default cover">
-                    {% endif %}
-                </a>
+                <div class="post_choice_block">
+                    <a href="{% url 'blog:post_edit' post.pk %}" class="post_choice_link">
+                        <h4>{{ post.title }}</h4>
+                        {% if post.cover_image %}
+                            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+                        {% else %}
+                            <img src="{{ site_logo.image.url }}" alt="Default cover">
+                        {% endif %}
+                    </a>
+                    <form method="post"
+                          action="{% url 'blog:post_delete' post.pk %}"
+                          onsubmit="return confirm('Удалить пост «{{ post.title|escapejs }}»? Это действие необратимо.');">
+                        {% csrf_token %}
+                        <button type="submit" class="users-btn dash-btn-sm dash-btn--danger">Удалить</button>
+                    </form>
+                </div>
+            {% empty %}
+                <p class="post_choice_empty">Постов пока нет.</p>
             {% endfor %}
+
         </div>
     </div>
 </div>

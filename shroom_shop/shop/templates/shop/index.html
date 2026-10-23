@@ -24,7 +24,7 @@
 <h1 class="visually-hidden">{{ SITE_NAME }} — лесные грибы с доставкой</h1>
 {% endif %}
 {% if main_blog_post %}
-<div class="main_blog_post_grid">
+<div class="main_blog_post_grid{% if categories|length > 3 %} main_blog_post_grid--wide{% endif %}">
     {% include 'shop/includes/post_preview.html' %}
     {% include 'shop/includes/categories.html' %}
 </div>

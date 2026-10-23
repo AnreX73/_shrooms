@@ -7,6 +7,14 @@
 <h1>{% if post.title %}{{ post.title }}{% else %}Новый пост{% endif %}</h1>
 <input type="button" class="users-btn" value="в админпанель" onclick="window.location.href='{% url 'dashboard:admin_area' %}'">
 
+{% if messages %}
+    {% for message in messages %}
+        <div class="dash-alert {% if message.tags == 'error' %}dash-alert--error{% else %}dash-alert--ok{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
 <!-- Форма полей самого поста: title, slug, excerpt, cover_image, category, is_published, published_at -->
 <form method="post" enctype="multipart/form-data" id="post-form">
     {% csrf_token %}
@@ -27,7 +35,7 @@
         </button>
 
         {% if post.is_published %}
-            <button type="submit" name="action" value="unpublish">Снять с публикации</button>
+            <button type="submit" name="action" value="unpublish" class="dash-btn--danger">Снять с публикации</button>
         {% else %}
             <button type="submit" name="action" value="publish">Готово — опубликовать</button>
         {% endif %}

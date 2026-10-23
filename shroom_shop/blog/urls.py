@@ -9,6 +9,7 @@ urlpatterns = [
     path("<slug:slug>/", views.blog_page, name="blog_page"),
     path("posts/new/", views.post_create, name="post_create"),
     path("edit/<int:pk>/", views.post_edit, name="post_edit"),
+    path("posts/<int:pk>/delete/", views.post_delete, name="post_delete"),
     path("posts/<int:post_id>/blocks/add/", views.block_add, name="block_add"),
     path(
         "posts/<int:pk>/main-page/confirm/",

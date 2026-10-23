@@ -16,6 +16,7 @@ from shroom_shop.seo import absolute_url, image_url, json_ld, make_description
 
 from django.http import HttpResponse
 from django.db.models import Max, Prefetch
+from django.views.decorators.http import require_POST
 from django_q.tasks import async_task
 
 from django.db import transaction
@@ -139,18 +140,54 @@ def post_edit(request, pk):
 
             post = post_form.save()
 
-            if post.is_published:
+            if action == "publish":
                 messages.success(request, "Пост опубликован")
                 return redirect("blog:blog_page", slug=post.slug)
+
+            if action == "unpublish":
+                messages.success(request, "Пост снят с публикации")
             else:
-                messages.info(request, "Черновик сохранён")
-                return redirect("dashboard:post_list")
+                messages.info(
+                    request,
+                    "Пост сохранён"
+                    if post.is_published
+                    else "Черновик сохранён",
+                )
+            return redirect("blog:post_edit", pk=post.pk)
     else:
         post_form = PostForm(instance=post)
 
     return render(
         request, "blog/post_edit.html", {"post_form": post_form, "post": post}
     )
+
+
+def _delete_file(field_file):
+    """Удаляет файл с диска, не трогая запись в БД."""
+    if field_file:
+        field_file.delete(save=False)
+
+
+@superuser_required
+@require_POST
+def post_delete(request, pk):
+    """Удаляет пост вместе с файлами (обложка, медиа блоков и галерей)."""
+    post = get_object_or_404(Post, pk=pk)
+    title = post.title
+
+    for block in post.blocks.prefetch_related("images"):
+        _delete_file(block.single_image)
+        _delete_file(block.video_original)
+        _delete_file(block.video_processed)
+        _delete_file(block.video_poster)
+        for image in block.images.all():
+            _delete_file(image.image)
+
+    _delete_file(post.cover_image)
+    post.delete()  # блоки, галереи и картинки удаляются каскадом
+
+    messages.success(request, f"Пост «{title}» удалён.")
+    return redirect("blog:post_choice")
 
 
 def block_add(request, post_id):

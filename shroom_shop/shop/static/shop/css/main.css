@@ -560,6 +560,7 @@ input[type="radio"] {
 .shrooms_types{
     
     max-width: var(--all-content-width);
+    width: 100%;
     margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
@@ -571,6 +572,8 @@ a.shroom_type_box {
     grid-template-columns: 1fr 3fr;
     gap: 1rem;
     width: clamp(20rem, 6.41vw + 18.558rem, 26.25rem);
+    max-width: calc(100% - 20px); /* margin: 10px с каждой стороны */
+    min-width: 0;
     min-height: fit-content;
     margin: 10px;
     text-align: center;
@@ -609,6 +612,23 @@ a.shroom_type_box {
     margin: 0.5rem 0;
     font-size: clamp(0.813rem, 0.192vw + 0.769rem, 1rem);
     text-align: justify;
+}
+
+@media (max-width: 480px) {
+    a.shroom_type_box {
+        grid-template-columns: 1fr;
+    }
+
+    .shroom_type_img {
+        width: clamp(120px, 40vw, 200px);
+        height: auto;
+        aspect-ratio: 1 / 1;
+        margin: 0 auto;
+    }
+
+    .shroom_type_content > p {
+        text-align: left;
+    }
 }
 /*табы в профиле*/
 .tabs-wrapper{
@@ -1126,7 +1146,7 @@ margin: 0 auto;
     right: 0;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
     color: white;
-    padding: 30px;
+    padding: clamp(12px, 2vw, 30px);
 }
 
 .category-overlay h3 {
@@ -1145,6 +1165,97 @@ margin: 0 auto;
     1px -1px 0 black,
     -1px 1px 0 black,
     1px 1px 0 black;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.category-img--empty {
+    background: var(--light-color);
+}
+
+/* Широкий режим: блог сверху, категории во всю ширину одним рядом */
+.main_blog_post_grid--wide {
+    grid-template-columns: 1fr;
+}
+
+.main_blog_post_grid--wide .main_blog_post_wrapper {
+    justify-self: center;
+    width: 100%;
+}
+
+.main_blog_post_grid--wide .main_blog_post {
+    flex-direction: row;
+    width: 100%;
+    max-width: 640px;
+}
+
+.main_blog_post_grid--wide .main_blog_post_image {
+    width: 320px;
+    height: auto;
+    aspect-ratio: 5 / 3;
+    flex: 0 0 auto;
+}
+
+.main_blog_post_grid--wide .categories-grid,
+.categories--wide .categories-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--cat-gap, clamp(3px, 2vw, 24px));
+    width: 100%;
+}
+
+.main_blog_post_grid--wide .category-card,
+.categories--wide .category-card {
+    flex: 0 1 calc(
+        (100% - (var(--cat-cols, 3) - 1) * var(--cat-gap, clamp(3px, 2vw, 24px))) /
+        var(--cat-cols, 3) - 1px
+    );
+    width: auto;
+    max-width: none;
+}
+
+.categories-grid[data-count="1"] { --cat-cols: 1; }
+.categories-grid[data-count="2"] { --cat-cols: 2; }
+.categories-grid[data-count="4"] { --cat-cols: 4; }
+.categories-grid[data-count="5"] { --cat-cols: 5; }
+.categories-grid[data-count="6"] { --cat-cols: 6; }
+
+/* без блога секция занимает всю ширину — не даём карточкам разрастаться */
+.categories--wide .categories-grid[data-count="1"] { max-width: 420px; margin-inline: auto; }
+.categories--wide .categories-grid[data-count="2"] { max-width: 700px; margin-inline: auto; }
+.categories--wide .categories-grid[data-count="3"] { max-width: 1000px; margin-inline: auto; }
+
+@media (max-width: 1199px) {
+    .categories-grid[data-count="4"] { --cat-cols: 4; }
+    .categories-grid[data-count="5"],
+    .categories-grid[data-count="6"] { --cat-cols: 3; }
+
+    /* на планшете не даём карточкам раздуваться на всю ширину */
+    .main_blog_post_grid--wide .category-card,
+    .categories--wide .category-card { max-width: 280px; }
+}
+
+@media (max-width: 899px) {
+    .categories-grid[data-count="4"] { --cat-cols: 2; }
+}
+
+@media (max-width: 599px) {
+    .categories-grid[data-count="4"],
+    .categories-grid[data-count="5"],
+    .categories-grid[data-count="6"] { --cat-cols: 2; }
+
+    .main_blog_post_grid--wide .main_blog_post {
+        flex-direction: column;
+        max-width: 500px;
+    }
+
+    .main_blog_post_grid--wide .main_blog_post_image {
+        width: 100%;
+        aspect-ratio: 5 / 3;
+    }
 }
 
 
