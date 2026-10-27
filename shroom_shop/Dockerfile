@@ -15,16 +15,15 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install gunicorn
 
 COPY . .
 
 EXPOSE 8000
 
-# Запускаем migrate, collectstatic и gunicorn.
+# Запускаем migrate, collectstatic и daphne (ASGI нужен для WebSocket-чата).
 # Воркер django-q (qcluster) вынесен в отдельный сервис worker в compose.yml.
 CMD ["sh", "-c", "\
     python manage.py migrate && \
     python manage.py collectstatic --no-input && \
-    gunicorn --workers 3 --bind 0.0.0.0:8000 shroom_shop.wsgi:application \
+    daphne -b 0.0.0.0 -p 8000 shroom_shop.asgi:application \
 "]

@@ -24,6 +24,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("dashboard/", include("dashboard.urls")),
     path("blog/", include("blog.urls")),
+    path("chat/", include("chat.urls")),
     # path("notifications/", include("notifications.urls")),
     # path("payments/", include("payments.urls")),
     path(

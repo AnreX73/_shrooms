@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 from decouple import Csv, config
 
@@ -31,6 +32,7 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
+    "chat.apps.ChatConfig",
     "users.apps.UsersConfig",
     "shop.apps.ShopConfig",
     "payments.apps.PaymentsConfig",
@@ -82,6 +85,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "shroom_shop.wsgi.application"
+ASGI_APPLICATION = "shroom_shop.asgi.application"
 
 
 # Database
@@ -192,6 +196,30 @@ PASSWORD_HASHERS = [
 ]
 
 
+REDIS_URL = config("REDIS_URL", default="redis://127.0.0.1:6379/0")
+
+# WebSocket-слой Channels и общий кэш (лимит сообщений в чате) живут в Redis.
+# Кэш выносим в соседнюю БД, чтобы не пересекаться с брокером django-q.
+_redis_parts = urlsplit(REDIS_URL)
+REDIS_CACHE_URL = urlunsplit(
+    (_redis_parts.scheme, _redis_parts.netloc, "/1", _redis_parts.query, _redis_parts.fragment)
+)
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [REDIS_URL]},
+    }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_CACHE_URL,
+    }
+}
+
+
 Q_CLUSTER = {
     "name": "myshop",
     "workers": 2,
@@ -205,7 +233,7 @@ Q_CLUSTER = {
     "bulk": 10,
     # Брокер Redis. Локально — WSL, в Docker переопределяется на redis://redis:6379/0.
     # Важно: не указывать одновременно "orm", иначе ORM-брокер имеет приоритет.
-    "redis": config("REDIS_URL", default="redis://127.0.0.1:6379/0"),
+    "redis": REDIS_URL,
     "save_limit": 1000,
 }
 
@@ -220,8 +248,12 @@ CSRF_COOKIE_NAME = "csrftoken_shroomsshop"  # убрать на деплое, х
 
 SESSION_COOKIE_NAME = "sessionid_shroomsshop"  # убрать на деплое, хотя это не критично, т.к. сессия генерируется заново при каждой авторизации
 
-SESSION_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
-CSRF_COOKIE_SECURE = True  # Включить на деплое, чтобы куки передавались только по HTTPS
+# На проде (DEBUG=False) куки только по HTTPS. В dev сайт открывают по http,
+# и Secure-cookie браузер не сохранит — тогда /chat/start/ отдаёт 403.
+# Переопределяется переменной COOKIE_SECURE.
+COOKIE_SECURE = config("COOKIE_SECURE", default=not DEBUG, cast=bool)
+SESSION_COOKIE_SECURE = COOKIE_SECURE
+CSRF_COOKIE_SECURE = COOKIE_SECURE
 SESSION_COOKIE_HTTPONLY = True  # Куки сессии недоступны через JavaScript
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

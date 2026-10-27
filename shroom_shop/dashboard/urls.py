@@ -8,14 +8,12 @@ from dashboard.views import (
     ProductEditView,
     ProductMediaView,
     ProductSearchView,
-    admin_chat_view,
     archived_orders,
     delete_product_media,
     media_item_partial,
     media_status,
     order_archive,
     reorder_product_media,
-    request_photo,
     upload_product_media,
   
 )
@@ -113,19 +111,10 @@ urlpatterns = [
     path("stock-sync/", views.stock_sync, name="stock_sync"),
     path("stock-sync/import/", views.stock_import, name="stock_import"),
     path("stock-sync/export/", views.stock_export, name="stock_export"),
-    path("admin-chat/<int:session_id>/", admin_chat_view, name="admin_chat"),
     # Синхронизация цен (новое)
     path("price-sync/", views.price_sync, name="price_sync"),
     path("price-sync/import/", views.price_import, name="price_import"),
     path("price-sync/export/", views.price_export, name="price_export"),
-    path(
-        "admin-chat/<int:session_id>/request-photo/",
-        request_photo,
-        name="request_photo",
-    ),
-    path("chat/", views.chat_list, name="chat_list"),
-    path("chat/<int:session_id>/", views.admin_chat, name="admin_chat"),
-    path("<int:session_id>/close/", views.close_session, name="chat_close"),
     path("orders/<int:order_id>/note/", views.order_save_note, name="order_save_note"),
     path(
         "orders/<int:order_id>/note/form/",

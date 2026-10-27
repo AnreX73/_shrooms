@@ -26,7 +26,6 @@ from django_q.tasks import async_task
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-from notifications.models import ChatMessage, ChatSession
 from shop.models import Category, Info, MushroomType, Order, OrderItem, Product, ProductImage
 
 from .forms import CategoryForm, MushroomTypeForm, ProductForm, StartBannerForm
@@ -621,88 +620,6 @@ class ProductSearchView(SuperuserRequiredMixin, View):
                 "query": query,
             },
         )
-
-    # admin_chat view — добавить отдельным url /admin-chat/<session_id>/
-
-
-@login_required
-def admin_chat_view(request, session_id):
-    if not request.user.is_staff:
-        return redirect("/")
-    session = get_object_or_404(ChatSession, id=session_id)
-    return render(request, "dashboard/admin_chat.html", {"session": session})
-
-
-# Кнопка "Запросить фото" — отдельный endpoint
-@login_required
-@require_POST
-def request_photo(request, session_id):
-    if not request.user.is_staff:
-        return JsonResponse({"error": "forbidden"}, status=403)
-    session = get_object_or_404(ChatSession, id=session_id)
-    ChatMessage.objects.create(
-        session=session,
-        sender="admin",
-        msg_type="photo_request",
-        text="Пожалуйста, пришлите фото для подбора оттенка",
-    )
-    return JsonResponse({"status": "ok"})
-    # сигнал сам отправит push клиенту
-
-
-@login_required
-def chat_list(request):
-    if not request.user.is_staff:
-        return redirect("/")
-
-    sessions = (
-        ChatSession.objects.filter(is_active=True)
-        .select_related("client")
-        .order_by("-created_at")
-    )
-
-    from django.db.models import Count, Q
-
-    sessions = sessions.annotate(
-        unread_count=Count(
-            "messages", filter=Q(messages__sender="client", messages__is_read=False)
-        )
-    )
-
-    total_unread = sum(s.unread_count for s in sessions)
-
-    return render(
-        request,
-        "dashboard/chat_list.html",
-        {
-            "sessions": sessions,
-            "total_unread": total_unread,
-        },
-    )
-
-
-@login_required
-def admin_chat(request, session_id):
-    if not request.user.is_staff:
-        return redirect("/")
-    session = get_object_or_404(ChatSession, id=session_id)
-
-    # помечаем все сообщения от клиента как прочитанные
-    session.messages.filter(sender="client", is_read=False).update(is_read=True)
-
-    return render(request, "dashboard/admin_chat.html", {"session": session})
-
-
-@login_required
-@require_POST
-def close_session(request, session_id):
-    if not request.user.is_staff:
-        return JsonResponse({"error": "forbidden"}, status=403)
-    session = get_object_or_404(ChatSession, id=session_id)
-    session.is_active = False
-    session.save()
-    return JsonResponse({"status": "ok"})
-
 
 @staff_member_required
 def stock_sync(request):
