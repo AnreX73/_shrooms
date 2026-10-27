@@ -92,9 +92,10 @@ def index(request):
     )
     contacts = Contact.objects.all()
     main_blog_post = (
-        Post.objects.filter(published_on_main_page=True)
+        Post.objects.filter(is_published=True)
         .annotate(first_block_text=Subquery(first_text_subquery))
         .only("title", "slug", "cover_image")
+        .order_by("-published_on_main_page", "-published_at")
         .first()
     )
 

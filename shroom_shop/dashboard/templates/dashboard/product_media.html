@@ -181,13 +181,6 @@
 
 {% block extra_js %}
 <script>
-(function() {
-    const mediaDropzone = document.getElementById('media-dropzone');
-    if (!mediaDropzone) return;
-    Dropzone.autoDiscover = false;
-    // ... остальной код ...
-})();
-
 {% if has_duplicates %}
 (function() {
     function attachCopyHandler() {

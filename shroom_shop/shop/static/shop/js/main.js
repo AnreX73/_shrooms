@@ -1,3 +1,22 @@
+// ── CSRF: единая точка получения токена ───────────────────────────────────────
+// Имя cookie CSRF задаётся в settings.py (CSRF_COOKIE_NAME), поэтому читать
+// «csrftoken» напрямую нельзя. Приоритет — токен из разметки (meta/input).
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta && meta.content) return meta.content;
+
+    const input = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (input && input.value) return input.value;
+
+    return getCookie('csrftoken_shroomsshop') || getCookie('csrftoken') || '';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // ── 1. СТАРТОВЫЙ БАННЕР ─────────────────────────────────────────────────────
     const banner = document.getElementById('startBanner');
@@ -112,18 +131,10 @@ document.addEventListener('DOMContentLoaded', function() {
     Dropzone.autoDiscover = false;
 
     const _urls = document.getElementById('js-urls').dataset;
-    const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')
-                       ? document.querySelector('[name=csrfmiddlewaretoken]').value
-                       : getCookie('csrftoken');
+    const CSRF_TOKEN = getCsrfToken();
 
     function buildUrl(template, id) {
         return template.replace('/0/', `/${id}/`);
-    }
-
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
     const dz = new Dropzone('#media-dropzone', {
@@ -164,9 +175,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressFill.style.width = '0%';
             });
 
-            this.on('error', (file, msg) => {
+            this.on('error', (file, msg, xhr) => {
                 progressWrap.classList.add('hidden');
-                alert('Ошибка загрузки: ' + (typeof msg === 'string' ? msg : msg.error || 'неизвестная ошибка'));
+                progressFill.style.width = '0%';
+
+                // HTML-страницу ошибки Django (403/500) в alert не показываем
+                if (xhr && xhr.status === 403) {
+                    console.error('403: CSRF-проверка не пройдена', xhr.responseText);
+                    alert('Доступ запрещён (403). Обновите страницу и попробуйте снова.');
+                } else if (typeof msg === 'string' && msg.trim().startsWith('<')) {
+                    console.error('Ошибка загрузки:', msg);
+                    alert('Не удалось загрузить файл: ошибка сервера. Подробности в консоли.');
+                } else {
+                    alert('Ошибка загрузки: ' + (typeof msg === 'string' ? msg : (msg && msg.error) || 'неизвестная ошибка'));
+                }
+
                 this.removeFile(file);
             });
         }
@@ -229,13 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
     Dropzone.autoDiscover = false;
 
     const _urls = document.getElementById('js-review-urls').dataset;
-    const CSRF_TOKEN = getCookie('csrftoken');
-
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
+    const CSRF_TOKEN = getCsrfToken();
 
     function buildUrl(template, id) {
         return template.replace('/0/', `/${id}/`);
