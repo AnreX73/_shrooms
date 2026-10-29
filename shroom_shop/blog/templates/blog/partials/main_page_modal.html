@@ -17,24 +17,37 @@
                 </button>
             </div>
 
-        {% elif current %}
-            <h3>Заменить пост на главной?</h3>
-            <p>Сейчас на главной странице показывается «{{ current.title }}».</p>
-            <p>Вы хотите заменить его на «{{ post.title }}»?</p>
+        {% elif not post.is_published %}
+            <h3>Пост пока не опубликован</h3>
+            <p>Черновик нельзя закрепить на главной. Сначала опубликуйте пост.</p>
             <div class="modal-actions">
-                <button type="button" @click="open = false">Отмена</button>
-                <button type="button"
-                        hx-post="{% url 'blog:main_page_toggle' post.pk %}"
-                        hx-target="#main-page-toggle-{{ post.pk }}"
-                        hx-swap="outerHTML"
-                        @click="open = false">
-                    Да, заменить
-                </button>
+                <button type="button" @click="open = false">Понятно</button>
+            </div>
+
+        {% elif limit_reached %}
+            <h3>На главной уже {{ limit }} поста</h3>
+            <p>Сейчас закреплены:</p>
+            <ul class="modal-pinned-list">
+                {% for pinned_post in pinned %}
+                    <li>{{ pinned_post.title }}</li>
+                {% endfor %}
+            </ul>
+            <p>Снимите один из постов с главной, чтобы освободить место.</p>
+            <div class="modal-actions">
+                <button type="button" @click="open = false">Понятно</button>
             </div>
 
         {% else %}
             <h3>Показать пост на главной?</h3>
-            <p>Сейчас на главной странице ничего не закреплено.</p>
+            <p>Сейчас закреплено: {{ pinned_count }} из {{ limit }}.</p>
+            {% if pinned %}
+                <ul class="modal-pinned-list">
+                    {% for pinned_post in pinned %}
+                        <li>{{ pinned_post.title }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <p>Пост «{{ post.title }}» появится на главной странице.</p>
             <div class="modal-actions">
                 <button type="button" @click="open = false">Отмена</button>
                 <button type="button"

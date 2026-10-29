@@ -158,7 +158,16 @@ def post_edit(request, pk):
         post_form = PostForm(instance=post)
 
     return render(
-        request, "blog/post_edit.html", {"post_form": post_form, "post": post}
+        request,
+        "blog/post_edit.html",
+        {
+            "post_form": post_form,
+            "post": post,
+            "main_page_count": Post.objects.filter(
+                published_on_main_page=True
+            ).count(),
+            "main_page_limit": Post.MAX_MAIN_PAGE_POSTS,
+        },
     )
 
 
@@ -247,35 +256,72 @@ def block_delete(request, pk):
     return HttpResponse("")  # htmx просто уберёт элемент из DOM
 
 
+@superuser_required
 def main_page_confirm(request, pk):
-    """Возвращает модалку — либо с предупреждением о замене, либо сразу подтверждение снятия."""
+    """Возвращает модалку: снять с главной, добавить или сообщить о лимите."""
     post = get_object_or_404(Post, pk=pk)
-    current = Post.objects.filter(published_on_main_page=True).exclude(pk=pk).first()
+    pinned = (
+        Post.objects.filter(published_on_main_page=True)
+        .exclude(pk=pk)
+        .order_by("-published_at")
+    )
+    limit = Post.MAX_MAIN_PAGE_POSTS
+    pinned_count = pinned.count() + (1 if post.published_on_main_page else 0)
+
     return render(
         request,
         "blog/partials/main_page_modal.html",
         {
             "post": post,
-            "current": current,
+            "pinned": pinned,
+            "pinned_count": pinned_count,
+            "limit": limit,
+            "limit_reached": not post.published_on_main_page
+            and pinned_count >= limit,
         },
     )
 
 
+@superuser_required
 def main_page_toggle(request, pk):
     """Реальное переключение — минуя Post.save(), чтобы не задевать slug/published_at логику."""
     post = get_object_or_404(Post, pk=pk)
+    limit = Post.MAX_MAIN_PAGE_POSTS
+    error = ""
 
-    with transaction.atomic():
-        if post.published_on_main_page:
-            Post.objects.filter(pk=pk).update(published_on_main_page=False)
-        else:
-            Post.objects.filter(published_on_main_page=True).exclude(pk=pk).update(
-                published_on_main_page=False
+    if post.published_on_main_page:
+        Post.objects.filter(pk=pk).update(published_on_main_page=False)
+    elif not post.is_published:
+        error = "Сначала опубликуйте пост."
+    else:
+        with transaction.atomic():
+            pinned_count = (
+                Post.objects.select_for_update()
+                .filter(published_on_main_page=True)
+                .exclude(pk=pk)
+                .count()
             )
-            Post.objects.filter(pk=pk).update(published_on_main_page=True)
+            if pinned_count >= limit:
+                error = (
+                    f"На главной уже {limit} поста. "
+                    "Снимите один из них, чтобы освободить место."
+                )
+            else:
+                Post.objects.filter(pk=pk).update(published_on_main_page=True)
 
     post.refresh_from_db(fields=["published_on_main_page"])
-    return render(request, "blog/partials/main_page_button.html", {"post": post})
+    return render(
+        request,
+        "blog/partials/main_page_button.html",
+        {
+            "post": post,
+            "main_page_count": Post.objects.filter(
+                published_on_main_page=True
+            ).count(),
+            "main_page_limit": limit,
+            "error": error,
+        },
+    )
 
 
 def block_reorder(request):
@@ -325,4 +371,14 @@ def upload_single_image(request, pk):
 @superuser_required
 def post_choice(request):
     posts = Post.objects.all()
-    return render(request, "blog/post_choice.html", {"posts": posts})
+    return render(
+        request,
+        "blog/post_choice.html",
+        {
+            "posts": posts,
+            "main_page_count": Post.objects.filter(
+                published_on_main_page=True
+            ).count(),
+            "main_page_limit": Post.MAX_MAIN_PAGE_POSTS,
+        },
+    )

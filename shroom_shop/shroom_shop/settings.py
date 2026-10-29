@@ -271,3 +271,10 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "Служба поддержки <han2201@bk.ru>"
 SERVER_EMAIL = "han2201@bk.ru"
 EMAIL_SUBJECT_PREFIX = "[les-feya.ru] "
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "DISABLE_PANELS": {
+        "debug_toolbar.panels.templates.TemplatesPanel",
+    },
+}

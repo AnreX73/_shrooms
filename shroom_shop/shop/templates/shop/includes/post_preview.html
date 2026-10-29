@@ -1,18 +1,25 @@
 <section class="main_blog_post_wrapper">
     <div class="section-title">
-         <h2 style="text-align: center;margin-bottom: 10px; margin-top: 20px;">Блог</h2>          
+        <h2 style="text-align: center; margin-bottom: 10px; margin-top: 20px;">Блог</h2>
     </div>
-    <h3 style="text-align:center;">{{ main_blog_post.title }}</h3>
-    <div class="main_blog_post">  
-          <div class="main_blog_post_image">
-            {% if main_blog_post.cover_image %}
-                <img src="{{ main_blog_post.cover_image.url }}" alt="{{ main_blog_post.title }}">
-            {% elif site_logo and site_logo.image %}
-                <img src="{{ site_logo.image.url }}" alt="{{ SITE_NAME }}">
-            {% endif %}
-        </div>
-        <p style="text-align: justify;line-height: 1; min-width:0;">{{ main_blog_post.first_block_text|truncatechars:200 }}</p>  
+    <div class="main_blog_post_list">
+        {% for post in main_blog_posts %}
+            <article class="main_blog_post">
+                <a class="main_blog_post_image" href="{% url 'blog:blog_page' post.slug %}">
+                    {% if post.cover_image %}
+                        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+                    {% elif site_logo and site_logo.image %}
+                        <img src="{{ site_logo.image.url }}" alt="{{ SITE_NAME }}">
+                    {% endif %}
+                </a>
+                <h3 class="main_blog_post_title">
+                    <a href="{% url 'blog:blog_page' post.slug %}">{{ post.title }}</a>
+                </h3>
+                {% if post.first_block_text %}
+                    <p class="main_blog_post_text">{{ post.first_block_text|striptags|truncatechars:160 }}</p>
+                {% endif %}
+                <a href="{% url 'blog:blog_page' post.slug %}" class="read_more_btn">Читать далее</a>
+            </article>
+        {% endfor %}
     </div>
-    <a href="{% url 'blog:blog_page' main_blog_post.slug %}" class="read_more_btn">Читать далее</a> 
 </section>
- 

@@ -17,12 +17,20 @@
 
     <div class="post_choice_container">
         <h1>Выберете пост для редактирования</h1>
+        {% if main_page_limit %}
+            <p class="post_choice_main_page_count">
+                На главной: {{ main_page_count }} из {{ main_page_limit }}
+            </p>
+        {% endif %}
         <div class="post_choice_wrapper">
 
             {% for post in posts %}
                 <div class="post_choice_block">
                     <a href="{% url 'blog:post_edit' post.pk %}" class="post_choice_link">
                         <h4>{{ post.title }}</h4>
+                        {% if post.published_on_main_page %}
+                            <span class="post_choice_badge">На главной</span>
+                        {% endif %}
                         {% if post.cover_image %}
                             <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
                         {% else %}

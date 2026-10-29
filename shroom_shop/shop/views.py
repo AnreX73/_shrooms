@@ -91,20 +91,18 @@ def index(request):
         Info.objects.all().exclude(name="Стартовый баннер").order_by("created_at")
     )
     contacts = Contact.objects.all()
-    main_blog_post = (
-        Post.objects.filter(is_published=True)
+    main_blog_posts = list(
+        Post.objects.filter(is_published=True, published_on_main_page=True)
         .annotate(first_block_text=Subquery(first_text_subquery))
-        .only("title", "slug", "cover_image")
-        .order_by("-published_on_main_page", "-published_at")
-        .first()
+        .order_by("-published_at")[: Post.MAX_MAIN_PAGE_POSTS]
     )
 
     site_logo = SiteAssets.objects.filter(name="logo", is_active=True).first()
     seo_image = None
     if start_banner and start_banner.image:
         seo_image = image_url(start_banner.image)
-    elif main_blog_post and main_blog_post.cover_image:
-        seo_image = image_url(main_blog_post.cover_image)
+    elif main_blog_posts and main_blog_posts[0].cover_image:
+        seo_image = image_url(main_blog_posts[0].cover_image)
     elif site_logo:
         seo_image = image_url(site_logo.image)
 
@@ -132,7 +130,7 @@ def index(request):
         "categories": categories,
         "info": info_objects,
         "contacts": contacts,
-        "main_blog_post": main_blog_post,
+        "main_blog_posts": main_blog_posts,
         "seo_title": f"{settings.SITE_NAME} — лесные грибы с доставкой",
         "seo_description": settings.SITE_DESCRIPTION,
         "seo_canonical": absolute_url("/"),

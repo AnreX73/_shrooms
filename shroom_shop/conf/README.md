@@ -26,16 +26,25 @@ bash conf/maintenance.sh status   # узнать текущий режим
 
 Скрипт копирует нужный шаблон в `conf/nginx.conf` и перезапускает контейнер `nginx`.
 
+Что делает скрипт, чтобы не уронить сайт:
+
+- если `conf/nginx.conf` пропал (например, свежий клон репозитория) — восстанавливает его из `nginx.working.conf`;
+- если на месте `conf/nginx.conf` оказался пустой каталог (артефакт Docker) — удаляет его и восстанавливает файл;
+- перед перезапуском проверяет новый конфиг через `nginx -t` внутри контейнера и при ошибке возвращает прежний конфиг;
+- делает `docker compose up -d --no-deps nginx` (применяет изменения compose, например новые volume, но не поднимает `web`/`db`) и затем `restart` — новый конфиг гарантированно прочитан.
+
+`status` дополнительно сообщает, запущен ли контейнер `nginx`.
+
 ### Вручную (если скрипт недоступен)
 
 ```bash
 # включить заглушку
 cp conf/nginx.maintenance.conf conf/nginx.conf
-docker compose restart nginx
+docker compose exec nginx nginx -t && docker compose restart nginx
 
 # вернуть сайт
 cp conf/nginx.working.conf conf/nginx.conf
-docker compose restart nginx
+docker compose exec nginx nginx -t && docker compose restart nginx
 ```
 
 ## Как это работает

@@ -659,6 +659,34 @@
     justify-content: flex-end;
 }
 
+.modal-pinned-list {
+    margin: 10px 0 0 20px;
+    color: var(--text-color);
+}
+
+.main-page-error {
+    margin-top: 8px;
+    color: #b3261e;
+    font-size: 0.85rem;
+    max-width: 260px;
+}
+
+.post_choice_main_page_count {
+    margin: 0 0 12px;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.post_choice_badge {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.75rem;
+}
+
 .rt-toolbar {
     position: absolute;
     display: flex;

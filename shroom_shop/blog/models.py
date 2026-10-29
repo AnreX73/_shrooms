@@ -1,5 +1,4 @@
 from django.db import models
-from django.db import transaction
 from .utils import make_slug
 from django.utils import timezone
 
@@ -33,14 +32,7 @@ class Post(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["published_on_main_page"],
-                condition=models.Q(published_on_main_page=True),
-                name="unique_post_on_main_page",
-            ),
-        ]
+    MAX_MAIN_PAGE_POSTS = 3
 
     def save(self, *args, **kwargs):
         old_is_published = False
@@ -61,15 +53,29 @@ class Post(models.Model):
             self.published_at = timezone.now()
         if not self.is_published:
             self.published_at = None
+            # черновик не может висеть на главной
+            self.published_on_main_page = False
 
-        if self.published_on_main_page:
-            with transaction.atomic():
-                Post.objects.select_for_update().filter(
-                    published_on_main_page=True
-                ).exclude(pk=self.pk).update(published_on_main_page=False)
-                super().save(*args, **kwargs)
-        else:
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if not self.published_on_main_page:
+            return
+
+        pinned_others = (
+            Post.objects.filter(published_on_main_page=True)
+            .exclude(pk=self.pk)
+            .count()
+        )
+        if pinned_others >= self.MAX_MAIN_PAGE_POSTS:
+            raise ValidationError(
+                {
+                    "published_on_main_page": (
+                        "На главной странице может быть не больше "
+                        f"{self.MAX_MAIN_PAGE_POSTS} постов."
+                    )
+                }
+            )
 
 
 class PostBlock(models.Model):

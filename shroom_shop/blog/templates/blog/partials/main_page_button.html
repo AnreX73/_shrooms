@@ -5,14 +5,17 @@
                 hx-get="{% url 'blog:main_page_confirm' post.pk %}"
                 hx-target="#modal-container"
                 hx-swap="innerHTML">
-            ✓ Показывается на главной
+            ✓ На главной{% if main_page_limit %} ({{ main_page_count }} из {{ main_page_limit }}){% endif %}
         </button>
     {% else %}
         <button type="button"
                 hx-get="{% url 'blog:main_page_confirm' post.pk %}"
                 hx-target="#modal-container"
                 hx-swap="innerHTML">
-            Показать на главной
+            Показать на главной{% if main_page_limit %} ({{ main_page_count }} из {{ main_page_limit }}){% endif %}
         </button>
+    {% endif %}
+    {% if error %}
+        <p class="main-page-error">{{ error }}</p>
     {% endif %}
 </div>
