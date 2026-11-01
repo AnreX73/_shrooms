@@ -104,8 +104,8 @@
         {% if messages %}
             {% for message in messages %}
                 <div style="padding:10px 14px;border-radius:8px;margin:10px 0;
-                            background:{% if message.tags == 'error' %}#fde4e4;color:#a02020
-                                       {% else %}#e4f6e8;color:#1e6b32{% endif %};">
+                            background:{% if message.tags == 'error' %}var(--danger-bg, #fde4e4);color:var(--danger-text, #a02020)
+                                       {% else %}var(--success-bg, #e4f6e8);color:var(--success-text, #1e6b32){% endif %};">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -145,7 +145,7 @@
                     {% if banner and banner.image %}
                         <img src="{{ banner.image.url }}" alt="preview" id="imagePreview">
                     {% else %}
-                        <span style="color:#999;">Изображение не выбрано</span>
+                        <span style="color:var(--muted-color, #999);">Изображение не выбрано</span>
                     {% endif %}
                 </div>
             </div>

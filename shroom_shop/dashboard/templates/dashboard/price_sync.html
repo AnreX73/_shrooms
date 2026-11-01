@@ -243,7 +243,7 @@
   {# ── ЭКСПОРТ ─────────────────────────────────────────────────── #}
   <div class="stock-card export">
     <div class="stock-card-title">↓ Выгрузить цены в Excel</div>
-    <p style="font-size:14px;color:#7d8590;margin-bottom:16px;">
+    <p style="font-size:14px;color:var(--muted-color, #7d8590);margin-bottom:16px;">
       Скачивает текущие цены на сайте (<code>final_price</code>) по всем товарам.
     </p>
     <a href="{% url 'dashboard:price_export' %}" class="btn-stock btn-export">↓ Скачать Excel</a>

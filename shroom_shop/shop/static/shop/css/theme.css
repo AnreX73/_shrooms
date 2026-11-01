@@ -1,0 +1,1168 @@
+/* ==========================================================================
+   Тёмная тема — витрина, блог и чат.
+
+   Файл подключается после main.css / blog.css / chat.css и только
+   переопределяет цвета, поэтому светлая тема остаётся без изменений.
+   Активная тема задаётся атрибутом data-theme на <html>:
+   data-theme="light" | data-theme="dark".
+   ========================================================================== */
+
+:root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f7f3ed;
+    --surface-3: #ede6db;
+    --surface-raised: #ffffff;
+
+    --border-color: #e2ddd2;
+    --border-strong: #cfc7b8;
+
+    --muted-color: #6b7280;
+    --heading-color: #2c412a;
+    --code-bg: #f4f1ea;
+    --header-bg: #7BA88E;
+
+    --success-bg: #e8f3ec;
+    --success-text: #3a7a50;
+    --success-border: #b8d8c4;
+
+    --info-bg: #e8eef8;
+    --info-text: #3a5a9a;
+    --info-border: #b8cce8;
+
+    --danger-bg: #f8e8e8;
+    --danger-text: #9a3a3a;
+    --danger-border: #e8b8b8;
+
+    --warning-bg: #f8f0e0;
+    --warning-text: #8a6020;
+    --warning-border: #e0cc98;
+
+    --purple-bg: #f0e8f8;
+    --purple-text: #6a3a9a;
+    --purple-border: #d0b8e8;
+}
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+
+    --bg: #121813;
+    --surface: #1b221c;
+    --surface-2: #222b23;
+    --surface-3: #2a342b;
+    --surface-raised: #1f2720;
+
+    --border-color: #364138;
+    --border-strong: #4a564b;
+
+    --muted-color: #a2ada1;
+    --heading-color: #edf2ea;
+    --code-bg: #2a342b;
+    --header-bg: #1b2b1f;
+
+    --text-color: #dfe6dc;
+    --primary-color: #4f7f65;
+    --secondary-color: #2b352c;
+    --accent-color: #ad5a2c;
+    --light-color: #242d25;
+    --dark-color: #0e140f;
+    --transparent-color: rgba(223, 230, 220, 0.58);
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --active-shadow: 0 6px 20px rgba(93, 145, 117, 0.32);
+
+    --select-bg: #202822;
+    --select-color: #e4ebe1;
+    --select-border: 1px solid #3a453b;
+    --select-focus-color: #5d9175;
+    --select-arrow-color: #a2ada1;
+
+    --success-bg: #1b3327;
+    --success-text: #8fd3a8;
+    --success-border: #2f5741;
+
+    --info-bg: #1c2a3d;
+    --info-text: #9bc0f0;
+    --info-border: #2f4666;
+
+    --danger-bg: #36201f;
+    --danger-text: #f0a09a;
+    --danger-border: #5a3230;
+
+    --warning-bg: #332a1a;
+    --warning-text: #e6c17a;
+    --warning-border: #5a4a2a;
+
+    --purple-bg: #2a2038;
+    --purple-text: #c3a8e8;
+    --purple-border: #473560;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text-color);
+}
+
+/* --------------------------------------------------------------------------
+   Переключатель темы
+   -------------------------------------------------------------------------- */
+
+.user_icons_wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: clamp(1.875rem, 0.641vw + 1.731rem, 2.5rem);
+    height: clamp(1.875rem, 0.641vw + 1.731rem, 2.5rem);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.theme-toggle:active {
+    transform: scale(0.94);
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.theme-toggle svg {
+    width: 58%;
+    height: 58%;
+    pointer-events: none;
+}
+
+.theme-toggle .icon-sun {
+    display: none;
+}
+
+.theme-toggle .icon-moon {
+    display: block;
+}
+
+html[data-theme="dark"] .theme-toggle .icon-sun {
+    display: block;
+}
+
+html[data-theme="dark"] .theme-toggle .icon-moon {
+    display: none;
+}
+
+/* Переключатель на страницах админки: нет цветной шапки,
+   поэтому кнопка рисуется на фоне страницы. */
+.dashboard_topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0.75rem 1rem 0;
+}
+
+.dashboard_topbar .theme-toggle {
+    background: rgba(63, 74, 62, 0.1);
+    color: var(--text-color, #3f4a3e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard_topbar .theme-toggle:hover {
+    background: rgba(63, 74, 62, 0.2);
+}
+
+.dashboard_topbar .theme-toggle:focus-visible {
+    outline-color: var(--primary-color, #7ba88e);
+}
+
+html[data-theme="dark"] .dashboard_topbar .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .dashboard_topbar .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   Шапка, подвал, служебные элементы
+   -------------------------------------------------------------------------- */
+
+html[data-theme="dark"] header {
+    background-blend-mode: multiply;
+}
+
+html[data-theme="dark"] .nav_icons_wrapper,
+html[data-theme="dark"] .user_icons_wrapper {
+    background-color: rgba(10, 16, 11, 0.45);
+}
+
+html[data-theme="dark"] .filters-overlay {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="dark"] .filters-toggle,
+html[data-theme="dark"] .catalog__filters-title,
+html[data-theme="dark"] .pagination a,
+html[data-theme="dark"] .chip {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .catalog__filters.is-open {
+    box-shadow: 8px 0 24px rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="dark"] .delivery-date {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .footer-col h3,
+html[data-theme="dark"] .footer-links a:hover {
+    color: #cfe0d2;
+}
+
+/* Текстовые акценты: на тёмном фоне используем более светлые оттенки,
+   чем у заливок кнопок и бейджей. */
+html[data-theme="dark"] input[type="text"]:focus ~ label,
+html[data-theme="dark"] input[type="password"]:focus ~ label,
+html[data-theme="dark"] input[type="password"]:valid ~ label,
+html[data-theme="dark"] .brand-link a,
+html[data-theme="dark"] .category-link a,
+html[data-theme="dark"] .close_icon,
+html[data-theme="dark"] .tabs__btn.active,
+html[data-theme="dark"] .details-btn,
+html[data-theme="dark"] .nice-btn:hover,
+html[data-theme="dark"] .admin-btn:hover,
+html[data-theme="dark"] .dropzone-custom .dz-link,
+html[data-theme="dark"] .dropzone-custom .dz-success-mark {
+    color: #8ec3a4;
+}
+
+html[data-theme="dark"] .details-btn {
+    border-color: #6fa98a;
+}
+
+html[data-theme="dark"] .current-price,
+html[data-theme="dark"] .rating-value,
+html[data-theme="dark"] .stars-filled,
+html[data-theme="dark"] .product_page_discount,
+html[data-theme="dark"] .main_blog_post_title a:hover,
+html[data-theme="dark"] .read_more_btn:hover,
+html[data-theme="dark"] .chip:hover,
+html[data-theme="dark"] #price-slider-value,
+html[data-theme="dark"] .form_error,
+html[data-theme="dark"] .cart_delete_btn,
+html[data-theme="dark"] .nice-btn,
+html[data-theme="dark"] .admin-btn,
+html[data-theme="dark"] .btn-review,
+html[data-theme="dark"] .filters-reset:hover,
+html[data-theme="dark"] .block-row > button[type="button"],
+html[data-theme="dark"] .del_img_btn,
+html[data-theme="dark"] .dropzone-custom .dz-remove {
+    color: #e09a6d;
+}
+
+html[data-theme="dark"] .payment-stub {
+    background-color: var(--surface-2);
+    border-color: var(--border-color);
+}
+
+/* --------------------------------------------------------------------------
+   Формы, авторизация, оформление заказа
+   -------------------------------------------------------------------------- */
+
+html[data-theme="dark"] input[type="text"],
+html[data-theme="dark"] input[type="password"],
+html[data-theme="dark"] textarea {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] input[type="text"],
+html[data-theme="dark"] input[type="password"] {
+    border-bottom-color: var(--border-strong);
+    background-color: transparent;
+}
+
+html[data-theme="dark"] input[type="text"] ~ label,
+html[data-theme="dark"] input[type="password"] ~ label,
+html[data-theme="dark"] .radio-group,
+html[data-theme="dark"] .file_group {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .radio-group,
+html[data-theme="dark"] .file_group {
+    border-bottom-color: var(--border-strong);
+}
+
+html[data-theme="dark"] .bar:before,
+html[data-theme="dark"] .bar:after {
+    background: var(--primary-color);
+}
+
+html[data-theme="dark"] .form-group input,
+html[data-theme="dark"] .form-group textarea {
+    background: var(--light-color);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .form-group input:focus,
+html[data-theme="dark"] .form-group textarea:focus {
+    border-color: var(--primary-color);
+}
+
+html[data-theme="dark"] .form-error,
+html[data-theme="dark"] #post-form .errorlist,
+html[data-theme="dark"] .main-page-error {
+    color: var(--danger-text);
+}
+
+html[data-theme="dark"] .checkout-summary,
+html[data-theme="dark"] .order-card {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .summary-title,
+html[data-theme="dark"] .summary-total {
+    color: var(--heading-color);
+}
+
+html[data-theme="dark"] .summary-item__name,
+html[data-theme="dark"] .summary-item__price,
+html[data-theme="dark"] .order-item__name,
+html[data-theme="dark"] .order-item__total {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .summary-item__qty,
+html[data-theme="dark"] .summary-row,
+html[data-theme="dark"] .order-item__qty,
+html[data-theme="dark"] .review-done,
+html[data-theme="dark"] .confirm-row dt {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .summary-divider,
+html[data-theme="dark"] .confirm-row,
+html[data-theme="dark"] .order-item,
+html[data-theme="dark"] .order-card__header,
+html[data-theme="dark"] .order-card__footer {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .order-item__img {
+    background: var(--surface-3);
+}
+
+html[data-theme="dark"] .confirm-banner {
+    background: var(--warning-bg);
+    border-left-color: var(--warning-border);
+    color: var(--warning-text);
+}
+
+html[data-theme="dark"] .btn-back {
+    border-color: var(--border-strong);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .btn-checkout {
+    color: #fff;
+}
+
+html[data-theme="dark"] .order-card__number,
+html[data-theme="dark"] .order-card__date,
+html[data-theme="dark"] .order-card__total {
+    color: #fff;
+}
+
+html[data-theme="dark"] .order-card__delivery {
+    color: #d6e6d8;
+}
+
+html[data-theme="dark"] .btn-review {
+    background: var(--surface-2);
+    border-color: var(--border-color);
+    color: var(--accent-color);
+}
+
+html[data-theme="dark"] .btn-review:hover {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+html[data-theme="dark"] .badge--delivered,
+html[data-theme="dark"] .badge--paid,
+html[data-theme="dark"] .badge--confirmed {
+    background: var(--success-bg);
+    border-color: var(--success-border);
+    color: var(--success-text);
+}
+
+html[data-theme="dark"] .badge--shipped,
+html[data-theme="dark"] .badge--refunded {
+    background: var(--info-bg);
+    border-color: var(--info-border);
+    color: var(--info-text);
+}
+
+html[data-theme="dark"] .badge--cancelled,
+html[data-theme="dark"] .badge--failed {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+    color: var(--danger-text);
+}
+
+html[data-theme="dark"] .badge--pending {
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+    color: var(--warning-text);
+}
+
+html[data-theme="dark"] .badge--processing {
+    background: var(--purple-bg);
+    border-color: var(--purple-border);
+    color: var(--purple-text);
+}
+
+html[data-theme="dark"] .review-product-header {
+    background: var(--surface-2);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .review-product-name {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .dash-alert--ok {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+html[data-theme="dark"] .dash-alert--error {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* --------------------------------------------------------------------------
+   Карточки товаров, каталог, модальные окна
+   -------------------------------------------------------------------------- */
+
+html[data-theme="dark"] .product-card {
+    background: var(--surface);
+    box-shadow: inset 0 0 74px 30px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .shroom_type_img,
+html[data-theme="dark"] .btn-buy-now {
+    background: var(--surface);
+}
+
+html[data-theme="dark"] .product_info_popup,
+html[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .review_popup_content {
+    background: var(--surface);
+}
+
+html[data-theme="dark"] .product-title,
+html[data-theme="dark"] .product-rating {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .old-price,
+html[data-theme="dark"] .stars-empty {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .favorite-btn {
+    background: rgba(27, 34, 28, 0.88);
+}
+
+html[data-theme="dark"] .favorite-btn svg {
+    stroke: var(--text-color);
+}
+
+html[data-theme="dark"] .discount-badge {
+    box-shadow: 0px 0px 30px 8px rgba(194, 106, 58, 0.35);
+}
+
+html[data-theme="dark"] .modal-overlay {
+    background: rgba(0, 0, 0, 0.65);
+}
+
+html[data-theme="dark"] .modal-content {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="dark"] .related-item:hover {
+    border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] .tab-list {
+    border-bottom-color: var(--border-color);
+}
+
+html[data-theme="dark"] .tab-btn,
+html[data-theme="dark"] .tabs__btn,
+html[data-theme="dark"] .spec-label,
+html[data-theme="dark"] .cart_spec_value,
+html[data-theme="dark"] .tabs__text {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .tab-btn:hover,
+html[data-theme="dark"] .tab-btn.active,
+html[data-theme="dark"] .tabs__btn:hover {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .tabs__btn:hover {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] .tabs__header {
+    border-bottom-color: var(--border-color);
+}
+
+@media (max-width: 600px) {
+    html[data-theme="dark"] .tabs__btn {
+        border-color: var(--border-color);
+    }
+}
+
+html[data-theme="dark"] .admin_edit_product,
+html[data-theme="dark"] .wait_for_arrival,
+html[data-theme="dark"] .admin_clone_product,
+html[data-theme="dark"] .admin_updated_product {
+    background: rgba(27, 34, 28, 0.75);
+}
+
+html[data-theme="dark"] .admin_btns_block:nth-child(odd) {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] .swiper-button-next:hover,
+html[data-theme="dark"] .swiper-button-prev:hover {
+    background-color: var(--surface);
+}
+
+html[data-theme="dark"] .swiper-button-next:hover svg,
+html[data-theme="dark"] .swiper-button-prev:hover svg {
+    color: var(--text-color);
+    fill: var(--text-color);
+}
+
+html[data-theme="dark"] .popup_close,
+html[data-theme="dark"] .review-limits,
+html[data-theme="dark"] .review-limits strong {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .reviewPopupSwiper .swiper-slide {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] .reviewPopupSwiper .swiper-button-next,
+html[data-theme="dark"] .reviewPopupSwiper .swiper-button-prev {
+    background: rgba(27, 34, 28, 0.85);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .reviewPopupSwiper .swiper-pagination-bullet {
+    background: var(--border-strong);
+}
+
+html[data-theme="dark"] .review_content:target {
+    border-color: #ffc107;
+}
+
+/* --------------------------------------------------------------------------
+   Загрузка изображений, отзывы
+   -------------------------------------------------------------------------- */
+
+html[data-theme="dark"] .dropzone-custom {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] .dropzone-custom:hover,
+html[data-theme="dark"] .dropzone-custom.dz-drag-hover {
+    background: var(--surface-3);
+    border-color: var(--primary-color);
+}
+
+html[data-theme="dark"] .dz-text,
+html[data-theme="dark"] .upload-progress__text,
+html[data-theme="dark"] .media-empty {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .dz-subtext,
+html[data-theme="dark"] .dz-hint,
+html[data-theme="dark"] .dash-sub {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .dz-link {
+    color: #7fb0ff;
+}
+
+html[data-theme="dark"] .upload-progress__bar {
+    background: var(--border-color);
+}
+
+html[data-theme="dark"] .media-item {
+    background: var(--surface-2);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .upload-error {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+    color: var(--danger-text);
+}
+
+/* --------------------------------------------------------------------------
+   Блог
+   -------------------------------------------------------------------------- */
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6 {
+    color: var(--heading-color);
+}
+
+html[data-theme="dark"] .post-editor input[type="text"],
+html[data-theme="dark"] .post-editor input[type="url"],
+html[data-theme="dark"] .post-editor input[type="datetime-local"],
+html[data-theme="dark"] .post-editor textarea,
+html[data-theme="dark"] .post-editor select,
+html[data-theme="dark"] #post-form,
+html[data-theme="dark"] .block-row,
+html[data-theme="dark"] .modal-box,
+html[data-theme="dark"] .rt-editable,
+html[data-theme="dark"] .dropzone-custom .dz-preview {
+    background: var(--surface);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] #post-form label,
+html[data-theme="dark"] .dropzone-custom .dz-text {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] #post-form input[type="file"],
+html[data-theme="dark"] .dropzone-custom .dz-preview {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] #blocks-container + button[type="button"],
+html[data-theme="dark"] .post_edit_link a {
+    color: var(--text-color);
+    border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] #blocks-container + button[type="button"]:hover {
+    background: rgba(93, 145, 117, 0.16);
+    border-color: var(--primary-color);
+    color: var(--heading-color);
+}
+
+html[data-theme="dark"] #blocks-container .sortable-ghost,
+html[data-theme="dark"] .gallery-thumbs .sortable-ghost,
+html[data-theme="dark"] .dropzone-custom:hover,
+html[data-theme="dark"] .dropzone-custom.dz-drag-hover {
+    background: rgba(93, 145, 117, 0.16);
+}
+
+html[data-theme="dark"] .post-gallery .caption {
+    color: var(--muted-color);
+}
+
+/* --------------------------------------------------------------------------
+   Чат
+   -------------------------------------------------------------------------- */
+
+html[data-theme="dark"] .support-chat,
+html[data-theme="dark"] .chat-operator {
+    --chat-bg: #1b221c;
+    --chat-panel-2: #222b23;
+    --chat-border: #364138;
+    --chat-border-strong: #4a564b;
+    --chat-muted: #a2ada1;
+    --chat-accent-soft: #3a2a20;
+    --chat-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="dark"] .chat-error,
+html[data-theme="dark"] .chat-open-page:hover,
+html[data-theme="dark"] .chat-item.is-awaiting strong,
+html[data-theme="dark"] .chat-back:hover {
+    color: #e09a6d;
+}
+
+/* --------------------------------------------------------------------------
+   Админка (dashboard)
+
+   Разметка админки собрана из компонентов main.css и локальных <style>
+   в шаблонах. Классы main.css переопределяем напрямую, локальные —
+   через body.dashboard, чтобы не задеть витрину.
+   -------------------------------------------------------------------------- */
+
+html[data-theme="dark"] body.dashboard {
+    background-color: var(--bg);
+}
+
+html[data-theme="dark"] .dash-table {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+html[data-theme="dark"] .dash-table__row {
+    border-top-color: var(--border-color);
+}
+
+html[data-theme="dark"] .dash-table__row--odd {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] .dash-table__row--even {
+    background: var(--surface);
+}
+
+html[data-theme="dark"] .dash-table__cell code {
+    background: var(--code-bg);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] .dash-link {
+    color: #8ec3a4;
+}
+
+html[data-theme="dark"] .dash-thumb {
+    background: var(--surface-3);
+}
+
+html[data-theme="dark"] .dash-thumb--empty {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .dash-pill--on {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+html[data-theme="dark"] .dash-pill--off {
+    background: var(--surface-3);
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] .dash-btn--danger {
+    background: var(--danger-bg) !important;
+    color: var(--danger-text) !important;
+}
+
+html[data-theme="dark"] .dash-btn--danger:hover {
+    background: #b3453f !important;
+    color: #fff !important;
+}
+
+html[data-theme="dark"] .dash-btn--warn {
+    background: var(--warning-bg) !important;
+    color: var(--warning-text) !important;
+}
+
+html[data-theme="dark"] .dash-btn--warn:hover {
+    background: var(--accent-color) !important;
+    color: #fff !important;
+}
+
+html[data-theme="dark"] .dash-form-card {
+    background: var(--surface);
+}
+
+html[data-theme="dark"] .dash-check {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] .dash-image-preview {
+    background: var(--surface-2);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .dash-form-actions {
+    border-top-color: var(--border-color);
+}
+
+html[data-theme="dark"] .dash-danger-zone {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+}
+
+html[data-theme="dark"] .dash-danger-zone__text {
+    color: var(--danger-text);
+}
+
+html[data-theme="dark"] .dash-error,
+html[data-theme="dark"] body.dashboard .errors {
+    color: var(--danger-text);
+}
+
+html[data-theme="dark"] .order_manager_block,
+html[data-theme="dark"] .order_manager_btns {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .text-muted {
+    color: var(--muted-color);
+}
+
+/* --- Загрузка цен и остатков --- */
+
+html[data-theme="dark"] body.dashboard .stock-subtitle,
+html[data-theme="dark"] body.dashboard .stock-card-title,
+html[data-theme="dark"] body.dashboard .discount-hint,
+html[data-theme="dark"] body.dashboard .muted,
+html[data-theme="dark"] body.dashboard .fmt-table th {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .stock-card {
+    background: var(--surface);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .stock-card.info {
+    border-top-color: var(--border-strong);
+}
+
+html[data-theme="dark"] body.dashboard .discount-chip label {
+    background: var(--surface-2);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .discount-chip input:checked + label {
+    background: #1d6fe0;
+    border-color: #1d6fe0;
+    color: #fff;
+}
+
+html[data-theme="dark"] body.dashboard #price-dropzone,
+html[data-theme="dark"] body.dashboard #stock-dropzone {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] body.dashboard #price-dropzone:hover,
+html[data-theme="dark"] body.dashboard #price-dropzone.dz-drag-hover,
+html[data-theme="dark"] body.dashboard #stock-dropzone:hover,
+html[data-theme="dark"] body.dashboard #stock-dropzone.dz-drag-hover {
+    background: var(--surface-3);
+    border-color: var(--primary-color);
+}
+
+html[data-theme="dark"] body.dashboard .dz-hint p,
+html[data-theme="dark"] body.dashboard .dz-hint small {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .btn-back {
+    background: var(--surface-2);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .result-box.ok {
+    background: var(--success-bg);
+    border-color: var(--success-border);
+    color: var(--success-text);
+}
+
+html[data-theme="dark"] body.dashboard .result-box.warn {
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+    color: var(--warning-text);
+}
+
+html[data-theme="dark"] body.dashboard .result-box.err {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+    color: var(--danger-text);
+}
+
+html[data-theme="dark"] body.dashboard .fmt-table th {
+    background: var(--surface-2);
+    border-bottom-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .fmt-table td {
+    border-bottom-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .col-tag.dim {
+    background: var(--surface-3);
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .col-tag,
+html[data-theme="dark"] body.dashboard .btn-import {
+    background: #1d6fe0;
+}
+
+html[data-theme="dark"] body.dashboard .btn-export {
+    background: #2f7d46;
+}
+
+html[data-theme="dark"] body.dashboard .dz-hint p strong {
+    color: #7fb0ff;
+}
+
+html[data-theme="dark"] body.dashboard .note-box {
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+    color: var(--warning-text);
+}
+
+/* --- Баннер на главной --- */
+
+html[data-theme="dark"] body.dashboard .banner-card {
+    background: var(--surface);
+}
+
+html[data-theme="dark"] body.dashboard .banner-card h1 {
+    color: var(--heading-color);
+}
+
+html[data-theme="dark"] body.dashboard .status-exists {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+html[data-theme="dark"] body.dashboard .status-new {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+html[data-theme="dark"] body.dashboard .form-group label {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-control {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-check {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] body.dashboard .help-text {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .help-text code {
+    background: var(--surface-3);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .image-preview {
+    background: var(--surface-2);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .banner-actions {
+    border-top-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .btn-primary {
+    color: #fff;
+}
+
+html[data-theme="dark"] body.dashboard .btn {
+    background: var(--surface-2);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .btn-primary {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+html[data-theme="dark"] body.dashboard .btn-admin {
+    background: var(--light-color);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .btn-secondary:hover {
+    background: var(--surface-3);
+    color: var(--text-color);
+}
+
+/* --- Редактор групп товаров --- */
+
+html[data-theme="dark"] body.dashboard .group-block {
+    background: var(--surface);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .group-header {
+    background: var(--surface-2);
+    border-bottom-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .group-header .slug,
+html[data-theme="dark"] body.dashboard .group-header .count,
+html[data-theme="dark"] body.dashboard .product-card .p-length {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .products-list {
+    border-bottom-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .product-card img,
+html[data-theme="dark"] body.dashboard .product-card .no-img {
+    background: var(--surface-3);
+}
+
+html[data-theme="dark"] body.dashboard .product-card .no-img {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .note-form textarea {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .note-form textarea.has-value {
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+    color: var(--warning-text);
+}
+
+html[data-theme="dark"] body.dashboard .filter-bar input {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .filter-bar label {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .messages li {
+    background: var(--success-bg);
+    border-color: var(--success-border);
+    color: var(--success-text);
+}
+
+/* --- Форма товара --- */
+
+html[data-theme="dark"] body.dashboard .steps-indicator {
+    background: var(--surface-2);
+}
+
+html[data-theme="dark"] body.dashboard .step-num {
+    background: var(--surface-3);
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .step.available .step-num {
+    background: var(--surface-3);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .step.active .step-num {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+html[data-theme="dark"] body.dashboard .step-arrow {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-section {
+    background: var(--surface);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-section__title {
+    background: var(--surface-2);
+    border-bottom-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .section-toggle {
+    color: var(--muted-color);
+}
+
+html[data-theme="dark"] body.dashboard .section-toggle:hover {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-field label,
+html[data-theme="dark"] body.dashboard .checkbox_group > label {
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-field input,
+html[data-theme="dark"] body.dashboard .form-field select,
+html[data-theme="dark"] body.dashboard .form-field textarea {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-field .errorlist {
+    color: var(--danger-text);
+}
+
+html[data-theme="dark"] body.dashboard .shade-checkbox.cr-wrapper span {
+    border-color: var(--border-strong);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard .shade-checkbox.cr-wrapper:hover span {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] body.dashboard .form-actions .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] body.dashboard .form-actions .btn-secondary:hover {
+    background: var(--surface-3);
+    color: var(--text-color);
+}
+
+html[data-theme="dark"] body.dashboard #name-suggestions {
+    background: var(--surface);
+    border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] body.dashboard #name-suggestions .name-suggestion-item:hover {
+    background: var(--surface-3);
+}

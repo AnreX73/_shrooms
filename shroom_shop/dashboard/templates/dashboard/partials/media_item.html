@@ -11,7 +11,7 @@
            src="{{ media.display_image.url }}"
            alt="Фото товара">
     {% else %}
-      <div class="media-item__thumb" style="background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af">⏳</div>
+      <div class="media-item__thumb" style="background:var(--surface-3, #e5e7eb);display:flex;align-items:center;justify-content:center;color:var(--muted-color, #9ca3af)">⏳</div>
     {% endif %}
   {% else %}
     <video class="media-item__video-thumb" muted preload="metadata"

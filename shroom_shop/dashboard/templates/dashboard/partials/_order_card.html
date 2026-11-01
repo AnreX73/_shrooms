@@ -196,7 +196,7 @@
                 <img src="{{ img.url }}" alt="{{ item.product_name }}"
                      style="width:76px;height:76px;object-fit:cover;border-radius:6px;flex-shrink:0">
               {% else %}
-                <div style="width:76px;height:76px;background:var(--bs-light);border-radius:6px;flex-shrink:0"></div>
+                <div style="width:76px;height:76px;background:var(--surface-3, #e5e7eb);border-radius:6px;flex-shrink:0"></div>
               {% endif %}
             {% endwith %}
               <a href="{{ item.product.get_absolute_url }}" class="forgot_article">артикул {{ item.product.article }}</a>

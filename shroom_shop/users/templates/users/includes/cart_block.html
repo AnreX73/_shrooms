@@ -6,7 +6,7 @@
                     </a>
                     <span class="spec-label cart_spec_label" style="flex-shrink: 1;">{{ item.product.name }}</span>
                     <span class="spec-dots"></span>
-                    <span class="spec-label cart_spec_label" style="color: #aa8870; font-size: 13px;">
+                    <span class="spec-label cart_spec_label" style="color: var(--muted-color, #aa8870); font-size: 13px;">
     {{ item.quantity }} шт. × {{ item.product.final_price }} ₽..
 </span>
 <span class="spec-value cart_spec_value">{{ item.total_price }} ₽</span>
@@ -67,7 +67,7 @@
        style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center">
     {# По центру экрана #}
     <div class="modal-box" 
-         style="background:#fff;border-radius:12px;padding:2rem;max-width:420px;width:90%;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
+         style="background:var(--surface, #fff);border-radius:12px;padding:2rem;max-width:420px;width:90%;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
          @click.stop>
       
       <h2 class="mb-3">{{atantion.title|default:"Перейти к оформлению заказа"}}</h2>

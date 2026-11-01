@@ -15,14 +15,14 @@
     {% endif %}
     <div>
       <span class="review-product-name">{{ product.name }}</span>
-      <p style="color:#6b7280;font-size:.9rem;margin:.25rem 0 0">
+      <p style="color:var(--muted-color, #6b7280);font-size:.9rem;margin:.25rem 0 0">
         Отзыв отправлен на модерацию ✓
       </p>
     </div>
   </div>
 
   <h2 class="checkout-title">Добавьте фото и видео</h2>
-  <p style="color:#6b7280;margin-bottom:1.5rem">
+  <p style="color:var(--muted-color, #6b7280);margin-bottom:1.5rem">
     До {{ max_photos }} фото и {{ max_videos }} видео.
     Можно пропустить этот шаг.
   </p>
@@ -65,7 +65,7 @@
     {% for media in review.media.all %}
       {% include "shop/includes/review_media_item.html" with media=media %}
     {% empty %}
-      <div id="review-empty" style="color:#9ca3af;font-size:.9rem;padding:1rem 0">
+      <div id="review-empty" style="color:var(--muted-color, #9ca3af);font-size:.9rem;padding:1rem 0">
         Пока нет файлов
       </div>
     {% endfor %}
@@ -75,7 +75,7 @@
     <a href="{% url 'users:profile' %}" class="btn-checkout">
       Готово →
     </a>
-    <a href="{% url 'users:profile' %}" style="color:#6b7280;align-self:center;font-size:.9rem">
+    <a href="{% url 'users:profile' %}" style="color:var(--muted-color, #6b7280);align-self:center;font-size:.9rem">
       Пропустить
     </a>
   </div>

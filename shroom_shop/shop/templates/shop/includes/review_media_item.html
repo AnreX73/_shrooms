@@ -8,7 +8,7 @@
     {% elif media.file %}
       <img class="media-item__thumb" src="{{ media.file.url }}" alt="">
     {% else %}
-      <div class="media-item__thumb" style="background:#e5e7eb"></div>
+      <div class="media-item__thumb" style="background:var(--surface-3, #e5e7eb)"></div>
     {% endif %}
   {% else %}
     <video class="media-item__video-thumb" muted preload="metadata"
