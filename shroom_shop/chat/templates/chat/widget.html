@@ -1,5 +1,4 @@
-{% load static %}
-<div class="support-chat" x-data="supportChat" data-start-url="{% url 'chat:start' %}" @keydown.escape="close()">
+<div class="support-chat" x-data="supportChat('', '{% url 'chat:upload' %}')" data-start-url="{% url 'chat:start' %}" @keydown.escape="close()">
     <section id="support-chat-panel" class="chat-panel" x-show="open" x-cloak x-transition.opacity
              role="region" aria-labelledby="support-chat-title">
         <header class="chat-header">
@@ -7,7 +6,9 @@
                 <strong id="support-chat-title">Помощь с подбором</strong>
                 <small>Напишите, что ищете — подскажем</small>
             </div>
-            <button type="button" class="chat-close" @click="close()" aria-label="Закрыть чат">×</button>
+            <div class="chat-header-actions">
+                <button type="button" class="chat-close" @click="close()" aria-label="Закрыть чат">×</button>
+            </div>
         </header>
         {% include 'chat/messages.html' %}
     </section>

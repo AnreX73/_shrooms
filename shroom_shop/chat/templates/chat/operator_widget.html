@@ -17,7 +17,12 @@
                 <li>
                     <button type="button" class="chat-item" :class="{ 'is-awaiting': !c.last_is_staff }" @click="selected = c.id">
                         <span class="chat-item-top">
-                            <strong x-text="'Диалог ' + c.id.slice(0, 8)"></strong>
+                            <span class="chat-item-name">
+                                <strong x-text="c.client_label"></strong>
+                                <span class="chat-status-badge"
+                                      :class="'chat-status-' + c.client_status"
+                                      x-text="c.client_status_label"></span>
+                            </span>
                             <small x-text="formatTime(c.updated_at)"></small>
                         </span>
                         <span class="chat-item-text" x-text="(c.last_is_staff ? 'Вы: ' : '') + c.last_text"></span>
@@ -28,7 +33,7 @@
         </ul>
 
         <template x-if="selected">
-            <div class="chat-thread" x-data="supportChat('/ws/chat/operator/' + selected + '/')" x-init="show()">
+            <div class="chat-thread" x-data="supportChat('/ws/chat/operator/' + selected + '/', '/chat/operator/' + selected + '/upload/')" x-init="show()">
                 {% include 'chat/messages.html' with chat_input_id='operator-chat-input' %}
             </div>
         </template>

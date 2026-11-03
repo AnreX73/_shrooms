@@ -1,43 +1,32 @@
-import time
 import uuid
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.utils import timezone
+from django.db.models import Exists, OuterRef
 
-from .models import Conversation, Message
+from shop.models import CartItem
 
-OPERATORS_GROUP = "chat.operators"
-
-
-def can_reply(user):
-    return bool(
-        user
-        and user.is_authenticated
-        and user.is_staff
-        and user.has_perm("chat.reply_conversation")
-    )
-
-
-def summary(conversation_pk, message):
-    """Краткая сводка диалога для списка в виджете оператора."""
-    return {
-        "id": str(conversation_pk),
-        "updated_at": message.created_at.isoformat(),
-        "last_text": message.text[:80],
-        "last_is_staff": message.is_staff,
-    }
+from .models import Conversation
+from .services import (
+    OPERATORS_GROUP,
+    ChatError,
+    RateLimited,
+    can_reply,
+    create_message,
+    publish_message,
+    summary,
+)
 
 
 class ChatConsumer(JsonWebsocketConsumer):
     def connect(self):
         self.group_name = None
+        self.conversation = None
         route = self.scope.get("url_route", {}).get("kwargs", {})
         self.operator = "pk" in route
         user = self.scope.get("user")
+
         if self.operator:
             if not can_reply(user):
                 self.close(code=4403)
@@ -46,21 +35,29 @@ class ChatConsumer(JsonWebsocketConsumer):
         else:
             session = self.scope.get("session")
             conversation_id = session.get("chat_conversation") if session else None
-        self.conversation = None
+
         if conversation_id:
             try:
-                self.conversation = Conversation.objects.filter(
-                    pk=conversation_id
-                ).first()
+                self.conversation = (
+                    Conversation.objects.select_related("user")
+                    .filter(pk=conversation_id)
+                    .first()
+                )
             except (ValidationError, ValueError):
                 self.conversation = None
+
         if self.conversation is None:
             self.close(code=4403)
             return
+
         self.group_name = f"chat.{self.conversation.pk.hex}"
-        # Subscribe first: concurrent messages are deduplicated by ID in the browser.
-        async_to_sync(self.channel_layer.group_add)(self.group_name, self.channel_name)
+        # Подписываемся до accept: сообщения, отправленные параллельно,
+        # браузер отсеет по ID.
+        async_to_sync(self.channel_layer.group_add)(
+            self.group_name, self.channel_name
+        )
         self.accept()
+
         messages = list(self.conversation.messages.order_by("-id")[:100])
         self.send_json(
             {
@@ -98,71 +95,46 @@ class ChatConsumer(JsonWebsocketConsumer):
                 {"type": "error", "message": "Некорректный формат сообщения."}
             )
             return
-        text = content.get("text")
+
         try:
             client_id = uuid.UUID(str(content.get("client_id")))
-        except ValueError:
+        except (ValueError, TypeError):
             self.send_json(
                 {"type": "error", "message": "Некорректный идентификатор сообщения."}
             )
             return
+
+        text = content.get("text")
         if not isinstance(text, str) or not text.strip() or len(text) > 2000:
             self.send_json(
                 {"type": "error", "message": "Введите сообщение от 1 до 2000 символов."}
             )
             return
+
         user = self.scope.get("user")
         if self.operator and not can_reply(user):
             self.close(code=4403)
             return
-        existing = Message.objects.filter(
-            conversation=self.conversation,
-            is_staff=self.operator,
-            client_id=client_id,
-        ).first()
-        if existing:
-            self.send_json({"type": "message", "message": existing.payload()})
-            return
-        # Shared Redis counter limits all tabs for this conversation to
-        # 20 messages/minute per side.
-        key = f"chat-rate:{self.conversation.pk}:{int(self.operator)}:{int(time.time()) // 60}"
-        cache.add(key, 0, timeout=120)
-        if cache.incr(key) > 20:
-            self.send_json(
-                {
-                    "type": "error",
-                    "message": "Слишком много сообщений. Подождите минуту.",
-                }
-            )
-            return
-        with transaction.atomic():
-            message, created = Message.objects.get_or_create(
-                conversation=self.conversation,
+
+        try:
+            message, created = create_message(
+                self.conversation,
                 is_staff=self.operator,
+                author=user if self.operator else None,
+                text=text,
                 client_id=client_id,
-                defaults={
-                    "text": text.strip(),
-                    "author": user if self.operator else None,
-                },
             )
-            if created:
-                Conversation.objects.filter(pk=self.conversation.pk).update(
-                    updated_at=timezone.now()
-                )
-        assert self.group_name is not None
-        async_to_sync(self.channel_layer.group_send)(
-            self.group_name,
-            {"type": "chat.message", "message": message.payload()},
-        )
+        except RateLimited as exc:
+            self.send_json({"type": "error", "message": str(exc)})
+            return
+        except ChatError as exc:
+            self.send_json({"type": "error", "message": str(exc)})
+            return
+
         if created:
-            # Живое обновление списка диалогов у всех сотрудников с доступом.
-            async_to_sync(self.channel_layer.group_send)(
-                OPERATORS_GROUP,
-                {
-                    "type": "inbox.update",
-                    "conversation": summary(self.conversation.pk, message),
-                },
-            )
+            publish_message(self.conversation, message, created=True)
+        else:
+            self.send_json({"type": "message", "message": message.payload()})
 
     def chat_message(self, event):
         self.send_json({"type": "message", "message": event["message"]})
@@ -194,13 +166,20 @@ class OperatorInboxConsumer(JsonWebsocketConsumer):
 
     def snapshot(self):
         result = []
-        conversations = Conversation.objects.filter(
-            messages__isnull=False
-        ).distinct()[:50]
+        conversations = (
+            Conversation.objects.filter(messages__isnull=False)
+            .select_related("user")
+            .annotate(
+                has_cart=Exists(
+                    CartItem.objects.filter(cart__user_id=OuterRef("user_id"))
+                )
+            )
+            .distinct()[:50]
+        )
         for conversation in conversations:
             last = conversation.messages.order_by("-id").first()
             if last:
-                result.append(summary(conversation.pk, last))
+                result.append(summary(conversation, last))
         return result
 
     def inbox_update(self, event):

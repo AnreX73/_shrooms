@@ -12,7 +12,7 @@
     <link type="text/css" rel="stylesheet" href="{% static 'shop/css/swiper-bundle.min.css' %}" />
     <link rel="stylesheet" href="{% static 'shop/css/dropzone.min.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'shop/css/main.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/chat.css' %}" />
+    <link rel="stylesheet" href="{% static 'chat/css/chat.css' %}" />
     <link rel="stylesheet" href="{% static 'shop/css/theme.css' %}" />
     {% comment %} <link rel="manifest" href="{% static 'manifest.json' %}"> {% endcomment %}
     {% comment %} <meta name="mobile-web-app-capable" content="yes"> {% endcomment %}
@@ -38,14 +38,12 @@
 {% endcomment %}
 
 {% if user.is_staff %}
-    {% if perms.chat.reply_conversation %}
-        {% include 'chat/operator_widget.html' %}
-    {% endif %}
+    {% include 'chat/operator_widget.html' %}
 {% else %}
     {% include 'chat/widget.html' %}
 {% endif %}
 
-<script defer src="{% static 'js/chat.js' %}"></script>
+<script defer src="{% static 'chat/js/chat.js' %}"></script>
 <script defer src="{% static 'shop/js/alpine.js' %}"></script>
 <script defer src="{% static 'shop/js/htmx.min.js' %}"></script>
 <script defer src="{% static 'shop/js/swiper-bundle.min.js' %}"></script>

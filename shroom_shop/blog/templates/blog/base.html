@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{% static 'blog/css/splide.min.css' %}">
     <link rel="stylesheet" href="{% static 'shop/css/dropzone.min.css' %}">
     <link rel="stylesheet" href="{% static 'shop/css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'chat/css/chat.css' %}">
     <style>[x-cloak] { display: none !important; }</style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -29,7 +30,14 @@
 {% endblock content %}
 
 
+{% if user.is_staff %}
+    {% include 'chat/operator_widget.html' %}
+{% else %}
+    {% include 'chat/widget.html' %}
+{% endif %}
+
 <script  src="{% static 'blog/js/script.js' %}"></script>
+<script src="{% static 'chat/js/chat.js' %}"></script>
 <script  src="{% static 'shop/js/alpine.js' %}"></script>
 <script src="{% static 'shop/js/htmx.min.js' %}"></script>
 <script  src="{% static 'blog/js/splide.min.js' %}"></script>

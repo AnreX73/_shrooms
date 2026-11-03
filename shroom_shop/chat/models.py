@@ -2,16 +2,27 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 
 class Conversation(models.Model):
     """Диалог посетителя с менеджером.
 
     Гость привязан к серверной Django-сессии, поэтому его ID не передаётся
-    в браузер и не может быть подменён.
+    в браузер и не может быть подменён. Если посетитель авторизован, диалог
+    дополнительно связывается с его аккаунтом — это нужно для имени
+    и статуса клиента в списке оператора.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="chat_conversations",
+        verbose_name="Пользователь",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
@@ -19,10 +30,15 @@ class Conversation(models.Model):
         ordering = ["-updated_at"]
         verbose_name = "Диалог"
         verbose_name_plural = "Диалоги"
-        permissions = [("reply_conversation", "Может отвечать посетителям в чате")]
 
     def __str__(self):
-        return f"Диалог {str(self.pk)[:8]}"
+        return f"Диалог {self.client_label}"
+
+    @property
+    def client_label(self):
+        if self.user_id and self.user:
+            return self.user.get_full_name() or self.user.username
+        return f"Гость #{str(self.pk)[:8]}"
 
 
 class Message(models.Model):
@@ -37,7 +53,10 @@ class Message(models.Model):
         null=True,
         blank=True,
     )
-    text = models.TextField(max_length=2000)
+    text = models.TextField(max_length=2000, blank=True)
+    image = models.ImageField(upload_to="chat/%Y/%m/", blank=True)
+    audio = models.FileField(upload_to="chat/%Y/%m/", blank=True)
+    audio_duration = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -48,11 +67,21 @@ class Message(models.Model):
             models.UniqueConstraint(
                 fields=["conversation", "is_staff", "client_id"],
                 name="chat_message_dedup",
-            )
+            ),
+            models.CheckConstraint(
+                condition=Q(text__gt="") | ~Q(image="") | ~Q(audio=""),
+                name="chat_message_has_content",
+            ),
         ]
 
     def __str__(self):
-        return f"{'Менеджер' if self.is_staff else 'Посетитель'}: {self.text[:40]}"
+        if self.text:
+            preview = self.text[:40]
+        elif self.audio:
+            preview = "🎤 Голосовое"
+        else:
+            preview = "📷 Фото"
+        return f"{'Менеджер' if self.is_staff else 'Посетитель'}: {preview}"
 
     def payload(self):
         return {
@@ -60,5 +89,8 @@ class Message(models.Model):
             "client_id": str(self.client_id),
             "is_staff": self.is_staff,
             "text": self.text,
+            "image": self.image.url if self.image else "",
+            "audio": self.audio.url if self.audio else "",
+            "audio_duration": self.audio_duration,
             "created_at": self.created_at.isoformat(),
         }

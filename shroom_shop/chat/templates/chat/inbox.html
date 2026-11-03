@@ -1,11 +1,40 @@
 {% extends 'shop/base.html' %}
 {% block title %}Диалоги с посетителями{% endblock %}
 {% block content %}
-<h1>Диалоги с посетителями</h1>
-<p>Последние 100 диалогов. Обновите страницу, чтобы увидеть новые обращения.</p>
-<ul>
-{% for conversation in conversations %}
-    <li><a href="{% url 'chat:conversation' conversation.pk %}">{{ conversation }}</a> — {{ conversation.updated_at|date:'d.m.Y H:i' }}</li>
-{% empty %}<li>Обращений пока нет.</li>{% endfor %}
-</ul>
+<div class="chat-inbox-page">
+    <h1>Диалоги с посетителями</h1>
+    <p class="chat-inbox-hint">Последние 100 диалогов. Новые сообщения приходят в панель «Диалоги» без перезагрузки.</p>
+
+    <ul class="chat-inbox-list">
+        {% for conversation in conversations %}
+        <li class="chat-inbox-item">
+            <a href="{% url 'chat:conversation' conversation.pk %}">
+                <span class="chat-inbox-client">
+                    {{ conversation.client_label }}
+                    {% if not conversation.user_id %}
+                    <span class="chat-status-badge chat-status-guest">Гость</span>
+                    {% elif conversation.has_cart %}
+                    <span class="chat-status-badge chat-status-cart">С корзиной</span>
+                    {% else %}
+                    <span class="chat-status-badge chat-status-registered">Клиент</span>
+                    {% endif %}
+                </span>
+                {% with last=conversation.messages.last %}
+                    {% if last %}
+                    <span class="chat-inbox-last">
+                        {% if last.is_staff %}Вы: {% endif %}
+                        {% if last.text %}{{ last.text|truncatechars:60 }}{% elif last.audio %}🎤 Голосовое сообщение{% else %}📷 Фото{% endif %}
+                    </span>
+                    {% else %}
+                    <span class="chat-inbox-last">нет сообщений</span>
+                    {% endif %}
+                {% endwith %}
+                <time datetime="{{ conversation.updated_at|date:'c' }}">{{ conversation.updated_at|date:'d.m.Y H:i' }}</time>
+            </a>
+        </li>
+        {% empty %}
+        <li class="chat-inbox-empty">Обращений пока нет.</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

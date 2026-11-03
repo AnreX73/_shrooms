@@ -208,7 +208,9 @@ REDIS_CACHE_URL = urlunsplit(
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [REDIS_URL]},
+        # socket_timeout: channels_redis блокируется на BZPOPMIN; с дефолтными
+        # 5 секундами воркер отваливается от Redis на простое и рвёт WebSocket.
+        "CONFIG": {"hosts": [{"address": REDIS_URL, "socket_timeout": 30}]},
     }
 }
 

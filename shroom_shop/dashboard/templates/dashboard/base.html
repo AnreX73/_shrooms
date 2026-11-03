@@ -11,7 +11,7 @@
     {% comment %} <link rel="shortcut icon" href="{{favicon.image.url}}"/> {% endcomment %}
     <script src="{% static 'shop/js/theme.js' %}"></script>
     <link type="text/css" rel="stylesheet" href="{% static 'shop/css/main.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/chat.css' %}" />
+    <link rel="stylesheet" href="{% static 'chat/css/chat.css' %}" />
     <link rel="stylesheet" href="{% static 'shop/css/dropzone.min.css' %}">
     <link rel="stylesheet" href="{% static 'shop/css/theme.css' %}">
     {% block extra_css %}{% endblock %}
@@ -30,7 +30,7 @@
 {% endblock content %}
 
 </div>
-<script src="{% static 'js/chat.js' %}"></script>
+<script src="{% static 'chat/js/chat.js' %}"></script>
 <script  src="{% static 'shop/js/alpine.js' %}"></script>
 <script src="{% static 'shop/js/htmx.min.js' %}"></script>
 <script  src="{% static 'shop/js/dropzone.min.js' %}"></script>
@@ -39,7 +39,7 @@
 <script src="{% static 'blog/js/dropzone-init.js' %}"></script>
 <script src="{% static 'blog/js/block-sortable.js' %}"></script>
 {% block extra_js %}{% endblock %} 
-{% if user.is_staff and perms.chat.reply_conversation %}
+{% if user.is_staff %}
     {% include 'chat/operator_widget.html' %}
 {% endif %}
 </body>

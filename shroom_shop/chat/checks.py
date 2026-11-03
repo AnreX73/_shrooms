@@ -33,7 +33,10 @@ def channel_layer_check(app_configs, **kwargs):
         return [
             Error(
                 f"Не удалось загрузить канал-слой {backend}: {exc}",
-                hint="Установите зависимости: pip install -r requirements.txt (channels-redis).",
+                hint=(
+                    "Установите зависимости: pip install -r requirements.txt "
+                    "(channels-redis)."
+                ),
                 id="chat.E002",
             )
         ]
@@ -43,13 +46,18 @@ def channel_layer_check(app_configs, **kwargs):
             continue
         parts = urlsplit(host)
         try:
-            with socket.create_connection((parts.hostname, parts.port or 6379), timeout=0.5):
+            with socket.create_connection(
+                (parts.hostname, parts.port or 6379), timeout=0.5
+            ):
                 pass
-        except OSError as exc:
+        except (OSError, TypeError) as exc:
             issues.append(
                 Warning(
                     f"Redis для чата недоступен ({host}): {exc}",
-                    hint="Запустите Redis или поправьте REDIS_URL: без него WebSocket не подключится.",
+                    hint=(
+                        "Запустите Redis или поправьте REDIS_URL: без него "
+                        "WebSocket не подключится."
+                    ),
                     id="chat.W001",
                 )
             )
