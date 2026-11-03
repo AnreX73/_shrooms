@@ -67,7 +67,7 @@ html[data-theme="dark"] {
     --light-color: #242d25;
     --dark-color: #0e140f;
     --transparent-color: rgba(223, 230, 220, 0.58);
-    --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow: 0 0 12px rgba(255, 241, 195, 0.4);
     --active-shadow: 0 6px 20px rgba(93, 145, 117, 0.32);
 
     --select-bg: #202822;
@@ -460,7 +460,7 @@ html[data-theme="dark"] .dash-alert--error {
 
 html[data-theme="dark"] .product-card {
     background: var(--surface);
-    box-shadow: inset 0 0 74px 30px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow);
 }
 
 html[data-theme="dark"] .shroom_type_img,

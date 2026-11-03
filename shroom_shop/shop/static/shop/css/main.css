@@ -377,7 +377,7 @@ input[type="radio"] {
 }
 
 /* кнопка каталог */
-.btn {
+.nice-btn {
   position: absolute; 
   left:clamp(3.125rem, 19.872vw - 1.346rem, 22.5rem);
   bottom: 30px;
@@ -420,16 +420,16 @@ input[type="radio"] {
 }
 
 /* Эффекты интерактивности */
-.btn:hover {
+.nice-btn:hover {
   transform: scale(1.05);
   filter: brightness(1.15); /* Кнопка станет сочнее и ярче */
 }
 
-.btn:active {
+.nice-btn:active {
   transform: scale(0.98);
 }
 @media (max-width: 768px) {
-    .btn {
+    .nice-btn {
         left: clamp(3.125rem, 19.872vw - 1.346rem, 22.5rem);
         bottom: clamp(-0.313rem, 6.127vw - 1.691rem, 1.25rem);
         width: clamp(3.75rem, 17.157vw - 0.11rem, 8.125rem);
